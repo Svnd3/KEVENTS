@@ -1,0 +1,73 @@
+.ke-logo {
+  --ke-logo-accent: #3767e8;
+  display: inline-flex;
+  min-width: 0;
+  align-items: center;
+  gap: 11px;
+  color: #171816;
+  line-height: 1;
+  user-select: none;
+}
+
+.ke-logo__mark {
+  display: block;
+  width: 32px;
+  height: 32px;
+  flex: 0 0 auto;
+  overflow: visible;
+}
+
+.ke-logo__ink {
+  fill: currentColor;
+}
+
+.ke-logo__fold {
+  fill: var(--ke-logo-accent);
+}
+
+.ke-logo__cut {
+  fill: var(--ke-logo-surface, #f7f6f2);
+}
+
+.ke-logo__wordmark {
+  display: grid;
+  gap: 4px;
+  transform: translateY(1px);
+  white-space: nowrap;
+}
+
+.ke-logo__name,
+.ke-logo__descriptor {
+  font-family: var(--sans, "Inter Local", Inter, Arial, Helvetica, sans-serif);
+  font-style: normal;
+  text-transform: uppercase;
+}
+
+.ke-logo__name {
+  font-size: 12px;
+  font-weight: 780;
+  letter-spacing: .16em;
+}
+
+.ke-logo__descriptor {
+  color: #62645f;
+  font-size: 6px;
+  font-weight: 650;
+  letter-spacing: .28em;
+}
+
+.ke-logo--compact {
+  display: inline-grid;
+  place-items: center;
+}
+
+.ke-logo--compact .ke-logo__mark {
+  width: 28px;
+  height: 28px;
+}
+
+@media (max-width: 520px) {
+  .ke-logo__descriptor {
+    display: none;
+  }
+}

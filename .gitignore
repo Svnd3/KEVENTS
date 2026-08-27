@@ -1,0 +1,13 @@
+node_modules/
+dist/
+.DS_Store
+.env*
+!.env.example
+
+# Locally downloaded design references are research material only.
+www.apple.com/
+www.dreamsinvite.com/
+www.thedigitalyes.com/
+www.apple.com.zip
+www.dreamsinvite.com.zip
+www.thedigitalyes.com.zip

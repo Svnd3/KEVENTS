@@ -1,0 +1,143 @@
+.template-preview {
+  min-height: 100vh;
+  background: #f7f6f1;
+  color: #111210;
+  font-family: "Inter Local", Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.template-preview *,
+.template-preview *::before,
+.template-preview *::after {
+  box-sizing: border-box;
+}
+
+.template-preview button,
+.template-preview a {
+  font: inherit;
+}
+
+.template-preview button svg,
+.template-preview a svg {
+  width: 19px;
+  height: 19px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.6;
+}
+
+.tp-reveal-enabled [data-invite-reveal] {
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity .4s ease, transform .5s cubic-bezier(.22, 1, .36, 1);
+}
+
+.tp-reveal-enabled [data-invite-reveal].is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.tp-toolbar {
+  position: sticky;
+  z-index: 80;
+  top: 0;
+  display: grid;
+  min-height: 68px;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 20px;
+  padding: 10px clamp(16px, 3vw, 44px);
+  border-bottom: 1px solid #e4e4df;
+  background: rgb(255 255 255 / 96%);
+  color: #111210;
+}
+
+.tp-toolbar button {
+  border: 0;
+  color: inherit;
+  cursor: pointer;
+}
+
+.tp-toolbar__back {
+  display: inline-flex;
+  width: max-content;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 8px 10px 0;
+  background: transparent;
+  font-size: 13px;
+  font-weight: 650;
+}
+
+.tp-toolbar__title {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  text-align: center;
+}
+
+.tp-toolbar__title strong {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.tp-toolbar__title span {
+  color: #666864;
+  font-size: 12px;
+}
+
+.tp-toolbar__use {
+  display: inline-flex;
+  min-height: 46px;
+  align-items: center;
+  justify-self: end;
+  gap: 13px;
+  padding: 0 18px;
+  border-radius: 999px;
+  background: #111210;
+  color: #fff !important;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.tp-toolbar button:focus-visible {
+  outline: 2px solid #315bea;
+  outline-offset: 3px;
+}
+
+@media (max-width: 680px) {
+  .tp-toolbar {
+    min-height: 62px;
+    grid-template-columns: auto 1fr auto;
+    gap: 9px;
+    padding: 8px 12px;
+  }
+
+  .tp-toolbar__back span,
+  .tp-toolbar__title span,
+  .tp-toolbar__use span {
+    display: none;
+  }
+
+  .tp-toolbar__back,
+  .tp-toolbar__use {
+    width: 42px;
+    min-height: 42px;
+    justify-content: center;
+    padding: 0;
+    border-radius: 50%;
+  }
+
+  .tp-toolbar__title {
+    justify-self: center;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tp-reveal-enabled [data-invite-reveal] {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
