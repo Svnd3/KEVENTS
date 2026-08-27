@@ -11,3 +11,7 @@ www.thedigitalyes.com/
 www.apple.com.zip
 www.dreamsinvite.com.zip
 www.thedigitalyes.com.zip
+
+# Keep the supplied music library local. The one track used by Karibu is bundled explicitly.
+songs/*
+!songs/CHAI YA SAA KUMI (LYRIC VIDEO) - YWAYA TAJIRI \[7b5aUIQ-sUc\].mp3

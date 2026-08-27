@@ -3,6 +3,7 @@ export const categories = ['All', 'African', 'Modern', 'Cultural', 'Editorial', 
 const rawDesigns = [
   ['Savannah Vows', 'African', 8500, 'Where your forever meets the horizon.', 'sunset', ['#d99255', '#231b16', '#f4d5a5', '#7a3f2b'], 'savannah.webp', 'Amara', 'Eli', ['Earthy', 'Gentle Motion', 'Story Scroll']],
   ['Zuri Weave', 'African', 10500, 'A bold beginning, beautifully woven.', 'weave', ['#1648aa', '#fff6dc', '#f3aa20', '#e43f6f'], null, 'Zuri', 'Kito', ['Bright', 'Interactive', 'Multi-Event Suite']],
+  ['Karibu', 'African', 22000, 'Made to be opened with the sound on.', 'sande', ['#2147b7', '#f7f3e9', '#ff6b66', '#10172f'], null, 'Zuri', 'Kito', ['Full Screen', 'Music', 'RSVP']],
   ['Lamu Moon', 'African', 12500, 'Salt air, moonlight, and two hearts.', 'arch', ['#102d43', '#f4edda', '#8cbeb4', '#d1a85a'], 'ocean.webp', 'Leila', 'Noah', ['Jewel', 'Interactive', 'RSVP-Ready']],
   ['Beaded Horizon', 'African', 11500, 'A radiant promise in every circle.', 'beads', ['#9f2f38', '#f1dcc0', '#25a4a0', '#121212'], null, 'Wanjiru', 'Amani', ['Bold', 'Interactive', 'Story Scroll']],
   ['Baobab Promise', 'African', 7500, 'Rooted in love. Growing together.', 'tree', ['#a95536', '#f6edda', '#768363', '#3c271f'], 'savannah.webp', 'Nia', 'Jabari', ['Earthy', 'Gentle Motion', 'Single Page']],
@@ -61,7 +62,7 @@ const slugify = (value) => value
   .replace(/(^-|-$)/g, '')
 
 export const designs = rawDesigns.map((design, index) => {
-  const [name, category, price, tagline, variant, palette, image, personOne, personTwo, tags] = design
+  const [name, category, price, tagline, variant, palette, image, personOne, personTwo, tags, eventType = 'Wedding'] = design
   return {
     id: index + 1,
     slug: slugify(name),
@@ -74,6 +75,7 @@ export const designs = rawDesigns.map((design, index) => {
     image: image ? `/images/${image}` : null,
     couple: [personOne, personTwo],
     tags,
+    eventType,
     featured: ['Lamu Moon', 'Ivory Issue', 'Celestial Overture', 'Savannah Vows', 'Nairobi Noir'].includes(name),
   }
 })

@@ -173,9 +173,9 @@ function Hero({ navigate, onEnquire }) {
   return (
     <section className="hero" onPointerMove={handlePointer}>
       <div className="hero__copy">
-        <span className="eyebrow">Wedding invitations</span>
-        <h1>Wedding<br /><span>invitations.</span></h1>
-        <p>Choose a design and customise the colours, wording, photos and event details.</p>
+        <span className="eyebrow">Digital invitations</span>
+        <h1>Make it<br /><span>an event.</span></h1>
+        <p>Choose a design for the celebration, then make the words, colours and details yours.</p>
         <div className="hero__actions">
           <button className="button button--dark" type="button" onClick={() => navigate('collection')}>
             Browse designs <ArrowRight size={17} />
@@ -312,7 +312,7 @@ function CollectionPage() {
   return (
     <main className="collection-page">
       <section className="collection-hero section-pad">
-        <span className="eyebrow">Wedding invitations</span>
+        <span className="eyebrow">Invitations for every event</span>
         <h1>Invitation designs</h1>
         <p>Filter by style, preview each design and choose one to customise.</p>
       </section>
@@ -414,7 +414,7 @@ function EnquiryPanel({ design, onClose }) {
               {design && <input type="hidden" name="price" value={formatPrice(design.price)} />}
               <label><span>Names</span><input name="name" autoComplete="name" required placeholder="Njeri and Malik" data-autofocus /></label>
               <label><span>Email address</span><input name="email" type="email" autoComplete="email" required placeholder="you@example.com" /></label>
-              <label><span>Wedding date</span><input name="date" type="date" /></label>
+              <label><span>Event date</span><input name="date" type="date" /></label>
               <label><span>Invitation details</span><textarea name="message" required rows="4" placeholder="Tell us about the events, wording and any ideas you already have." /></label>
               {error && <p className="form-error" role="alert">{error}</p>}
               <button className="button button--dark button--full" type="submit" disabled={submitting}>{submitting ? 'Sending…' : 'Send enquiry'} <ArrowRight size={17} /></button>
@@ -437,7 +437,7 @@ function Footer({ navigate, onEnquire }) {
   return (
     <footer className="site-footer section-pad">
       <div className="footer-brand"><BrandLogo /></div>
-      <div className="footer-copy"><p>Wedding invitations<br />designed in Nairobi.</p><span>Available worldwide</span></div>
+      <div className="footer-copy"><p>Digital invitations<br />designed in Nairobi.</p><span>Available worldwide</span></div>
       <div className="footer-links">
         <button type="button" onClick={() => navigate('collection')}>Designs</button>
         <button type="button" onClick={() => onEnquire(null)}>Custom design</button>
@@ -487,8 +487,8 @@ export default function App() {
     document.title = previewDesign
       ? `${previewDesign.name} | K EVENTS`
       : view === 'collection'
-        ? 'Wedding invitation designs | K EVENTS'
-        : 'K EVENTS | Wedding invitations'
+        ? 'Invitation designs | K EVENTS'
+        : 'K EVENTS | Digital invitations'
   }, [previewDesign, view])
 
   const navigate = (destination) => {

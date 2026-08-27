@@ -1,0 +1,439 @@
+import { useEffect, useId, useMemo, useRef, useState } from 'react'
+import '../sande-signature-story.css'
+
+const FALLBACK_DATE = '2027-10-16T15:00:00+03:00'
+const FALLBACK_VENUE = 'The Acacia Garden, Nairobi'
+
+function ArrowIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M5 12h13M14 7l5 5-5 5" />
+    </svg>
+  )
+}
+
+function BackIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="m10 6-6 6 6 6M5 12h15" />
+    </svg>
+  )
+}
+
+function PinIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M12 21s6-5.3 6-11a6 6 0 1 0-12 0c0 5.7 6 11 6 11Z" />
+      <circle cx="12" cy="10" r="2" />
+    </svg>
+  )
+}
+
+function MusicIcon({ playing }) {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M9 17.5V6.8l9-2v10.1" />
+      <circle cx="6.7" cy="17.5" r="2.7" />
+      <circle cx="15.7" cy="14.9" r="2.7" />
+      {playing && <path className="ss-music-pulse" d="M21 8.4c1 1 1 2.4 0 3.4M22.8 6.1c2.3 2.4 2.3 5.9 0 8.2" />}
+    </svg>
+  )
+}
+
+function WeaveMark({ compact = false }) {
+  return (
+    <svg className={compact ? 'ss-weave-mark ss-weave-mark--compact' : 'ss-weave-mark'} viewBox="0 0 186 64" aria-hidden="true">
+      <path d="m4 32 22-22 22 22 22-22 23 22 22-22 22 22 23-22 22 22" />
+      <path d="m4 32 22 22 22-22 22 22 23-22 22 22 22-22 23 22 22-22" />
+      <circle cx="93" cy="32" r="6" />
+    </svg>
+  )
+}
+
+function AbstractPortrait({ person, side }) {
+  const isLeft = side === 'left'
+
+  return (
+    <figure className={`ss-portrait ss-portrait--${side}`}>
+      <div className="ss-portrait__canvas" aria-hidden="true">
+        <svg viewBox="0 0 520 650" role="img">
+          <title>An abstract portrait of {person}</title>
+          <rect className="ss-portrait__ground" width="520" height="650" rx="210" />
+          <path className="ss-portrait__sun" d={isLeft ? 'M-18 80h240v240H-18z' : 'M298 48h250v250H298z'} />
+          <path
+            className="ss-portrait__shoulders"
+            d={isLeft
+              ? 'M66 650c5-154 75-232 193-232 122 0 191 78 195 232H66Z'
+              : 'M47 650c6-154 75-232 194-232 121 0 190 78 194 232H47Z'}
+          />
+          <path
+            className="ss-portrait__neck"
+            d={isLeft ? 'M208 358h100v115H208z' : 'M190 351h101v122H190z'}
+          />
+          <ellipse className="ss-portrait__face" cx={isLeft ? 258 : 241} cy="280" rx="103" ry="132" />
+          <path
+            className="ss-portrait__hair"
+            d={isLeft
+              ? 'M151 288c-3-107 33-170 110-174 89-4 129 70 103 184-23-84-80-110-170-78-7 31-21 54-43 68Z'
+              : 'M139 289c0-117 48-178 115-175 81 3 122 76 92 192-18-79-70-119-154-92-7 36-24 61-53 75Z'}
+          />
+          <path className="ss-portrait__profile" d={isLeft ? 'M207 294c19 15 47 17 73 5M236 345c18 9 37 9 55 0' : 'M194 295c22 14 48 15 74 3M220 344c18 10 37 10 55 0'} />
+          <path className="ss-portrait__fabric" d="M83 590 223 445l60 72 63-72 91 126M120 650l149-151 143 151M58 622h401" />
+          <path className="ss-portrait__thread" d="m105 74 35 35 35-35 35 35 35-35M318 548l31 31 31-31 31 31 31-31" />
+        </svg>
+        <span className="ss-portrait__initial">{person.charAt(0)}</span>
+      </div>
+      <figcaption>
+        <span>Meet</span>
+        <strong>{person}</strong>
+        <p>{isLeft ? 'Keeps the plan, the playlist and a backup charger.' : 'Says five minutes and means a full Nairobi hour.'}</p>
+      </figcaption>
+    </figure>
+  )
+}
+
+function getCountdown(targetDate) {
+  const distance = Math.max(0, targetDate.getTime() - Date.now())
+  return {
+    days: Math.floor(distance / 86400000),
+    hours: Math.floor((distance / 3600000) % 24),
+    minutes: Math.floor((distance / 60000) % 60),
+    seconds: Math.floor((distance / 1000) % 60),
+  }
+}
+
+function FlipUnit({ value, label, wide = false }) {
+  const displayValue = String(value).padStart(wide ? 3 : 2, '0')
+
+  return (
+    <div className="ss-flip-unit">
+      <div className={`ss-flip-card${wide ? ' ss-flip-card--wide' : ''}`} aria-hidden="true">
+        <span className="ss-flip-card__static">{displayValue}</span>
+        <span key={displayValue} className="ss-flip-card__leaf" data-value={displayValue} />
+      </div>
+      <span className="ss-flip-unit__label">{label}</span>
+      <span className="sr-only">{displayValue} {label}</span>
+    </div>
+  )
+}
+
+function Countdown({ date }) {
+  const targetDate = useMemo(() => {
+    const parsed = new Date(date || FALLBACK_DATE)
+    return Number.isNaN(parsed.getTime()) ? new Date(FALLBACK_DATE) : parsed
+  }, [date])
+  const [remaining, setRemaining] = useState(() => getCountdown(targetDate))
+
+  useEffect(() => {
+    setRemaining(getCountdown(targetDate))
+    const timer = window.setInterval(() => setRemaining(getCountdown(targetDate)), 1000)
+    return () => window.clearInterval(timer)
+  }, [targetDate])
+
+  return (
+    <div className="ss-countdown" role="timer" aria-live="off" aria-label="Time remaining until the wedding">
+      <FlipUnit value={remaining.days} label="days" wide />
+      <FlipUnit value={remaining.hours} label="hours" />
+      <FlipUnit value={remaining.minutes} label="minutes" />
+      <FlipUnit value={remaining.seconds} label="seconds" />
+    </div>
+  )
+}
+
+function LocationSketch() {
+  return (
+    <svg className="ss-location-sketch" viewBox="0 0 760 530" aria-hidden="true">
+      <path d="M-30 103c113-96 215 42 334-30 119-72 218 66 503-24" />
+      <path d="M-40 184c129-92 231 34 348-28 126-67 236 58 503-15" />
+      <path d="M-32 265c111-73 232 25 354-31 117-54 231 53 474-17" />
+      <path d="M-36 354c138-82 247 24 376-34 111-50 221 38 454-25" />
+      <path d="M-28 447c120-75 239 31 359-24 127-58 218 39 473-33" />
+      <path className="ss-location-sketch__route" d="M71 491c83-71 85-177 195-194 115-18 128 67 219 19 80-42 72-138 192-202" />
+      <circle cx="485" cy="316" r="48" />
+      <circle cx="485" cy="316" r="13" />
+      <path d="M485 266v-44M485 410v-44M435 316h-44M579 316h-44" />
+    </svg>
+  )
+}
+
+function RsvpForm({ first, second }) {
+  const formId = useId()
+  const [attending, setAttending] = useState('yes')
+  const [response, setResponse] = useState(null)
+
+  function handleSubmit(event) {
+    event.preventDefault()
+    const data = new FormData(event.currentTarget)
+    const fullName = String(data.get('fullName') || '').trim()
+    if (!fullName) return
+    setResponse({
+      firstName: fullName.split(/\s+/)[0],
+      attending: data.get('attendance') === 'yes',
+    })
+  }
+
+  if (response) {
+    return (
+      <div className="ss-rsvp-success" role="status" aria-live="polite">
+        <span aria-hidden="true">✓</span>
+        <h3>{response.attending ? `You’re on the list, ${response.firstName}.` : `We’ll miss you, ${response.firstName}.`}</h3>
+        <p>{response.attending ? 'Bring your best shoes. We have plans for the dance floor.' : `${first} and ${second} will save you a slice in spirit.`}</p>
+        <button type="button" onClick={() => setResponse(null)}>Change response</button>
+      </div>
+    )
+  }
+
+  return (
+    <form className="ss-rsvp-form" onSubmit={handleSubmit}>
+      <label className="ss-rsvp-field" htmlFor={`${formId}-name`}>
+        <span>Your name</span>
+        <input id={`${formId}-name`} name="fullName" type="text" autoComplete="name" placeholder="First and last name" required />
+      </label>
+
+      <fieldset className="ss-rsvp-attendance">
+        <legend>Will you be there?</legend>
+        <label>
+          <input type="radio" name="attendance" value="yes" checked={attending === 'yes'} onChange={() => setAttending('yes')} />
+          <span>Absolutely</span>
+        </label>
+        <label>
+          <input type="radio" name="attendance" value="no" checked={attending === 'no'} onChange={() => setAttending('no')} />
+          <span>Can’t make it</span>
+        </label>
+      </fieldset>
+
+      {attending === 'yes' && (
+        <label className="ss-rsvp-field" htmlFor={`${formId}-guests`}>
+          <span>Seats needed</span>
+          <select id={`${formId}-guests`} name="guests" defaultValue="1">
+            <option value="1">Just me</option>
+            <option value="2">Two seats</option>
+            <option value="3">Three seats</option>
+            <option value="4">Four seats</option>
+          </select>
+        </label>
+      )}
+
+      <label className="ss-rsvp-field ss-rsvp-field--wide" htmlFor={`${formId}-note`}>
+        <span>Leave a note</span>
+        <textarea id={`${formId}-note`} name="note" rows="3" placeholder="A message, a song request, or both" />
+      </label>
+
+      <button className="ss-rsvp-submit" type="submit">
+        <span>Send RSVP</span>
+        <ArrowIcon />
+      </button>
+    </form>
+  )
+}
+
+export default function SandeSignatureStory({
+  design,
+  onBack,
+  onUseDesign,
+  isMusicPlaying = false,
+  onToggleMusic,
+}) {
+  const rootRef = useRef(null)
+  const [first = 'Zuri', second = 'Kito'] = design?.couple || []
+  const eventDate = useMemo(() => {
+    const parsed = new Date(design?.eventDate || FALLBACK_DATE)
+    return Number.isNaN(parsed.getTime()) ? new Date(FALLBACK_DATE) : parsed
+  }, [design?.eventDate])
+  const eventDateValue = eventDate.toISOString()
+  const venue = design?.venue || FALLBACK_VENUE
+  const mapUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(venue)}`
+  const formattedDate = useMemo(() => new Intl.DateTimeFormat('en-KE', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  }).format(eventDate), [eventDate])
+
+  useEffect(() => {
+    const root = rootRef.current
+    if (!root) return undefined
+
+    root.focus({ preventScroll: true })
+
+    const targets = [...root.querySelectorAll('[data-ss-reveal]')]
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    root.classList.add('ss-reveal-ready')
+
+    if (reducedMotion || !('IntersectionObserver' in window)) {
+      targets.forEach((target) => target.classList.add('is-visible'))
+      return undefined
+    }
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return
+        entry.target.classList.add('is-visible')
+        observer.unobserve(entry.target)
+      })
+    }, { threshold: 0.12, rootMargin: '0px 0px -8% 0px' })
+
+    targets.forEach((target) => observer.observe(target))
+
+    let frame = 0
+    const updateParallax = () => {
+      frame = 0
+      const offset = Math.max(-96, Math.min(96, -root.getBoundingClientRect().top * 0.045))
+      root.style.setProperty('--ss-parallax-near', `${offset}px`)
+      root.style.setProperty('--ss-parallax-far', `${offset * -0.42}px`)
+    }
+    const handleScroll = () => {
+      if (!frame) frame = window.requestAnimationFrame(updateParallax)
+    }
+
+    updateParallax()
+    window.addEventListener('scroll', handleScroll, { passive: true })
+
+    return () => {
+      observer.disconnect()
+      window.removeEventListener('scroll', handleScroll)
+      if (frame) window.cancelAnimationFrame(frame)
+    }
+  }, [])
+
+  return (
+    <main id="main-content" ref={rootRef} className="ss-story" tabIndex={-1}>
+      <nav className="ss-floating-nav" aria-label="Invitation preview controls">
+        <button className="ss-round-action ss-round-action--back" type="button" onClick={onBack}>
+          <BackIcon />
+          <span>Designs</span>
+        </button>
+        <span className="ss-floating-nav__signature" aria-label="A Sande invitation">Sande</span>
+        <button className="ss-round-action ss-round-action--use" type="button" onClick={() => onUseDesign?.(design)}>
+          <span>Use this design</span>
+          <ArrowIcon />
+        </button>
+      </nav>
+
+      <button
+        className={`ss-music-button${isMusicPlaying ? ' is-playing' : ''}`}
+        type="button"
+        onClick={onToggleMusic}
+        disabled={!onToggleMusic}
+        aria-pressed={isMusicPlaying}
+        aria-label={isMusicPlaying ? 'Pause invitation music' : 'Play invitation music'}
+      >
+        <MusicIcon playing={isMusicPlaying} />
+        <span>{isMusicPlaying ? 'Playing' : 'Music'}</span>
+      </button>
+
+      <header className="ss-hero">
+        <div className="ss-hero__halo ss-parallax-far" aria-hidden="true" />
+        <div className="ss-hero__orbit ss-parallax-near" aria-hidden="true" />
+        <div className="ss-hero__grain" aria-hidden="true" />
+        <div className="ss-hero__content">
+          <WeaveMark />
+          <p className="ss-kicker">A little news from Nairobi</p>
+          <h1>
+            <span>{first}</span>
+            <i>&amp;</i>
+            <span>{second}</span>
+          </h1>
+          <p className="ss-hero__announcement">are getting married</p>
+          <div className="ss-hero__details">
+            <time dateTime={eventDateValue}>{formattedDate}</time>
+            <span>{venue}</span>
+          </div>
+        </div>
+        <a className="ss-scroll-cue" href="#meet-the-two">
+          <span>Come in</span>
+          <i aria-hidden="true" />
+        </a>
+      </header>
+
+      <section id="meet-the-two" className="ss-meet ss-paper-section">
+        <div className="ss-section-heading" data-ss-reveal>
+          <p className="ss-kicker">The two of us</p>
+          <h2>Different calendars.<br />One very good plan.</h2>
+        </div>
+        <div className="ss-meet__grid">
+          <div data-ss-reveal><AbstractPortrait person={first} side="left" /></div>
+          <div data-ss-reveal><AbstractPortrait person={second} side="right" /></div>
+        </div>
+      </section>
+
+      <section className="ss-how-we-met">
+        <div className="ss-how-we-met__pattern ss-parallax-far" aria-hidden="true"><WeaveMark /></div>
+        <div className="ss-how-we-met__copy" data-ss-reveal>
+          <p className="ss-kicker">How we met</p>
+          <h2>It started with 3% battery.</h2>
+          <p>They met when {second} borrowed {first}’s charger at a rooftop party. He returned it three days later with coffee and a wildly unconvincing excuse. The charger survived. So did the conversation.</p>
+          <span>That coffee lasted four hours.</span>
+        </div>
+      </section>
+
+      <section className="ss-date-section ss-paper-section">
+        <div className="ss-date-section__intro" data-ss-reveal>
+          <p className="ss-kicker">Keep the date</p>
+          <h2>{formattedDate}</h2>
+          <p>We’ll handle the food. You handle the dance moves.</p>
+        </div>
+        <div data-ss-reveal>
+          <Countdown date={eventDateValue} />
+        </div>
+      </section>
+
+      <section className="ss-location">
+        <div className="ss-location__map" data-ss-reveal>
+          <LocationSketch />
+          <span className="ss-location__pin"><PinIcon /></span>
+        </div>
+        <div className="ss-location__details" data-ss-reveal>
+          <p className="ss-kicker">Meet us here</p>
+          <h2>{venue}</h2>
+          <p>Garden doors open at 2:00 PM. The ceremony begins at 3:00 PM, followed by supper and a dance floor with no curfew.</p>
+          <a href={mapUrl} target="_blank" rel="noreferrer">
+            <span>Open in Maps</span>
+            <ArrowIcon />
+          </a>
+        </div>
+      </section>
+
+      <section className="ss-journey ss-paper-section">
+        <div className="ss-section-heading" data-ss-reveal>
+          <p className="ss-kicker">Our route here</p>
+          <h2>Three turns worth keeping.</h2>
+        </div>
+        <div className="ss-journey__track" data-ss-reveal>
+          <article>
+            <span>Late 2023</span>
+            <h3>The rooftop</h3>
+            <p>One borrowed charger, two long coffees.</p>
+          </article>
+          <article>
+            <span>Easter 2025</span>
+            <h3>The wrong turn</h3>
+            <p>Naivasha was not the plan. It became the best weekend.</p>
+          </article>
+          <article>
+            <span>Right now</span>
+            <h3>The good bit</h3>
+            <p>All our favourite people, in one place.</p>
+          </article>
+        </div>
+      </section>
+
+      <section className="ss-rsvp">
+        <div className="ss-rsvp__intro" data-ss-reveal>
+          <WeaveMark compact />
+          <p className="ss-kicker">Save us a seat count</p>
+          <h2>Are you coming?</h2>
+          <p>Tell us by 20 September. {second} has promised not to guess the catering numbers.</p>
+        </div>
+        <div className="ss-rsvp__card" data-ss-reveal>
+          <RsvpForm first={first} second={second} />
+        </div>
+      </section>
+
+      <footer className="ss-footer">
+        <p>{first} &amp; {second}</p>
+        <span>Made in Nairobi by Sande</span>
+      </footer>
+    </main>
+  )
+}

@@ -1,7 +1,10 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { formatPrice } from '../data/designs.js'
+import chaiYaSaaKumiUrl from '../../songs/CHAI YA SAA KUMI (LYRIC VIDEO) - YWAYA TAJIRI [7b5aUIQ-sUc].mp3?url'
 import InvitationIntro from './InvitationIntro.jsx'
 import InvitationStory from './InvitationStory.jsx'
+import SandeEnvelopeIntro from './SandeEnvelopeIntro.jsx'
+import SandeSignatureStory from './SandeSignatureStory.jsx'
 import '../preview.css'
 
 function BackIcon() {
@@ -22,11 +25,41 @@ function ArrowIcon() {
 
 export default function TemplatePreview({ design, onBack, onEnquire }) {
   const [introComplete, setIntroComplete] = useState(false)
+  const [isMusicPlaying, setIsMusicPlaying] = useState(false)
+  const audioRef = useRef(null)
+  const isSandeSignature = design?.variant === 'sande'
 
   useEffect(() => {
     setIntroComplete(false)
+    setIsMusicPlaying(false)
     window.scrollTo({ top: 0, behavior: 'auto' })
   }, [design?.slug])
+
+  useEffect(() => {
+    const player = audioRef.current
+    return () => {
+      if (!player) return
+      player.pause()
+      player.currentTime = 0
+    }
+  }, [design?.slug])
+
+  const startMusic = useCallback(() => {
+    const player = audioRef.current
+    if (!player) return
+    player.volume = 0.28
+    player.play().catch(() => setIsMusicPlaying(false))
+  }, [])
+
+  const toggleMusic = useCallback(() => {
+    const player = audioRef.current
+    if (!player) return
+    if (player.paused) {
+      player.play().catch(() => setIsMusicPlaying(false))
+    } else {
+      player.pause()
+    }
+  }, [])
 
   useEffect(() => {
     if (!introComplete) return undefined
@@ -56,6 +89,36 @@ export default function TemplatePreview({ design, onBack, onEnquire }) {
   }, [design?.slug, introComplete])
 
   if (!design) return null
+
+  if (isSandeSignature) {
+    return (
+      <>
+        {introComplete ? (
+          <SandeSignatureStory
+            design={design}
+            onBack={onBack}
+            onUseDesign={(selectedDesign) => onEnquire?.(selectedDesign)}
+            isMusicPlaying={isMusicPlaying}
+            onToggleMusic={toggleMusic}
+          />
+        ) : (
+          <SandeEnvelopeIntro
+            design={design}
+            onComplete={() => setIntroComplete(true)}
+            onUserGesture={startMusic}
+          />
+        )}
+        <audio
+          ref={audioRef}
+          src={chaiYaSaaKumiUrl}
+          preload="none"
+          loop
+          onPlay={() => setIsMusicPlaying(true)}
+          onPause={() => setIsMusicPlaying(false)}
+        />
+      </>
+    )
+  }
 
   if (!introComplete) {
     return <InvitationIntro design={design} onComplete={() => setIntroComplete(true)} />
