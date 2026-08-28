@@ -1837,11 +1837,11 @@
   object-fit: contain;
   object-position: center;
   pointer-events: none;
-  filter: saturate(.94) contrast(1.02);
+  filter: none;
 }
 
 .sw-story--love-bomb .sw-film-bg__video {
-  filter: saturate(1.08) contrast(1.03);
+  filter: none;
 }
 
 .sw-film-bg__scrim {
@@ -1940,7 +1940,6 @@
   opacity: var(--char-reveal, 0);
   transform: translateY(calc((1 - var(--char-reveal, 0)) * .42em)) rotate(calc((1 - var(--char-reveal, 0)) * 3deg));
   transform-origin: bottom;
-  will-change: opacity, transform;
 }
 
 /* Letter over film ---------------------------------------------------- */
@@ -3189,13 +3188,73 @@
   line-height: .78;
 }
 
-.sw-rsvp__success-card > span:last-child {
+.sw-rsvp__success-card > span:last-of-type {
   max-width: 520px;
   font-family: "Instrument Serif Local", "Cormorant Local", Georgia, serif;
   font-size: clamp(20px, 2vw, 29px);
   letter-spacing: 0;
   line-height: 1.1;
   text-transform: none;
+}
+
+.sw-rsvp__delivery {
+  position: absolute;
+  right: 27px;
+  bottom: 24px;
+  width: 92px;
+  margin: 0;
+  padding: 6px 6px 8px;
+  transform: rotate(4deg);
+  border: 1px solid #171316;
+  background: #fff;
+  box-shadow: 4px 4px 0 var(--rsvp-accent-three);
+}
+
+.sw-rsvp__delivery video,
+.sw-rsvp__delivery img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 321 / 512;
+  object-fit: cover;
+}
+
+.sw-rsvp__delivery figcaption {
+  padding-top: 6px;
+  color: #171316;
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: .13em;
+  line-height: 1.05;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+@media (max-width: 680px) {
+  .sw-film-bg__wash {
+    opacity: .72;
+    filter: none;
+    transform: none;
+  }
+
+  .sw-film-bg__grain {
+    display: none;
+  }
+
+  .sw-note__label,
+  .sw-rsvp__intro > span,
+  .sw-rsvp__intro > p,
+  .sw-rsvp__form {
+    backdrop-filter: none;
+  }
+
+  .sw-rsvp__delivery {
+    position: relative;
+    right: auto;
+    bottom: auto;
+    width: 84px;
+    margin-top: 8px;
+    transform: rotate(3deg);
+  }
 }
 
 @keyframes sw-rsvp-fields-in {

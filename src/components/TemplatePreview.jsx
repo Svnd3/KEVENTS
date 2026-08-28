@@ -36,19 +36,132 @@ function SoundIcon({ playing }) {
   )
 }
 
+function SoundtrackButton({ soundtrack, playing, onToggle, scrollWedding = false }) {
+  const action = playing ? 'Pause' : 'Play'
+
+  return (
+    <button
+      className={`tp-soundtrack tp-soundtrack--${soundtrack.tone}${scrollWedding ? ' tp-soundtrack--scroll' : ''}${playing ? ' is-playing' : ''}`}
+      type="button"
+      onClick={onToggle}
+      aria-pressed={playing}
+      aria-label={`${action} “${soundtrack.title}” by ${soundtrack.artist}`}
+      title={`${action} ${soundtrack.title} — ${soundtrack.artist}`}
+    >
+      <SoundIcon playing={playing} />
+      <span>{playing ? soundtrack.playingLabel : soundtrack.idleLabel}</span>
+    </button>
+  )
+}
+
 export default function TemplatePreview({ design, onBack, onEnquire }) {
   const [introComplete, setIntroComplete] = useState(false)
   const [isMusicPlaying, setIsMusicPlaying] = useState(false)
   const audioRef = useRef(null)
+  const fadeFrameRef = useRef(0)
+  const musicIntentRef = useRef(false)
   const isSandeSignature = design?.variant === 'sande'
   const isScrollWedding = scrollWeddingVariants.has(design?.variant)
   const soundtrack = getSoundtrack(design)
 
+  const cancelAudioFade = useCallback(() => {
+    window.cancelAnimationFrame(fadeFrameRef.current)
+    fadeFrameRef.current = 0
+  }, [])
+
+  const fadeAudio = useCallback((player, targetVolume, duration, onComplete) => {
+    cancelAudioFade()
+    const fromVolume = player.volume
+    const startedAt = performance.now()
+
+    const step = (now) => {
+      const progress = Math.min(1, (now - startedAt) / duration)
+      const eased = 1 - ((1 - progress) ** 3)
+      player.volume = Math.max(0, Math.min(1, fromVolume + (targetVolume - fromVolume) * eased))
+
+      if (progress < 1) {
+        fadeFrameRef.current = window.requestAnimationFrame(step)
+      } else {
+        fadeFrameRef.current = 0
+        onComplete?.()
+      }
+    }
+
+    fadeFrameRef.current = window.requestAnimationFrame(step)
+  }, [cancelAudioFade])
+
+  const attachSoundtrack = useCallback(() => {
+    const player = audioRef.current
+    if (!player) return null
+    if (player.dataset.soundtrackSrc === soundtrack.src) return player
+
+    cancelAudioFade()
+    player.pause()
+    player.src = soundtrack.src
+    player.dataset.soundtrackSrc = soundtrack.src
+    player.volume = 0
+    player.load()
+    return player
+  }, [cancelAudioFade, soundtrack.src])
+
+  const startMusic = useCallback(() => {
+    const player = attachSoundtrack()
+    if (!player) return
+
+    musicIntentRef.current = true
+    player.volume = 0
+    const playback = player.play()
+    const fadeIn = () => fadeAudio(player, soundtrack.volume, 520)
+
+    if (playback?.then) {
+      playback.then(fadeIn).catch(() => {
+        musicIntentRef.current = false
+        setIsMusicPlaying(false)
+      })
+    } else {
+      fadeIn()
+    }
+  }, [attachSoundtrack, fadeAudio, soundtrack.volume])
+
+  const toggleMusic = useCallback(() => {
+    const player = audioRef.current
+    if (!player || player.paused || !musicIntentRef.current) {
+      startMusic()
+      return
+    }
+
+    musicIntentRef.current = false
+    setIsMusicPlaying(false)
+    fadeAudio(player, 0, 260, () => {
+      if (!musicIntentRef.current) player.pause()
+    })
+  }, [fadeAudio, startMusic])
+
   useEffect(() => {
+    const player = audioRef.current
+    cancelAudioFade()
+    musicIntentRef.current = false
     setIntroComplete(false)
     setIsMusicPlaying(false)
     window.scrollTo({ top: 0, behavior: 'auto' })
-  }, [design?.slug])
+
+    if (player) {
+      player.pause()
+      player.removeAttribute('src')
+      delete player.dataset.soundtrackSrc
+      player.load()
+    }
+
+    return () => {
+      cancelAudioFade()
+      musicIntentRef.current = false
+      if (!player) return
+      player.pause()
+      player.removeAttribute('src')
+      delete player.dataset.soundtrackSrc
+      player.load()
+    }
+  }, [cancelAudioFade, design?.slug])
 
   useEffect(() => {
     if (!isSandeSignature) return
@@ -59,30 +172,19 @@ export default function TemplatePreview({ design, onBack, onEnquire }) {
   }, [isSandeSignature])
 
   useEffect(() => {
-    const player = audioRef.current
-    return () => {
-      if (!player) return
+    const handleVisibilityChange = () => {
+      const player = audioRef.current
+      if (!document.hidden || !player || player.paused) return
+      cancelAudioFade()
+      musicIntentRef.current = false
+      player.volume = 0
       player.pause()
-      player.currentTime = 0
+      setIsMusicPlaying(false)
     }
-  }, [design?.slug])
 
-  const startMusic = useCallback(() => {
-    const player = audioRef.current
-    if (!player) return
-    player.volume = 0.28
-    player.play().catch(() => setIsMusicPlaying(false))
-  }, [])
-
-  const toggleMusic = useCallback(() => {
-    const player = audioRef.current
-    if (!player) return
-    if (player.paused) {
-      player.play().catch(() => setIsMusicPlaying(false))
-    } else {
-      player.pause()
-    }
-  }, [])
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange)
+  }, [cancelAudioFade])
 
   useEffect(() => {
     if (!introComplete) return undefined
@@ -113,30 +215,45 @@ export default function TemplatePreview({ design, onBack, onEnquire }) {
 
   if (!design) return null
 
+  const audioPlayer = (
+    <audio
+      ref={audioRef}
+      preload="none"
+      loop
+      onPlay={() => setIsMusicPlaying(true)}
+      onPause={() => setIsMusicPlaying(false)}
+    />
+  )
+
   if (isScrollWedding) {
     return (
-      <div className="template-preview template-preview--scroll">
-        <nav className="tp-toolbar" aria-label="Invitation preview controls">
-          <button className="tp-toolbar__back" type="button" onClick={onBack} aria-label="Back to all designs">
-            <BackIcon />
-            <span>All designs</span>
-          </button>
+      <>
+        <div className="template-preview template-preview--scroll">
+          <nav className="tp-toolbar" aria-label="Invitation preview controls">
+            <button className="tp-toolbar__back" type="button" onClick={onBack} aria-label="Back to all designs">
+              <BackIcon />
+              <span>All designs</span>
+            </button>
 
-          <div className="tp-toolbar__title">
-            <strong>{design.name}</strong>
-            <span>{formatPrice(design.price)}</span>
-          </div>
+            <div className="tp-toolbar__title">
+              <strong>{design.name}</strong>
+              <span>{formatPrice(design.price)}</span>
+            </div>
 
-          <button className="tp-toolbar__use" type="button" onClick={() => onEnquire?.(design)} aria-label={`Use ${design.name} design`}>
-            <span>Use this design</span>
-            <ArrowIcon />
-          </button>
-        </nav>
+            <button className="tp-toolbar__use" type="button" onClick={() => onEnquire?.(design)} aria-label={`Use ${design.name} design`}>
+              <span>Use this design</span>
+              <ArrowIcon />
+            </button>
+          </nav>
 
-        <main id="main-content" tabIndex={-1}>
-          <ScrollWeddingStory design={design} />
-        </main>
-      </div>
+          <main id="main-content" tabIndex={-1}>
+            <ScrollWeddingStory design={design} />
+          </main>
+
+          <SoundtrackButton soundtrack={soundtrack} playing={isMusicPlaying} onToggle={toggleMusic} scrollWedding />
+        </div>
+        {audioPlayer}
+      </>
     )
   }
 
@@ -158,14 +275,7 @@ export default function TemplatePreview({ design, onBack, onEnquire }) {
             onUserGesture={startMusic}
           />
         )}
-        <audio
-          ref={audioRef}
-          src={soundtrack.src}
-          preload="none"
-          loop
-          onPlay={() => setIsMusicPlaying(true)}
-          onPause={() => setIsMusicPlaying(false)}
-        />
+        {audioPlayer}
       </>
     )
   }
@@ -195,17 +305,7 @@ export default function TemplatePreview({ design, onBack, onEnquire }) {
             <InvitationStory design={design} onEnquire={onEnquire} />
           </main>
 
-          <button
-            className={`tp-soundtrack${isMusicPlaying ? ' is-playing' : ''}`}
-            type="button"
-            onClick={toggleMusic}
-            aria-pressed={isMusicPlaying}
-            aria-label={`${isMusicPlaying ? 'Pause' : 'Play'} ${soundtrack.title}`}
-            title={soundtrack.title}
-          >
-            <SoundIcon playing={isMusicPlaying} />
-            <span>{isMusicPlaying ? 'Sound on' : 'Play song'}</span>
-          </button>
+          <SoundtrackButton soundtrack={soundtrack} playing={isMusicPlaying} onToggle={toggleMusic} />
         </div>
       ) : (
         <InvitationIntro
@@ -215,14 +315,7 @@ export default function TemplatePreview({ design, onBack, onEnquire }) {
         />
       )}
 
-      <audio
-        ref={audioRef}
-        src={soundtrack.src}
-        preload="none"
-        loop
-        onPlay={() => setIsMusicPlaying(true)}
-        onPause={() => setIsMusicPlaying(false)}
-      />
+      {audioPlayer}
     </>
   )
 }
