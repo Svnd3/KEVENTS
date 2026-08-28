@@ -83,7 +83,13 @@ function useScrollFilm(storyRef, filmRef, worldRef, videoRef, config) {
       let roseY
       let roseRotation
       let roseScale
-      if (config.roseKind === 'stem') {
+      if (config.persistentRose) {
+        const orbit = worldProgress * Math.PI * 6
+        roseX = 37 * Math.cos(orbit)
+        roseY = 6 + 19 * Math.sin(orbit + .55)
+        roseRotation = 6 + 26 * Math.cos(orbit)
+        roseScale = .54 + Math.sin(orbit + .8) * .035
+      } else if (config.roseKind === 'stem') {
         roseX = -54 + heroProgress * 111
         roseY = 34 - heroProgress * 69 + Math.sin(heroProgress * Math.PI) * 8
         roseRotation = -12 + heroProgress * 31
@@ -98,7 +104,7 @@ function useScrollFilm(storyRef, filmRef, worldRef, videoRef, config) {
       story.style.setProperty('--rose-y', `${roseY.toFixed(2)}vh`)
       story.style.setProperty('--rose-turn', `${roseRotation.toFixed(2)}deg`)
       story.style.setProperty('--rose-scale', roseScale.toFixed(3))
-      story.style.setProperty('--rose-opacity', clamp((0.94 - heroProgress) / 0.11).toFixed(3))
+      story.style.setProperty('--rose-opacity', config.persistentRose ? '.84' : clamp((0.94 - heroProgress) / 0.11).toFixed(3))
 
       if (video.duration && Number.isFinite(video.duration) && video.readyState >= 2) {
         const desiredTime = worldProgress * Math.max(0, video.duration - 0.08)
@@ -193,6 +199,7 @@ function useScrollTypography(storyRef) {
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     const reveals = [...story.querySelectorAll('[data-scroll-reveal]')]
     const motions = [...story.querySelectorAll('[data-scroll-motion]')]
+    const carousels = [...story.querySelectorAll('[data-day-carousel]')]
     let frame = 0
 
     const paint = () => {
@@ -225,6 +232,38 @@ function useScrollTypography(storyRef) {
         block.style.setProperty('--motion-y', `${((1 - enter) * 46 - (1 - exit) * 22).toFixed(2)}px`)
         block.style.setProperty('--motion-scale', (.94 + enter * .06).toFixed(3))
         block.style.setProperty('--motion-turn', `${(direction * (1 - enter) * -4).toFixed(2)}deg`)
+      })
+
+      carousels.forEach((track) => {
+        const rect = track.getBoundingClientRect()
+        const cards = [...track.querySelectorAll('.sw-venue')]
+        const travel = Math.max(1, cards.length - 1)
+        const simplifyCarousel = reducedMotion || window.matchMedia('(max-height: 600px) and (orientation: landscape)').matches
+        const progress = simplifyCarousel ? 0 : clamp(-rect.top / Math.max(1, rect.height - viewport))
+        const activeIndex = Math.round(progress * travel)
+        track.style.setProperty('--carousel-progress', progress.toFixed(3))
+
+        cards.forEach((card, index) => {
+          const phase = simplifyCarousel ? 0 : progress * travel - index
+          const distance = Math.min(1.35, Math.abs(phase))
+          const horizontal = clamp(-phase, -1.25, 1.25) * 86
+          const vertical = Math.pow(distance, 1.55) * 112
+          const opacity = simplifyCarousel ? 1 : clamp(1 - Math.max(0, distance - .08) * 1.12)
+          const scale = 1 - Math.min(distance, 1) * .12
+          const rotation = clamp(-phase * 9, -11, 11)
+          const isActive = simplifyCarousel || index === activeIndex
+
+          card.style.setProperty('--card-x', `${horizontal.toFixed(2)}vw`)
+          card.style.setProperty('--card-y', `${vertical.toFixed(2)}px`)
+          card.style.setProperty('--card-scale', scale.toFixed(3))
+          card.style.setProperty('--card-turn', `${rotation.toFixed(2)}deg`)
+          card.style.setProperty('--card-opacity', opacity.toFixed(3))
+          card.style.setProperty('--card-z', String(20 - Math.round(distance * 10)))
+          card.setAttribute('aria-hidden', isActive ? 'false' : 'true')
+          card.querySelectorAll('a, button, input, select, textarea').forEach((control) => {
+            control.tabIndex = isActive ? 0 : -1
+          })
+        })
       })
       frame = 0
     }
@@ -282,6 +321,9 @@ function PersistentFilm({ config, videoRef }) {
       >
         <source src={config.video} type="video/mp4" />
       </video>
+      {config.persistentRose && (
+        <img className={`sw-film-bg__rose sw-film__rose sw-film__rose--${config.roseKind}`} src={config.rose} alt="" />
+      )}
       <div className="sw-film-bg__scrim" />
       <div className="sw-film-bg__grain" />
     </div>
@@ -301,7 +343,7 @@ function FilmHero({ config, storyRef, worldRef, videoRef }) {
       <h1 className="sr-only">{config.couple[0]} and {config.couple[1]} are getting married on {config.date}</h1>
       <p className="sr-only">{config.eyebrow}. {config.heroLines.join(' ')} {config.revealWords.join(' ')} {config.sceneLines.join(' ')}</p>
       <div className="sw-film__stage">
-        <img className={`sw-film__rose sw-film__rose--${config.roseKind}`} src={config.rose} alt="" aria-hidden="true" />
+        {!config.persistentRose && <img className={`sw-film__rose sw-film__rose--${config.roseKind}`} src={config.rose} alt="" aria-hidden="true" />}
 
         <div className="sw-film__scenes" aria-hidden="true">
           <div className="sw-film__scene sw-film__scene--0">
@@ -421,6 +463,28 @@ function WeddingMap({ config }) {
 }
 
 function DayPlan({ config }) {
+  const venueCards = config.venues.map((venue, index) => (
+    <article
+      className="sw-venue"
+      data-scroll-motion={config.dayPlanMotion === 'stack' ? '' : undefined}
+      key={venue.number}
+      style={{ '--venue-color': venue.color, '--venue-index': index }}
+    >
+      <div className="sw-venue__photo">
+        <img src={venue.image} alt="" loading="lazy" decoding="async" />
+        <span>{venue.title}</span>
+      </div>
+      <div className="sw-venue__details">
+        <div className="sw-venue__number">{venue.number}</div>
+        <time>{venue.time}</time>
+        <h3>{venue.venue}</h3>
+        <p>{venue.title}</p>
+        <small>{venue.note}</small>
+        <a href={venue.directions} target="_blank" rel="noreferrer"><PinIcon /> Directions</a>
+      </div>
+    </article>
+  ))
+
   return (
     <section className="sw-plan">
       <header className="sw-section-heading sw-section-heading--plan">
@@ -432,23 +496,15 @@ function DayPlan({ config }) {
         <p>Three places. Zero boring bits.</p>
       </header>
 
-      <div className="sw-plan__stack">
-        {config.venues.map((venue, index) => (
-          <article className="sw-venue" data-scroll-motion key={venue.number} style={{ '--venue-color': venue.color, '--venue-index': index }}>
-            <div className="sw-venue__photo">
-              <img src={venue.image} alt="" loading="lazy" decoding="async" />
-              <span>{venue.title}</span>
+      <div className={`sw-plan__stack ${config.dayPlanMotion === 'orbit' ? 'sw-plan__stack--orbit' : ''}`} data-day-carousel={config.dayPlanMotion === 'orbit' ? 'true' : undefined}>
+        {config.dayPlanMotion === 'orbit' ? (
+          <div className="sw-plan__carousel">
+            {venueCards}
+            <div className="sw-plan__carousel-index" aria-hidden="true">
+              {config.venues.map((venue) => <i key={venue.number} />)}
             </div>
-            <div className="sw-venue__details">
-              <div className="sw-venue__number">{venue.number}</div>
-              <time>{venue.time}</time>
-              <h3>{venue.venue}</h3>
-              <p>{venue.title}</p>
-              <small>{venue.note}</small>
-              <a href={venue.directions} target="_blank" rel="noreferrer"><PinIcon /> Directions</a>
-            </div>
-          </article>
-        ))}
+          </div>
+        ) : venueCards}
       </div>
     </section>
   )

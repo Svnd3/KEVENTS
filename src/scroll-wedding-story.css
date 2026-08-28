@@ -2389,3 +2389,217 @@
     padding-top: 90px;
   }
 }
+
+/* Soft Launch travelling rose ----------------------------------------- */
+.sw-film-bg__video { z-index: 1; }
+.sw-film-bg__scrim { z-index: 3; }
+.sw-film-bg__grain { z-index: 4; }
+
+.sw-film-bg__rose.sw-film__rose {
+  z-index: 2;
+  width: min(68vw, 920px);
+  opacity: var(--rose-opacity, .84);
+  filter: drop-shadow(0 18px 22px rgb(23 8 13 / 22%));
+}
+
+/* Soft Launch shallow-orbit day carousel ------------------------------ */
+.sw-plan__stack--orbit {
+  position: relative;
+  max-width: none;
+  height: 330svh;
+  margin-right: calc(clamp(18px, 5vw, 78px) * -1);
+  margin-left: calc(clamp(18px, 5vw, 78px) * -1);
+}
+
+.sw-plan__carousel {
+  position: sticky;
+  top: 86px;
+  display: grid;
+  height: calc(100svh - 106px);
+  min-height: 620px;
+  place-items: center;
+  overflow: hidden;
+  perspective: 1400px;
+}
+
+.sw-plan__carousel::before {
+  position: absolute;
+  bottom: -52%;
+  left: 50%;
+  width: min(118vw, 1700px);
+  aspect-ratio: 1;
+  transform: translateX(-50%);
+  border: 1px dashed rgb(255 255 255 / 20%);
+  border-radius: 50%;
+  content: '';
+  pointer-events: none;
+}
+
+.sw-plan__carousel .sw-venue {
+  position: absolute;
+  z-index: var(--card-z, 10);
+  top: 50%;
+  left: 50%;
+  width: min(1180px, calc(100vw - 150px));
+  height: min(690px, calc(100svh - 138px));
+  min-height: 560px;
+  margin: 0;
+  opacity: var(--card-opacity, 0);
+  transform: translate3d(calc(-50% + var(--card-x, 86vw)), calc(-50% + var(--card-y, 112px)), 0) rotate(var(--card-turn, 9deg)) scale(var(--card-scale, .88));
+  transform-origin: 50% 145%;
+  transition: opacity 90ms linear, filter 90ms linear;
+  will-change: transform, opacity;
+}
+
+.sw-plan__carousel .sw-venue:first-child {
+  --card-x: 0vw;
+  --card-y: 0px;
+  --card-opacity: 1;
+  --card-scale: 1;
+  --card-turn: 0deg;
+}
+
+.sw-plan__carousel .sw-venue[aria-hidden="true"] {
+  filter: saturate(.72) brightness(.84);
+}
+
+.sw-plan__carousel-index {
+  position: absolute;
+  z-index: 40;
+  bottom: 9px;
+  left: 50%;
+  display: flex;
+  width: 94px;
+  justify-content: space-between;
+  padding: 8px 11px;
+  transform: translateX(-50%);
+  border: 1px solid rgb(255 255 255 / 42%);
+  border-radius: 999px;
+  background: rgb(16 14 17 / 54%);
+  backdrop-filter: blur(12px);
+}
+
+.sw-plan__carousel-index i {
+  width: 18px;
+  height: 3px;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 42%);
+}
+
+.sw-plan__carousel-index::after {
+  position: absolute;
+  top: 8px;
+  left: 11px;
+  width: 18px;
+  height: 3px;
+  transform: translateX(calc(var(--carousel-progress, 0) * 54px));
+  border-radius: 999px;
+  background: #fff;
+  content: '';
+}
+
+@media (max-width: 680px) {
+  .sw-film-bg__rose.sw-film__rose {
+    width: 98vw;
+  }
+
+  .sw-plan__stack--orbit {
+    height: 320svh;
+    margin-right: -14px;
+    margin-left: -14px;
+  }
+
+  .sw-plan__carousel {
+    top: 70px;
+    height: calc(100svh - 80px);
+    min-height: 0;
+  }
+
+  .sw-plan__carousel::before {
+    bottom: -21%;
+    width: 180vw;
+  }
+
+  .sw-plan__carousel .sw-venue {
+    top: 48%;
+    width: calc(100vw - 28px);
+    height: min(690px, calc(100svh - 105px));
+    min-height: 0;
+    grid-template-rows: minmax(225px, 43%) 1fr;
+    transform-origin: 50% 128%;
+  }
+
+  .sw-plan__carousel .sw-venue__photo {
+    min-height: 225px;
+  }
+
+  .sw-plan__carousel .sw-venue__photo img {
+    min-height: 190px;
+  }
+}
+
+@media (max-height: 600px) and (orientation: landscape) {
+  .sw-plan__stack--orbit {
+    height: auto;
+    margin: 0;
+  }
+
+  .sw-plan__carousel {
+    position: relative;
+    top: auto;
+    display: grid;
+    height: auto;
+    min-height: 0;
+    gap: 40px;
+    overflow: visible;
+  }
+
+  .sw-plan__carousel::before,
+  .sw-plan__carousel-index {
+    display: none;
+  }
+
+  .sw-plan__carousel .sw-venue {
+    position: relative;
+    top: auto;
+    left: auto;
+    width: 100%;
+    height: auto;
+    min-height: auto;
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sw-plan__stack--orbit {
+    height: auto;
+    margin: 0;
+  }
+
+  .sw-plan__carousel {
+    position: relative;
+    top: auto;
+    display: grid;
+    height: auto;
+    min-height: 0;
+    gap: 56px;
+    overflow: visible;
+  }
+
+  .sw-plan__carousel::before,
+  .sw-plan__carousel-index {
+    display: none;
+  }
+
+  .sw-plan__carousel .sw-venue {
+    position: relative;
+    top: auto;
+    left: auto;
+    width: 100%;
+    height: auto;
+    min-height: auto;
+    opacity: 1;
+    transform: none;
+  }
+}
