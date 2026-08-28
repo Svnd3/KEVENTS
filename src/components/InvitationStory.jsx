@@ -1,4 +1,5 @@
-import { useId, useState } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
+import { getExperienceRecipe } from '../data/experienceRecipes.js'
 import '../invitation-story.css'
 
 const venueByCategory = {
@@ -61,6 +62,75 @@ const modeBySlug = {
 }
 
 const celestialVariants = new Set(['cosmos', 'orbit', 'glow', 'stars', 'electric'])
+const signatureTextileVariants = new Set(['weave', 'beads', 'tree', 'print'])
+
+const storyProfiles = {
+  sunset: ['horizon', 'panorama', 'rise', 'sand', 'landscape'],
+  weave: ['loom', 'split', 'unfold', 'cobalt', 'framed'],
+  arch: ['coast', 'portal', 'tide', 'moon', 'postcard'],
+  beads: ['orbit', 'seal', 'radial', 'coral', 'round'],
+  tree: ['botanical', 'rooted', 'grow', 'earth', 'specimen'],
+  city: ['nocturne', 'poster', 'cut', 'ink', 'fullbleed'],
+  print: ['loom', 'blocks', 'stagger', 'cobalt', 'cutout'],
+  mountain: ['horizon', 'summit', 'rise', 'mist', 'landscape'],
+  glass: ['construct', 'split', 'slide', 'glass', 'architectural'],
+  electric: ['orbit', 'signal', 'radial', 'night', 'neon'],
+  blocks: ['construct', 'blocks', 'stagger', 'primary', 'cutout'],
+  orbit: ['orbit', 'offset', 'radial', 'silver', 'round'],
+  glow: ['orbit', 'halo', 'bloom', 'peach', 'soft'],
+  type: ['editorial', 'typewall', 'wipe', 'paper', 'portrait'],
+  woven: ['loom', 'offset', 'unfold', 'forest', 'framed'],
+  coastal: ['coast', 'portal', 'tide', 'shell', 'postcard'],
+  mehndi: ['ceremony', 'courtyard', 'draw', 'henna', 'ornament'],
+  textile: ['loom', 'column', 'unfold', 'wine', 'framed'],
+  crossweave: ['loom', 'cross', 'stagger', 'gold', 'framed'],
+  cathedral: ['ceremony', 'portal', 'draw', 'ivory', 'architectural'],
+  magazine: ['editorial', 'cover', 'wipe', 'ivory', 'portrait'],
+  newspaper: ['editorial', 'broadsheet', 'wipe', 'newsprint', 'monochrome'],
+  editorial: ['editorial', 'spread', 'slide', 'paper', 'landscape'],
+  couture: ['editorial', 'portfolio', 'wipe', 'blanc', 'portrait'],
+  cover: ['editorial', 'coverline', 'cut', 'white', 'fullbleed'],
+  society: ['editorial', 'column', 'slide', 'cream', 'ornament'],
+  ocean: ['coast', 'postcard', 'tide', 'aqua', 'landscape'],
+  aegean: ['coast', 'split', 'slide', 'blue', 'postcard'],
+  vineyard: ['botanical', 'estate', 'grow', 'ochre', 'landscape'],
+  stars: ['nocturne', 'horizon', 'radial', 'midnight', 'landscape'],
+  mist: ['horizon', 'quiet', 'rise', 'mist', 'landscape'],
+  spice: ['coast', 'stamp', 'stagger', 'terracotta', 'postcard'],
+  peony: ['botanical', 'silk', 'bloom', 'blush', 'soft'],
+  pressed: ['botanical', 'herbarium', 'draw', 'parchment', 'specimen'],
+  orchid: ['nocturne', 'oval', 'bloom', 'black', 'portrait'],
+  bougainvillea: ['botanical', 'border', 'stagger', 'pink', 'cutout'],
+  protea: ['botanical', 'crown', 'grow', 'sage', 'specimen'],
+  rose: ['botanical', 'letter', 'bloom', 'rose', 'soft'],
+  line: ['stationery', 'hairline', 'draw', 'white', 'minimal'],
+  bow: ['stationery', 'formal', 'unfold', 'blacktie', 'minimal'],
+  serif: ['stationery', 'quiet', 'rise', 'cream', 'minimal'],
+  monogram: ['stationery', 'seal', 'radial', 'blanc', 'round'],
+  clay: ['construct', 'poster', 'cut', 'clay', 'cutout'],
+  thread: ['stationery', 'thread', 'draw', 'silver', 'minimal'],
+  dawn: ['film', 'panorama', 'rise', 'sunrise', 'fullbleed'],
+  noir: ['film', 'letterbox', 'cut', 'black', 'monochrome'],
+  cosmos: ['orbit', 'chart', 'radial', 'cosmos', 'round'],
+  reel: ['film', 'filmstrip', 'wipe', 'sepia', 'fullbleed'],
+  blooming: ['botanical', 'theatre', 'bloom', 'garden', 'portrait'],
+  nightcity: ['film', 'offset', 'cut', 'cobalt', 'fullbleed'],
+}
+
+function getStoryProfile(design) {
+  const [family = getMode(design), layout = 'classic', motion = 'rise', surface = 'paper', media = 'framed'] = storyProfiles[design.variant] || []
+  const tags = new Set(design.tags || [])
+  return {
+    family,
+    layout,
+    motion,
+    surface,
+    media,
+    compact: tags.has('Single Page'),
+    photoLed: tags.has('Photo-Led'),
+    multiEvent: tags.has('Multi-Event Suite'),
+  }
+}
 
 const eventPlans = {
   editorial: [
@@ -266,8 +336,7 @@ function StoryMedia({ design, mode, priority = false, caption }) {
   )
 }
 
-function RSVP({ design, mode, prompt = 'Can you make it?' }) {
-  const [first, second] = design.couple
+function RSVP({ design: _design, mode, prompt = 'Can you make it?' }) {
   const fieldId = useId()
   const [attendance, setAttendance] = useState('yes')
   const [guestName, setGuestName] = useState('')
@@ -297,8 +366,8 @@ function RSVP({ design, mode, prompt = 'Can you make it?' }) {
             <strong>Thank you, {guestName}.</strong>
             <span>
               {attendance === 'yes'
-                ? `${first} and ${second} have you marked as attending.`
-                : `Your reply has been saved. ${first} and ${second} will miss you.`}
+                ? 'We have saved you a place. We cannot wait to celebrate with you.'
+                : 'Your reply is saved. We will miss you on the day.'}
             </span>
             {note && <small>Your note was included.</small>}
             <button type="button" onClick={() => setSubmitted(false)}>Edit response</button>
@@ -366,12 +435,19 @@ function RSVP({ design, mode, prompt = 'Can you make it?' }) {
   )
 }
 
-function StoryFooter({ design }) {
+function StoryFooter({ design, venue }) {
   const [first, second] = design.couple
+  const mapUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(venue)}`
   return (
     <footer className="is-footer">
-      <strong>{first} &amp; {second}</strong>
-      <span>Saturday, 16 October 2027</span>
+      <div>
+        <strong>{first} &amp; {second}</strong>
+        <span>Saturday, 16 October 2027</span>
+      </div>
+      <a href={mapUrl} target="_blank" rel="noreferrer" aria-label={`Open ${venue} in Google Maps`}>
+        <PinIcon />
+        <span>{venue}</span>
+      </a>
     </footer>
   )
 }
@@ -429,7 +505,7 @@ function EditorialStory({ design, venue }) {
         </aside>
       </section>
       <RSVP design={design} mode="editorial" prompt="Will we see you there?" />
-      <StoryFooter design={design} />
+      <StoryFooter design={design} venue={venue} />
     </div>
   )
 }
@@ -441,10 +517,10 @@ function PalaceStory({ design, venue }) {
       <section className="is-palace-hero" aria-labelledby={`story-${design.slug}`}>
         <div className="is-palace-hero__pattern" aria-hidden="true" />
         <div className="is-palace-hero__arch">
-          <p>Together with our families</p>
+          <p>We’re getting married</p>
           <h1 id={`story-${design.slug}`}>{first}<span>&amp;</span>{second}</h1>
           <div className="is-palace-hero__date"><span>Saturday</span><strong>16 October 2027</strong><span>Nairobi</span></div>
-          <p className="is-palace-hero__welcome">request the pleasure of your company</p>
+          <p className="is-palace-hero__welcome">and we’d love you there with us</p>
         </div>
         <PalaceDrawing />
       </section>
@@ -482,7 +558,7 @@ function PalaceStory({ design, venue }) {
         </div>
       </section>
       <RSVP design={design} mode="palace" prompt="May we save you a place?" />
-      <StoryFooter design={design} />
+      <StoryFooter design={design} venue={venue} />
     </div>
   )
 }
@@ -540,7 +616,7 @@ function TravelStory({ design, venue }) {
         </div>
       </section>
       <RSVP design={design} mode="travel" prompt="Are you coming with us?" />
-      <StoryFooter design={design} />
+      <StoryFooter design={design} venue={venue} />
     </div>
   )
 }
@@ -590,7 +666,7 @@ function GardenStory({ design, venue }) {
         </div>
       </section>
       <RSVP design={design} mode="garden" prompt="Will you be in the garden?" />
-      <StoryFooter design={design} />
+      <StoryFooter design={design} venue={venue} />
     </div>
   )
 }
@@ -632,7 +708,7 @@ function KineticStory({ design, venue }) {
         </div>
       </section>
       <RSVP design={design} mode="kinetic" prompt="In or out?" />
-      <StoryFooter design={design} />
+      <StoryFooter design={design} venue={venue} />
     </div>
   )
 }
@@ -673,7 +749,7 @@ function CinemaStory({ design, venue }) {
         <div className="is-cinema-still__caption"><span>Location</span><strong>{venue}</strong><p>Formal dress. Guest transport leaves central Nairobi at 1:30 PM. Please share dietary requirements with your RSVP.</p></div>
       </section>
       <RSVP design={design} mode="cinema" prompt="See you in the final scene?" />
-      <StoryFooter design={design} />
+      <StoryFooter design={design} venue={venue} />
     </div>
   )
 }
@@ -739,25 +815,54 @@ function CelestialStory({ design, venue }) {
         </div>
       </section>
       <RSVP design={design} mode="celestial" prompt="Will you meet us under the stars?" />
-      <StoryFooter design={design} />
+      <StoryFooter design={design} venue={venue} />
     </div>
   )
 }
 
 function TextileStory({ design, venue }) {
   const [first, second] = design.couple
+  const experience = getExperienceRecipe(design)
+  const hasSignatureHero = signatureTextileVariants.has(design.variant)
   return (
     <div className="is-layout is-layout--textile">
-      <section className="is-textile-hero" aria-labelledby={`story-${design.slug}`}>
-        <div className="is-textile-border" aria-hidden="true" />
-        <div className="is-textile-hero__sun"><TextileSun /></div>
-        <div className="is-textile-hero__copy">
-          <p>Together with our families</p>
-          <h1 id={`story-${design.slug}`}>{first}<span>&amp;</span>{second}</h1>
-          <strong>Saturday, 16 October 2027</strong>
-          <span>{venue}</span>
-        </div>
-      </section>
+      {hasSignatureHero ? (
+        <section className={`is-textile-hero is-textile-hero--${design.variant}`} aria-labelledby={`story-${design.slug}`}>
+          {design.variant === 'tree' && <StoryMedia design={design} mode="textile" priority />}
+          <div className="is-textile-signature__surface" aria-hidden="true">
+            <span /><span /><span /><span /><span /><span />
+          </div>
+          {design.variant === 'beads' && (
+            <div className="is-textile-signature__orbit" aria-hidden="true">
+              <span /><span /><span /><span />
+            </div>
+          )}
+          <div className="is-textile-signature__copy">
+            <p className="is-textile-signature__phrase">{experience.phrase}</p>
+            <h1 id={`story-${design.slug}`}>
+              <span className="is-textile-signature__first">{first}</span>
+              <span className="is-textile-signature__join">&amp;</span>
+              <span className="is-textile-signature__second">{second}</span>
+            </h1>
+            <p className="is-textile-signature__subline">{experience.subline}</p>
+          </div>
+          <div className="is-textile-signature__meta">
+            <time dateTime="2027-10-16">Saturday, 16 October 2027</time>
+            <span>{venue}</span>
+          </div>
+        </section>
+      ) : (
+        <section className="is-textile-hero" aria-labelledby={`story-${design.slug}`}>
+          <div className="is-textile-border" aria-hidden="true" />
+          <div className="is-textile-hero__sun"><TextileSun /></div>
+          <div className="is-textile-hero__copy">
+            <p>Come celebrate with us</p>
+            <h1 id={`story-${design.slug}`}>{first}<span>&amp;</span>{second}</h1>
+            <strong>Saturday, 16 October 2027</strong>
+            <span>{venue}</span>
+          </div>
+        </section>
+      )}
 
       <section className="is-textile-welcome" data-invite-reveal>
         <div className="is-textile-welcome__pattern" aria-hidden="true" />
@@ -787,7 +892,7 @@ function TextileStory({ design, venue }) {
         </div>
       </section>
       <RSVP design={design} mode="textile" prompt="Will you celebrate with us?" />
-      <StoryFooter design={design} />
+      <StoryFooter design={design} venue={venue} />
     </div>
   )
 }
@@ -798,9 +903,9 @@ function LetterpressStory({ design, venue }) {
     <div className="is-layout is-layout--letterpress">
       <section className="is-letterpress-hero" aria-labelledby={`story-${design.slug}`}>
         <div className="is-letterpress-hero__sheet">
-          <p>Together with their families</p>
+          <p>We’re getting married</p>
           <h1 id={`story-${design.slug}`}>{first}<span>&amp;</span>{second}</h1>
-          <p>invite you to their wedding</p>
+          <p>and we’d love you to join us</p>
           <div className="is-letterpress-hero__date"><strong>Saturday</strong><span>16 October 2027 · 3:30 PM</span><em>{venue}</em></div>
         </div>
         <div className="is-letterpress-hero__blind" aria-hidden="true">{first[0]}{second[0]}</div>
@@ -833,21 +938,74 @@ function LetterpressStory({ design, venue }) {
         </div>
       </section>
       <RSVP design={design} mode="letterpress" prompt="Will you join us?" />
-      <StoryFooter design={design} />
+      <StoryFooter design={design} venue={venue} />
     </div>
   )
 }
 
 export default function InvitationStory({ design }) {
+  const storyRoot = useRef(null)
+  const dragState = useRef({ active: false })
+  const inertiaFrame = useRef(null)
+  const parallaxFrame = useRef(null)
+
+  useEffect(() => () => {
+    if (inertiaFrame.current) window.cancelAnimationFrame(inertiaFrame.current)
+    if (parallaxFrame.current) window.cancelAnimationFrame(parallaxFrame.current)
+  }, [])
+
+  useEffect(() => {
+    const root = storyRoot.current
+    if (!root || root.dataset.pannable !== 'true') return undefined
+    const rail = root.querySelector('.is-layout')
+    if (!rail) return undefined
+
+    const handleRailWheel = (event) => {
+      if (event.target.closest('input, textarea, select')) return
+      if (rail.scrollWidth <= rail.clientWidth) return
+
+      const verticalPanel = event.target.closest('.is-layout > section, .is-layout > footer')
+      const verticalIntent = Math.abs(event.deltaY) > Math.abs(event.deltaX)
+      if (verticalIntent && verticalPanel && verticalPanel.scrollHeight > verticalPanel.clientHeight + 2) {
+        const panelCanMoveUp = event.deltaY < 0 && verticalPanel.scrollTop > 1
+        const panelCanMoveDown = event.deltaY > 0
+          && verticalPanel.scrollTop + verticalPanel.clientHeight < verticalPanel.scrollHeight - 1
+        if (panelCanMoveUp || panelCanMoveDown) return
+      }
+
+      const movement = Math.abs(event.deltaY) >= Math.abs(event.deltaX) ? event.deltaY : event.deltaX
+      const atStart = rail.scrollLeft <= 1 && movement < 0
+      const atEnd = rail.scrollLeft + rail.clientWidth >= rail.scrollWidth - 1 && movement > 0
+      if (atStart || atEnd) {
+        if (verticalIntent && event.deltaY) {
+          event.preventDefault()
+          const page = document.scrollingElement
+          if (page) page.scrollTop += event.deltaY
+        }
+        return
+      }
+
+      event.preventDefault()
+      rail.scrollLeft += movement
+    }
+
+    root.addEventListener('wheel', handleRailWheel, { passive: false })
+    return () => root.removeEventListener('wheel', handleRailWheel)
+  }, [design?.slug])
+
   if (!design) return null
 
   const mode = getMode(design)
+  const profile = getStoryProfile(design)
+  const experience = getExperienceRecipe(design)
   const venue = getVenue(design)
   const [base = '#f3f1eb', , accent = '#315bea', accentTwo = '#141514'] = design.palette || []
   const style = {
     '--is-base': base,
     '--is-accent': accent,
     '--is-accent-two': accentTwo,
+    '--experience-accent': experience.accent,
+    '--experience-backdrop': experience.backdrop,
   }
   const props = { design, venue }
   const Story = {
@@ -862,9 +1020,186 @@ export default function InvitationStory({ design }) {
     letterpress: LetterpressStory,
   }[mode]
 
+  const usesStoryRail = ['horizontal', 'carousel', 'filmstrip'].includes(experience.storyLayout)
+
+  const getStoryRail = () => storyRoot.current?.querySelector('.is-layout')
+
+  const stopRailInertia = () => {
+    if (!inertiaFrame.current) return
+    window.cancelAnimationFrame(inertiaFrame.current)
+    inertiaFrame.current = null
+  }
+
+  const updateStoryParallax = (rail) => {
+    const root = storyRoot.current
+    if (!root || !rail) return
+    const maximum = Math.max(1, rail.scrollWidth - rail.clientWidth)
+    const progress = Math.min(1, Math.max(0, rail.scrollLeft / maximum))
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    const travel = reduceMotion ? 0 : (progress - 0.5) * 112
+    root.style.setProperty('--story-pan-progress', progress.toFixed(4))
+    root.style.setProperty('--story-parallax-near', `${travel * -0.23}px`)
+    root.style.setProperty('--story-parallax-far', `${travel * 0.12}px`)
+  }
+
+  const scheduleStoryParallax = (rail) => {
+    if (parallaxFrame.current) return
+    parallaxFrame.current = window.requestAnimationFrame(() => {
+      parallaxFrame.current = null
+      updateStoryParallax(rail)
+    })
+  }
+
+  const moveStoryRail = (direction) => {
+    const rail = getStoryRail()
+    if (!rail) return
+    stopRailInertia()
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    rail.scrollBy({ left: direction * rail.clientWidth * 0.72, behavior: reduceMotion ? 'auto' : 'smooth' })
+  }
+
+  const handleStoryScroll = (event) => {
+    if (!usesStoryRail || event.target !== getStoryRail()) return
+    scheduleStoryParallax(event.target)
+  }
+
+  const handleStoryPointerDown = (event) => {
+    if (!usesStoryRail || event.pointerType === 'touch' || event.button !== 0) return
+    if (event.target.closest('a, button, input, textarea, select, label, [contenteditable="true"]')) return
+    const rail = event.target.closest('.is-layout')
+    if (!rail || rail !== getStoryRail()) return
+    stopRailInertia()
+    dragState.current = {
+      active: true,
+      dragged: false,
+      pointerId: event.pointerId,
+      rail,
+      startX: event.clientX,
+      startY: event.clientY,
+      lastX: event.clientX,
+      lastTime: performance.now(),
+      velocity: 0,
+    }
+    event.currentTarget.setPointerCapture?.(event.pointerId)
+  }
+
+  const handleStoryPointerMove = (event) => {
+    const drag = dragState.current
+    if (!drag.active || drag.pointerId !== event.pointerId) return
+    const totalX = event.clientX - drag.startX
+    const totalY = event.clientY - drag.startY
+    if (!drag.dragged) {
+      if (Math.max(Math.abs(totalX), Math.abs(totalY)) < 7) return
+      if (Math.abs(totalY) > Math.abs(totalX) * 1.15) {
+        drag.active = false
+        if (event.currentTarget.hasPointerCapture?.(event.pointerId)) {
+          event.currentTarget.releasePointerCapture(event.pointerId)
+        }
+        return
+      }
+      drag.dragged = true
+      drag.rail.classList.add('is-dragging')
+    }
+
+    event.preventDefault()
+    const now = performance.now()
+    const elapsed = Math.max(8, now - drag.lastTime)
+    const movement = drag.lastX - event.clientX
+    drag.rail.scrollLeft += movement
+    const instantVelocity = movement / elapsed
+    drag.velocity = Math.max(-2.4, Math.min(2.4, drag.velocity * 0.7 + instantVelocity * 0.3))
+    drag.lastX = event.clientX
+    drag.lastTime = now
+  }
+
+  const finishStoryDrag = (event, allowInertia = true) => {
+    const drag = dragState.current
+    if (!drag.active || drag.pointerId !== event.pointerId) return
+    drag.active = false
+    drag.rail.classList.remove('is-dragging')
+    if (event.currentTarget.hasPointerCapture?.(event.pointerId)) {
+      event.currentTarget.releasePointerCapture(event.pointerId)
+    }
+
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    let velocity = drag.velocity || 0
+    if (!allowInertia || !drag.dragged || reduceMotion || Math.abs(velocity) < 0.025) return
+    let previousTime = performance.now()
+    const glide = (time) => {
+      const elapsed = Math.min(34, time - previousTime)
+      previousTime = time
+      const before = drag.rail.scrollLeft
+      drag.rail.scrollLeft += velocity * elapsed
+      velocity *= Math.pow(0.91, elapsed / 16.67)
+      const reachedEdge = Math.abs(drag.rail.scrollLeft - before) < 0.25
+      if (Math.abs(velocity) < 0.018 || reachedEdge) {
+        inertiaFrame.current = null
+        return
+      }
+      inertiaFrame.current = window.requestAnimationFrame(glide)
+    }
+    inertiaFrame.current = window.requestAnimationFrame(glide)
+  }
+
+  const handleStoryKeyDown = (event) => {
+    if (!usesStoryRail || event.target.closest('a, button, input, textarea, select')) return
+    const rail = getStoryRail()
+    if (!rail) return
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    const behavior = reduceMotion ? 'auto' : 'smooth'
+    const keyMovement = {
+      ArrowLeft: -rail.clientWidth * 0.24,
+      ArrowRight: rail.clientWidth * 0.24,
+      PageUp: -rail.clientWidth * 0.78,
+      PageDown: rail.clientWidth * 0.78,
+    }[event.key]
+    if (keyMovement) {
+      event.preventDefault()
+      stopRailInertia()
+      rail.scrollBy({ left: keyMovement, behavior })
+    } else if (event.key === 'Home' || event.key === 'End') {
+      event.preventDefault()
+      stopRailInertia()
+      rail.scrollTo({ left: event.key === 'Home' ? 0 : rail.scrollWidth, behavior })
+    }
+  }
+
   return (
-    <div className={`inv-story inv-story--${mode} inv-story--${design.variant}`} style={style}>
+    <div
+      ref={storyRoot}
+      className={`inv-story inv-story--${mode} inv-story--family-${profile.family} inv-story--mode-${mode} inv-story--variant-${design.variant} inv-story--layout-${profile.layout} inv-story--experience-${experience.storyLayout}${profile.compact ? ' inv-story--compact' : ''}${profile.photoLed ? ' inv-story--photo-led' : ''}${profile.multiEvent ? ' inv-story--multi-event' : ''}`}
+      data-motion={profile.motion}
+      data-section-motion={experience.sectionMotion}
+      data-story-layout={experience.storyLayout}
+      data-pannable={usesStoryRail ? 'true' : undefined}
+      data-surface={profile.surface}
+      data-media={profile.media}
+      style={style}
+      role={usesStoryRail ? 'region' : undefined}
+      aria-label={usesStoryRail ? 'Scrollable invitation story' : undefined}
+      tabIndex={usesStoryRail ? 0 : undefined}
+      onScrollCapture={handleStoryScroll}
+      onPointerDown={handleStoryPointerDown}
+      onPointerMove={handleStoryPointerMove}
+      onPointerUp={(event) => finishStoryDrag(event)}
+      onPointerCancel={(event) => finishStoryDrag(event, false)}
+      onKeyDown={handleStoryKeyDown}
+      onDragStart={(event) => {
+        if (usesStoryRail && event.target.closest('.is-layout')) event.preventDefault()
+      }}
+    >
       <Story {...props} />
+      {usesStoryRail && (
+        <nav className="is-story-rail-controls" aria-label="Invitation chapters">
+          <button type="button" onClick={() => moveStoryRail(-1)} aria-label="Previous chapter">
+            <ArrowIcon />
+          </button>
+          <span aria-hidden="true" />
+          <button type="button" onClick={() => moveStoryRail(1)} aria-label="Next chapter">
+            <ArrowIcon />
+          </button>
+        </nav>
+      )}
     </div>
   )
 }

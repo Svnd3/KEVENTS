@@ -78,7 +78,7 @@ export default function InvitationArtwork({ design, className = '', priority = f
           <em>&amp;</em>
           <span>{second}</span>
         </h3>
-        <p className="invitation__copy">joyfully invite you to celebrate their wedding</p>
+        <p className="invitation__copy">joyfully invite you to celebrate with us</p>
         <div className="invitation__date"><span>16</span><i />OCTOBER<i /><span>27</span></div>
         <span className="invitation__place">
           {design.category === 'Destination' ? 'A BEAUTIFUL PLACE • FAR AWAY' : 'NAIROBI • KENYA'}

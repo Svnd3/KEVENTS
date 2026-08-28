@@ -20,15 +20,6 @@ function BackIcon() {
   )
 }
 
-function PinIcon() {
-  return (
-    <svg viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M12 21s6-5.3 6-11a6 6 0 1 0-12 0c0 5.7 6 11 6 11Z" />
-      <circle cx="12" cy="10" r="2" />
-    </svg>
-  )
-}
-
 function MusicIcon({ playing }) {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -86,7 +77,7 @@ function AbstractPortrait({ person, side }) {
       <figcaption>
         <span>Meet</span>
         <strong>{person}</strong>
-        <p>{isLeft ? 'Keeps the plan, the playlist and a backup charger.' : 'Says five minutes and means a full Nairobi hour.'}</p>
+        <p>{isLeft ? 'I keep the plan, the playlist and a backup charger.' : 'I say five minutes and mean a full Nairobi hour.'}</p>
       </figcaption>
     </figure>
   )
@@ -137,22 +128,6 @@ function Countdown({ date }) {
       <FlipUnit value={remaining.minutes} label="minutes" />
       <FlipUnit value={remaining.seconds} label="seconds" />
     </div>
-  )
-}
-
-function LocationSketch() {
-  return (
-    <svg className="ss-location-sketch" viewBox="0 0 760 530" aria-hidden="true">
-      <path d="M-30 103c113-96 215 42 334-30 119-72 218 66 503-24" />
-      <path d="M-40 184c129-92 231 34 348-28 126-67 236 58 503-15" />
-      <path d="M-32 265c111-73 232 25 354-31 117-54 231 53 474-17" />
-      <path d="M-36 354c138-82 247 24 376-34 111-50 221 38 454-25" />
-      <path d="M-28 447c120-75 239 31 359-24 127-58 218 39 473-33" />
-      <path className="ss-location-sketch__route" d="M71 491c83-71 85-177 195-194 115-18 128 67 219 19 80-42 72-138 192-202" />
-      <circle cx="485" cy="316" r="48" />
-      <circle cx="485" cy="316" r="13" />
-      <path d="M485 266v-44M485 410v-44M435 316h-44M579 316h-44" />
-    </svg>
   )
 }
 
@@ -303,7 +278,9 @@ export default function SandeSignatureStory({
           <BackIcon />
           <span>Designs</span>
         </button>
-        <span className="ss-floating-nav__signature" aria-label="A Sande invitation">Sande</span>
+        <span className="ss-floating-nav__signature" aria-label={`${first} and ${second}`}>
+          {first.charAt(0)} + {second.charAt(0)}
+        </span>
         <button className="ss-round-action ss-round-action--use" type="button" onClick={() => onUseDesign?.(design)}>
           <span>Use this design</span>
           <ArrowIcon />
@@ -326,15 +303,40 @@ export default function SandeSignatureStory({
         <div className="ss-hero__halo ss-parallax-far" aria-hidden="true" />
         <div className="ss-hero__orbit ss-parallax-near" aria-hidden="true" />
         <div className="ss-hero__grain" aria-hidden="true" />
+        <div className="ss-hero__photos" aria-hidden="true">
+          <figure className="ss-hero-photo ss-hero-photo--top-left">
+            <img
+              src="/images/wedding-couple.webp"
+              alt=""
+              width="1067"
+              height="1600"
+              loading="eager"
+              decoding="async"
+              fetchPriority="high"
+              draggable="false"
+            />
+          </figure>
+          <figure className="ss-hero-photo ss-hero-photo--bottom-right">
+            <img
+              src="/images/wedding-celebration.webp"
+              alt=""
+              width="1600"
+              height="1067"
+              loading="eager"
+              decoding="async"
+              draggable="false"
+            />
+          </figure>
+        </div>
         <div className="ss-hero__content">
           <WeaveMark />
-          <p className="ss-kicker">A little news from Nairobi</p>
+          <p className="ss-kicker">We have some news from Nairobi</p>
           <h1>
             <span>{first}</span>
             <i>&amp;</i>
             <span>{second}</span>
           </h1>
-          <p className="ss-hero__announcement">are getting married</p>
+          <p className="ss-hero__announcement">we’re getting married</p>
           <div className="ss-hero__details">
             <time dateTime={eventDateValue}>{formattedDate}</time>
             <span>{venue}</span>
@@ -349,7 +351,7 @@ export default function SandeSignatureStory({
       <section id="meet-the-two" className="ss-meet ss-paper-section">
         <div className="ss-section-heading" data-ss-reveal>
           <p className="ss-kicker">The two of us</p>
-          <h2>Different calendars.<br />One very good plan.</h2>
+          <h2>This is us.<br />One very good plan.</h2>
         </div>
         <div className="ss-meet__grid">
           <div data-ss-reveal><AbstractPortrait person={first} side="left" /></div>
@@ -361,9 +363,9 @@ export default function SandeSignatureStory({
         <div className="ss-how-we-met__pattern ss-parallax-far" aria-hidden="true"><WeaveMark /></div>
         <div className="ss-how-we-met__copy" data-ss-reveal>
           <p className="ss-kicker">How we met</p>
-          <h2>It started with 3% battery.</h2>
-          <p>They met when {second} borrowed {first}’s charger at a rooftop party. He returned it three days later with coffee and a wildly unconvincing excuse. The charger survived. So did the conversation.</p>
-          <span>That coffee lasted four hours.</span>
+          <h2>We started with 3% battery.</h2>
+          <p>We met when {second} borrowed {first}’s charger at a rooftop party. It came back three days later with coffee and a wildly unconvincing excuse. The charger survived. We did better.</p>
+          <span>Our first coffee lasted four hours.</span>
         </div>
       </section>
 
@@ -380,13 +382,31 @@ export default function SandeSignatureStory({
 
       <section className="ss-location">
         <div className="ss-location__map" data-ss-reveal>
-          <LocationSketch />
-          <span className="ss-location__pin"><PinIcon /></span>
+          <img
+            src="/images/acacia-garden-map.webp"
+            alt={`Street map around ${venue}`}
+            width="1280"
+            height="1024"
+            loading="lazy"
+            decoding="async"
+          />
+          <span className="ss-location__pin" aria-hidden="true">
+            <i />
+            <b>Acacia Garden</b>
+          </span>
+          <a
+            className="ss-location__attribution"
+            href="https://www.openstreetmap.org/copyright"
+            target="_blank"
+            rel="noreferrer"
+          >
+            © OpenStreetMap contributors
+          </a>
         </div>
         <div className="ss-location__details" data-ss-reveal>
           <p className="ss-kicker">Meet us here</p>
           <h2>{venue}</h2>
-          <p>Garden doors open at 2:00 PM. The ceremony begins at 3:00 PM, followed by supper and a dance floor with no curfew.</p>
+          <p>We’ll be there from 2:00 PM. We say our vows at 3:00 PM, then feed you properly and keep the dance floor open late.</p>
           <a href={mapUrl} target="_blank" rel="noreferrer">
             <span>Open in Maps</span>
             <ArrowIcon />
@@ -423,7 +443,7 @@ export default function SandeSignatureStory({
           <WeaveMark compact />
           <p className="ss-kicker">Save us a seat count</p>
           <h2>Are you coming?</h2>
-          <p>Tell us by 20 September. {second} has promised not to guess the catering numbers.</p>
+          <p>Tell us by 20 September. We promise not to guess the catering numbers.</p>
         </div>
         <div className="ss-rsvp__card" data-ss-reveal>
           <RsvpForm first={first} second={second} />
@@ -431,8 +451,8 @@ export default function SandeSignatureStory({
       </section>
 
       <footer className="ss-footer">
-        <p>{first} &amp; {second}</p>
-        <span>Made in Nairobi by Sande</span>
+        <p>We love you all.</p>
+        <span>With love, {first} &amp; {second}</span>
       </footer>
     </main>
   )

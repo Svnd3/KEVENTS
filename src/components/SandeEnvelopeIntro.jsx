@@ -75,6 +75,14 @@ function PetalMark() {
   )
 }
 
+function HeartbeatMark() {
+  return (
+    <svg className="sei-seal__heart" viewBox="0 0 64 64" aria-hidden="true">
+      <path d="M32 54.5 12.2 35.7C1.7 25.7 7.4 9.5 20.5 9.5c5.2 0 9.2 2.8 11.5 6.4 2.3-3.6 6.3-6.4 11.5-6.4 13.1 0 18.8 16.2 8.3 26.2L32 54.5Z" />
+    </svg>
+  )
+}
+
 export default function SandeEnvelopeIntro({ design, onComplete, onUserGesture }) {
   const [phase, setPhase] = useState('sealed')
   const timersRef = useRef([])
@@ -145,13 +153,8 @@ export default function SandeEnvelopeIntro({ design, onComplete, onUserGesture }
             <span className="sei-envelope__pocket" />
             <span className="sei-envelope__seam sei-envelope__seam--left" />
             <span className="sei-envelope__seam sei-envelope__seam--right" />
-            <span className="sei-seal"><PetalMark /></span>
+            <span className="sei-seal"><HeartbeatMark /></span>
           </span>
-        </span>
-
-        <span className="sei-prompt">
-          <span className="sei-prompt__pulse" aria-hidden="true" />
-          Tap the seal
         </span>
       </button>
 

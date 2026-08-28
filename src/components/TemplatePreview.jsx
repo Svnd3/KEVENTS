@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { formatPrice } from '../data/designs.js'
-import chaiYaSaaKumiUrl from '../../songs/CHAI YA SAA KUMI (LYRIC VIDEO) - YWAYA TAJIRI [7b5aUIQ-sUc].mp3?url'
+import { getSoundtrack } from '../data/soundtracks.js'
 import InvitationIntro from './InvitationIntro.jsx'
 import InvitationStory from './InvitationStory.jsx'
 import SandeEnvelopeIntro from './SandeEnvelopeIntro.jsx'
@@ -23,17 +23,37 @@ function ArrowIcon() {
   )
 }
 
+function SoundIcon({ playing }) {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M9 18V7l9-2v10" />
+      <circle cx="6.5" cy="18" r="2.5" />
+      <circle cx="15.5" cy="15" r="2.5" />
+      {playing && <path className="tp-soundtrack__wave" d="M21 8c1 1 1 3 0 4" />}
+    </svg>
+  )
+}
+
 export default function TemplatePreview({ design, onBack, onEnquire }) {
   const [introComplete, setIntroComplete] = useState(false)
   const [isMusicPlaying, setIsMusicPlaying] = useState(false)
   const audioRef = useRef(null)
   const isSandeSignature = design?.variant === 'sande'
+  const soundtrack = getSoundtrack(design)
 
   useEffect(() => {
     setIntroComplete(false)
     setIsMusicPlaying(false)
     window.scrollTo({ top: 0, behavior: 'auto' })
   }, [design?.slug])
+
+  useEffect(() => {
+    if (!isSandeSignature) return
+    ;['/images/wedding-couple.webp', '/images/wedding-celebration.webp'].forEach((src) => {
+      const image = new window.Image()
+      image.src = src
+    })
+  }, [isSandeSignature])
 
   useEffect(() => {
     const player = audioRef.current
@@ -110,7 +130,7 @@ export default function TemplatePreview({ design, onBack, onEnquire }) {
         )}
         <audio
           ref={audioRef}
-          src={chaiYaSaaKumiUrl}
+          src={soundtrack.src}
           preload="none"
           loop
           onPlay={() => setIsMusicPlaying(true)}
@@ -120,32 +140,59 @@ export default function TemplatePreview({ design, onBack, onEnquire }) {
     )
   }
 
-  if (!introComplete) {
-    return <InvitationIntro design={design} onComplete={() => setIntroComplete(true)} />
-  }
-
   return (
-    <div className="template-preview">
-      <nav className="tp-toolbar" aria-label="Invitation preview controls">
-        <button className="tp-toolbar__back" type="button" onClick={onBack}>
-          <BackIcon />
-          <span>All designs</span>
-        </button>
+    <>
+      {introComplete ? (
+        <div className="template-preview">
+          <nav className="tp-toolbar" aria-label="Invitation preview controls">
+            <button className="tp-toolbar__back" type="button" onClick={onBack}>
+              <BackIcon />
+              <span>All designs</span>
+            </button>
 
-        <div className="tp-toolbar__title">
-          <strong>{design.name}</strong>
-          <span>{formatPrice(design.price)}</span>
+            <div className="tp-toolbar__title">
+              <strong>{design.name}</strong>
+              <span>{formatPrice(design.price)}</span>
+            </div>
+
+            <button className="tp-toolbar__use" type="button" onClick={() => onEnquire?.(design)}>
+              <span>Use this design</span>
+              <ArrowIcon />
+            </button>
+          </nav>
+
+          <main id="main-content" tabIndex={-1}>
+            <InvitationStory design={design} onEnquire={onEnquire} />
+          </main>
+
+          <button
+            className={`tp-soundtrack${isMusicPlaying ? ' is-playing' : ''}`}
+            type="button"
+            onClick={toggleMusic}
+            aria-pressed={isMusicPlaying}
+            aria-label={`${isMusicPlaying ? 'Pause' : 'Play'} ${soundtrack.title}`}
+            title={soundtrack.title}
+          >
+            <SoundIcon playing={isMusicPlaying} />
+            <span>{isMusicPlaying ? 'Sound on' : 'Play song'}</span>
+          </button>
         </div>
+      ) : (
+        <InvitationIntro
+          design={design}
+          onComplete={() => setIntroComplete(true)}
+          onUserGesture={startMusic}
+        />
+      )}
 
-        <button className="tp-toolbar__use" type="button" onClick={() => onEnquire?.(design)}>
-          <span>Use this design</span>
-          <ArrowIcon />
-        </button>
-      </nav>
-
-      <main id="main-content" tabIndex={-1}>
-        <InvitationStory design={design} onEnquire={onEnquire} />
-      </main>
-    </div>
+      <audio
+        ref={audioRef}
+        src={soundtrack.src}
+        preload="none"
+        loop
+        onPlay={() => setIsMusicPlaying(true)}
+        onPause={() => setIsMusicPlaying(false)}
+      />
+    </>
   )
 }
