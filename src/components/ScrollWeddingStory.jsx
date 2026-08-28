@@ -16,6 +16,36 @@ const persistentRosePath = [
 
 const smoothStep = (value) => value * value * (3 - 2 * value)
 
+const getDocumentTop = (element) => {
+  let top = 0
+  let current = element
+  while (current) {
+    top += current.offsetTop
+    current = current.offsetParent
+  }
+  return top
+}
+
+function useReducedMotionPreference() {
+  const [reducedMotion, setReducedMotion] = useState(() => (
+    typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  ))
+
+  useEffect(() => {
+    const preference = window.matchMedia('(prefers-reduced-motion: reduce)')
+    const updatePreference = () => setReducedMotion(preference.matches)
+    preference.addEventListener?.('change', updatePreference)
+    if (!preference.addEventListener) preference.addListener(updatePreference)
+    updatePreference()
+    return () => {
+      preference.removeEventListener?.('change', updatePreference)
+      if (!preference.removeEventListener) preference.removeListener(updatePreference)
+    }
+  }, [])
+
+  return reducedMotion
+}
+
 function ArrowIcon() {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -42,6 +72,8 @@ function HeartIcon() {
 }
 
 function useScrollFilm(storyRef, filmRef, worldRef, videoRef, config) {
+  const reducedMotion = useReducedMotionPreference()
+
   useEffect(() => {
     const story = storyRef.current
     const film = filmRef.current
@@ -49,10 +81,13 @@ function useScrollFilm(storyRef, filmRef, worldRef, videoRef, config) {
     const video = videoRef.current
     if (!story || !film || !world || !video) return undefined
 
-    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches || navigator.connection?.saveData
     const words = [...film.querySelectorAll('[data-scroll-word]')]
+    const wordValues = words.map(() => '')
     const sceneCounter = film.querySelector('[data-scene-counter]')
     const roseSections = config.persistentRose ? [...world.querySelectorAll('.sw-film-world__content > section')] : []
+    const rose = config.persistentRose
+      ? story.querySelector('.sw-film-bg__rose')
+      : film.querySelector('.sw-film__rose')
     let heroTarget = 0
     let heroCurrent = 0
     let worldTarget = 0
@@ -63,24 +98,42 @@ function useScrollFilm(storyRef, filmRef, worldRef, videoRef, config) {
     let previousTick = performance.now()
     let lastSeek = 0
     let roseStops = persistentRosePath.map((_, index) => index / (persistentRosePath.length - 1))
-    let measuredWorldHeight = -1
-    let measuredViewportHeight = -1
+    let filmTop = 0
+    let filmHeight = 1
+    let worldTop = 0
+    let worldHeight = 1
+    let lastFilmProgress = ''
+    let lastPalette = ''
+    let lastRoseTransform = ''
+    let lastRoseOpacity = ''
 
     const setPalette = (progress) => {
+      const hues = config.id === 'love-bomb'
+        ? [338 + progress * 52, 165 + progress * 55, 45 + progress * 35]
+        : [194 + progress * 34, 266 + progress * 40, 16 + progress * 30]
+      const roundedHues = hues.map(Math.round)
+      const palette = roundedHues.join(':')
+      if (palette === lastPalette) return
+
+      const [one, two, three] = roundedHues
       if (config.id === 'love-bomb') {
-        story.style.setProperty('--line-one', `hsl(${338 + progress * 52} 88% 69%)`)
-        story.style.setProperty('--line-two', `hsl(${165 + progress * 55} 72% 70%)`)
-        story.style.setProperty('--line-three', `hsl(${45 + progress * 35} 94% 66%)`)
+        story.style.setProperty('--line-one', `hsl(${one} 88% 69%)`)
+        story.style.setProperty('--line-two', `hsl(${two} 72% 70%)`)
+        story.style.setProperty('--line-three', `hsl(${three} 94% 66%)`)
       } else {
-        story.style.setProperty('--line-one', `hsl(${194 + progress * 34} 64% 78%)`)
-        story.style.setProperty('--line-two', `hsl(${266 + progress * 40} 58% 84%)`)
-        story.style.setProperty('--line-three', `hsl(${16 + progress * 30} 78% 84%)`)
+        story.style.setProperty('--line-one', `hsl(${one} 64% 78%)`)
+        story.style.setProperty('--line-two', `hsl(${two} 58% 84%)`)
+        story.style.setProperty('--line-three', `hsl(${three} 78% 84%)`)
       }
+      lastPalette = palette
     }
 
     const paint = (heroProgress, worldProgress, now) => {
-      story.style.setProperty('--film-progress', heroProgress.toFixed(4))
-      story.style.setProperty('--world-progress', worldProgress.toFixed(4))
+      const filmProgress = heroProgress.toFixed(4)
+      if (filmProgress !== lastFilmProgress) {
+        film.style.setProperty('--film-progress', filmProgress)
+        lastFilmProgress = filmProgress
+      }
       setPalette(worldProgress)
 
       const scene = heroProgress < 0.17 ? 0 : heroProgress < 0.35 ? 1 : heroProgress < 0.57 ? 2 : heroProgress < 0.76 ? 3 : 4
@@ -92,7 +145,10 @@ function useScrollFilm(storyRef, filmRef, worldRef, videoRef, config) {
 
       words.forEach((word, index) => {
         const wordProgress = clamp((heroProgress - (0.35 + index * 0.024)) / 0.075)
-        word.style.setProperty('--word-reveal', wordProgress.toFixed(3))
+        const wordValue = wordProgress.toFixed(3)
+        if (wordValue === wordValues[index]) return
+        word.style.setProperty('--word-reveal', wordValue)
+        wordValues[index] = wordValue
       })
 
       let roseX
@@ -136,15 +192,26 @@ function useScrollFilm(storyRef, filmRef, worldRef, videoRef, config) {
         roseRotation = -24 + heroProgress * 224
         roseScale = 1.08 - heroProgress * 0.43
       }
-      story.style.setProperty('--rose-x', `${roseX.toFixed(2)}vw`)
-      story.style.setProperty('--rose-y', `${roseY.toFixed(2)}vh`)
-      story.style.setProperty('--rose-turn', `${roseRotation.toFixed(2)}deg`)
-      story.style.setProperty('--rose-scale', roseScale.toFixed(3))
-      story.style.setProperty('--rose-opacity', config.persistentRose ? '1' : clamp((0.94 - heroProgress) / 0.11).toFixed(3))
+      if (rose) {
+        const roseTransform = `translate(-50%, -50%) translate3d(${roseX.toFixed(2)}vw, ${roseY.toFixed(2)}vh, 0) rotate(${roseRotation.toFixed(2)}deg) scale(${roseScale.toFixed(3)})`
+        const roseOpacity = config.persistentRose ? '1' : clamp((0.94 - heroProgress) / 0.11).toFixed(3)
+        if (roseTransform !== lastRoseTransform) {
+          rose.style.transform = roseTransform
+          lastRoseTransform = roseTransform
+        }
+        if (roseOpacity !== lastRoseOpacity) {
+          rose.style.opacity = roseOpacity
+          lastRoseOpacity = roseOpacity
+        }
+      }
 
       if (video.duration && Number.isFinite(video.duration) && video.readyState >= 2) {
         const desiredTime = worldProgress * Math.max(0, video.duration - 0.08)
-        if (!video.seeking && now - lastSeek >= 33 && Math.abs(desiredTime - video.currentTime) > 0.032) {
+        const carouselIsActive = config.dayPlanMotion === 'orbit'
+          && worldProgress >= (roseStops[3] ?? 0) - .015
+          && worldProgress <= (roseStops[4] ?? 1) + .015
+        const seekInterval = carouselIsActive && window.innerWidth <= 680 ? 66 : 33
+        if (!video.seeking && now - lastSeek >= seekInterval && Math.abs(desiredTime - video.currentTime) > 0.032) {
           video.currentTime = desiredTime
           lastSeek = now
         }
@@ -168,23 +235,32 @@ function useScrollFilm(storyRef, filmRef, worldRef, videoRef, config) {
       }
     }
 
-    const measure = () => {
-      const filmRect = film.getBoundingClientRect()
-      const worldRect = world.getBoundingClientRect()
-      const heroDistance = Math.max(1, filmRect.height - window.innerHeight)
-      const worldDistance = Math.max(1, worldRect.height - window.innerHeight)
-      heroTarget = clamp(-filmRect.top / heroDistance)
-      worldTarget = clamp(-worldRect.top / worldDistance)
-      if (config.persistentRose && (Math.abs(measuredWorldHeight - worldRect.height) > 1 || measuredViewportHeight !== window.innerHeight)) {
+    const updateLayout = () => {
+      filmTop = getDocumentTop(film)
+      filmHeight = film.offsetHeight
+      worldTop = getDocumentTop(world)
+      worldHeight = world.offsetHeight
+      if (config.persistentRose) {
+        const worldDistance = Math.max(1, worldHeight - window.innerHeight)
         const sectionStops = roseSections.map((section, index) => {
           if (index === 0) return 0
           return clamp((section.offsetTop - window.innerHeight * .32) / worldDistance)
         })
         roseStops = [...sectionStops, 1]
-        measuredWorldHeight = worldRect.height
-        measuredViewportHeight = window.innerHeight
       }
+    }
+
+    const measure = () => {
+      const heroDistance = Math.max(1, filmHeight - window.innerHeight)
+      const worldDistance = Math.max(1, worldHeight - window.innerHeight)
+      heroTarget = clamp((window.scrollY - filmTop) / heroDistance)
+      worldTarget = clamp((window.scrollY - worldTop) / worldDistance)
       if (!frame) frame = window.requestAnimationFrame(tick)
+    }
+
+    const handleLayoutChange = () => {
+      updateLayout()
+      measure()
     }
 
     const resumeAfterSeek = () => {
@@ -205,6 +281,8 @@ function useScrollFilm(storyRef, filmRef, worldRef, videoRef, config) {
     const showReducedState = () => {
       story.classList.add('is-reduced-motion')
       film.dataset.scene = '0'
+      rose?.style.removeProperty('transform')
+      rose?.style.removeProperty('opacity')
       words.forEach((word) => word.style.setProperty('--word-reveal', '1'))
       setPalette(0.35)
       const seekPosterFrame = () => {
@@ -212,102 +290,252 @@ function useScrollFilm(storyRef, filmRef, worldRef, videoRef, config) {
       }
       video.addEventListener('loadedmetadata', seekPosterFrame, { once: true })
       seekPosterFrame()
-      return () => video.removeEventListener('loadedmetadata', seekPosterFrame)
+      return () => {
+        video.removeEventListener('loadedmetadata', seekPosterFrame)
+        story.classList.remove('is-reduced-motion')
+      }
     }
 
-    if (reduceMotion) return showReducedState()
+    if (reducedMotion) return showReducedState()
 
+    story.classList.remove('is-reduced-motion')
+    let disposed = false
+    const resizeObserver = 'ResizeObserver' in window ? new ResizeObserver(handleLayoutChange) : null
     video.load()
     video.addEventListener('seeked', resumeAfterSeek)
     video.addEventListener('loadedmetadata', measure)
     window.addEventListener('scroll', handleScroll, { passive: true })
-    window.addEventListener('resize', measure)
+    window.addEventListener('resize', handleLayoutChange)
+    story.addEventListener('load', handleLayoutChange, true)
     worldObserver?.observe(world)
+    resizeObserver?.observe(world)
+    document.fonts?.ready.then(() => {
+      if (!disposed) handleLayoutChange()
+    })
+    updateLayout()
     measure()
 
     return () => {
+      disposed = true
       window.removeEventListener('scroll', handleScroll)
-      window.removeEventListener('resize', measure)
+      window.removeEventListener('resize', handleLayoutChange)
+      story.removeEventListener('load', handleLayoutChange, true)
       video.removeEventListener('seeked', resumeAfterSeek)
       video.removeEventListener('loadedmetadata', measure)
       worldObserver?.disconnect()
+      resizeObserver?.disconnect()
       window.cancelAnimationFrame(frame)
     }
-  }, [config, filmRef, storyRef, videoRef, worldRef])
+  }, [config, filmRef, reducedMotion, storyRef, videoRef, worldRef])
 }
 
 function useScrollTypography(storyRef) {
+  const reducedMotion = useReducedMotionPreference()
+
   useEffect(() => {
     const story = storyRef.current
     if (!story) return undefined
 
-    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    const reveals = [...story.querySelectorAll('[data-scroll-reveal]')]
-    const motions = [...story.querySelectorAll('[data-scroll-motion]')]
-    const carousels = [...story.querySelectorAll('[data-day-carousel]')]
+    const shortLandscape = window.matchMedia('(max-height: 600px) and (orientation: landscape)')
+    const reveals = [...story.querySelectorAll('[data-scroll-reveal]')].map((block) => {
+      const characters = [...block.querySelectorAll('[data-scroll-char]')]
+      return {
+        block,
+        characters,
+        characterValues: characters.map(() => '0.000'),
+        progressValue: '0.000',
+        exitValue: '1.000',
+        top: 0,
+        height: 0,
+      }
+    })
+    const motions = [...story.querySelectorAll('[data-scroll-motion]')].map((block) => ({
+      block,
+      values: {},
+      top: 0,
+      height: 0,
+    }))
+    const carousels = [...story.querySelectorAll('[data-day-carousel]')].map((track) => {
+      const cards = [...track.querySelectorAll('.sw-venue')].map((card) => ({
+        card,
+        controls: [...card.querySelectorAll('a, button, input, select, textarea')],
+        transform: '',
+        opacity: '',
+        zIndex: '',
+        visibility: '',
+      }))
+      cards.forEach(({ card, controls }, index) => {
+        card.setAttribute('aria-hidden', index === 0 ? 'false' : 'true')
+        controls.forEach((control) => { control.tabIndex = index === 0 ? 0 : -1 })
+      })
+      return { track, cards, activeIndex: 0, simplified: false, progressValue: '', top: 0, height: 0 }
+    })
     let frame = 0
+
+    const measureLayout = () => {
+      reveals.forEach((item) => {
+        item.top = getDocumentTop(item.block)
+        item.height = item.block.offsetHeight
+      })
+      motions.forEach((item) => {
+        item.top = getDocumentTop(item.block)
+        item.height = item.block.offsetHeight
+      })
+      carousels.forEach((item) => {
+        item.top = getDocumentTop(item.track)
+        item.height = item.track.offsetHeight
+      })
+    }
 
     const paint = () => {
       const viewport = window.innerHeight
+      const viewportWidth = window.innerWidth
+      const scrollOffset = window.scrollY
 
-      reveals.forEach((block) => {
-        const rect = block.getBoundingClientRect()
-        const progress = reducedMotion ? 1 : clamp((viewport * .88 - rect.top) / Math.max(180, viewport * .44))
-        const exit = reducedMotion ? 1 : clamp((rect.bottom - viewport * .08) / Math.max(130, viewport * .27))
-        block.style.setProperty('--line-reveal', progress.toFixed(3))
-        block.style.setProperty('--line-exit', exit.toFixed(3))
+      reveals.forEach((item) => {
+        const { block, characters, characterValues } = item
+        const top = item.top - scrollOffset
+        const bottom = top + item.height
+        const progress = reducedMotion ? 1 : clamp((viewport * .88 - top) / Math.max(180, viewport * .44))
+        const exit = reducedMotion ? 1 : clamp((bottom - viewport * .08) / Math.max(130, viewport * .27))
+        const progressValue = progress.toFixed(3)
+        const exitValue = exit.toFixed(3)
 
-        const characters = block.querySelectorAll('[data-scroll-char]')
-        const count = characters.length
-        characters.forEach((character, index) => {
-          const characterProgress = clamp((progress * (count + 5) - index) / 5)
-          character.style.setProperty('--char-reveal', characterProgress.toFixed(3))
+        if (progressValue !== item.progressValue) {
+          block.style.setProperty('--line-reveal', progressValue)
+          item.progressValue = progressValue
+          const count = characters.length
+          characters.forEach((character, index) => {
+            const characterValue = clamp((progress * (count + 5) - index) / 5).toFixed(3)
+            if (characterValue === characterValues[index]) return
+            character.style.setProperty('--char-reveal', characterValue)
+            characterValues[index] = characterValue
+          })
+        }
+        if (exitValue !== item.exitValue) {
+          block.style.setProperty('--line-exit', exitValue)
+          item.exitValue = exitValue
+        }
+      })
+
+      motions.forEach((item) => {
+        const { block, values } = item
+        const top = item.top - scrollOffset
+        const bottom = top + item.height
+        const enter = reducedMotion ? 1 : clamp((viewport * .93 - top) / Math.max(220, viewport * .58))
+        const exit = reducedMotion ? 1 : clamp((bottom - viewport * .06) / Math.max(160, viewport * .34))
+        const direction = Number(block.dataset.motionDirection || 0)
+        const nextValues = {
+          '--motion-enter': enter.toFixed(3),
+          '--motion-exit': exit.toFixed(3),
+          '--motion-opacity': (enter * exit).toFixed(3),
+          '--motion-x': `${(direction * ((1 - enter) * 38 - (1 - exit) * 18)).toFixed(2)}vw`,
+          '--motion-y': `${((1 - enter) * 46 - (1 - exit) * 22).toFixed(2)}px`,
+          '--motion-scale': (.94 + enter * .06).toFixed(3),
+          '--motion-turn': `${(direction * (1 - enter) * -4).toFixed(2)}deg`,
+        }
+        Object.entries(nextValues).forEach(([property, value]) => {
+          if (values[property] === value) return
+          block.style.setProperty(property, value)
+          values[property] = value
         })
       })
 
-      motions.forEach((block) => {
-        const rect = block.getBoundingClientRect()
-        const enter = reducedMotion ? 1 : clamp((viewport * .93 - rect.top) / Math.max(220, viewport * .58))
-        const exit = reducedMotion ? 1 : clamp((rect.bottom - viewport * .06) / Math.max(160, viewport * .34))
-        const direction = Number(block.dataset.motionDirection || 0)
-        block.style.setProperty('--motion-enter', enter.toFixed(3))
-        block.style.setProperty('--motion-exit', exit.toFixed(3))
-        block.style.setProperty('--motion-opacity', (enter * exit).toFixed(3))
-        block.style.setProperty('--motion-x', `${(direction * ((1 - enter) * 38 - (1 - exit) * 18)).toFixed(2)}vw`)
-        block.style.setProperty('--motion-y', `${((1 - enter) * 46 - (1 - exit) * 22).toFixed(2)}px`)
-        block.style.setProperty('--motion-scale', (.94 + enter * .06).toFixed(3))
-        block.style.setProperty('--motion-turn', `${(direction * (1 - enter) * -4).toFixed(2)}deg`)
-      })
-
-      carousels.forEach((track) => {
-        const rect = track.getBoundingClientRect()
-        const cards = [...track.querySelectorAll('.sw-venue')]
+      carousels.forEach((item) => {
+        const { track, cards } = item
+        const top = item.top - scrollOffset
         const travel = Math.max(1, cards.length - 1)
-        const simplifyCarousel = reducedMotion || window.matchMedia('(max-height: 600px) and (orientation: landscape)').matches
-        const progress = simplifyCarousel ? 0 : clamp(-rect.top / Math.max(1, rect.height - viewport))
-        const activeIndex = Math.round(progress * travel)
-        track.style.setProperty('--carousel-progress', progress.toFixed(3))
+        const simplifyCarousel = reducedMotion || shortLandscape.matches
+        const progress = simplifyCarousel ? 0 : clamp(-top / Math.max(1, item.height - viewport))
+        const progressValue = progress.toFixed(3)
+        const rawPosition = progress * travel
+        const baseIndex = Math.min(cards.length - 2, Math.floor(rawPosition))
+        const localProgress = clamp(rawPosition - baseIndex)
+        const handoff = smoothStep(clamp((localProgress - .12) / .76))
+        const activeIndex = handoff >= .74 ? baseIndex + 1 : baseIndex
 
-        cards.forEach((card, index) => {
-          const phase = simplifyCarousel ? 0 : progress * travel - index
-          const distance = Math.min(1.35, Math.abs(phase))
-          const horizontal = clamp(-phase, -1.25, 1.25) * 86
-          const vertical = Math.pow(distance, 1.55) * 112
-          const opacity = simplifyCarousel ? 1 : clamp(1 - Math.max(0, distance - .08) * 1.12)
-          const scale = 1 - Math.min(distance, 1) * .12
-          const rotation = clamp(-phase * 9, -11, 11)
-          const isActive = simplifyCarousel || index === activeIndex
+        if (item.progressValue !== progressValue) {
+          track.style.setProperty('--carousel-progress', progressValue)
+          item.progressValue = progressValue
+        }
 
-          card.style.setProperty('--card-x', `${horizontal.toFixed(2)}vw`)
-          card.style.setProperty('--card-y', `${vertical.toFixed(2)}px`)
-          card.style.setProperty('--card-scale', scale.toFixed(3))
-          card.style.setProperty('--card-turn', `${rotation.toFixed(2)}deg`)
-          card.style.setProperty('--card-opacity', opacity.toFixed(3))
-          card.style.setProperty('--card-z', String(20 - Math.round(distance * 10)))
-          card.setAttribute('aria-hidden', isActive ? 'false' : 'true')
-          card.querySelectorAll('a, button, input, select, textarea').forEach((control) => {
-            control.tabIndex = isActive ? 0 : -1
+        if (item.activeIndex !== activeIndex || item.simplified !== simplifyCarousel) {
+          cards.forEach(({ card, controls }, index) => {
+            const isActive = simplifyCarousel || index === activeIndex
+            card.setAttribute('aria-hidden', isActive ? 'false' : 'true')
+            controls.forEach((control) => { control.tabIndex = isActive ? 0 : -1 })
           })
+          item.activeIndex = activeIndex
+        }
+
+        if (simplifyCarousel) {
+          if (!item.simplified) {
+            cards.forEach((cardItem) => {
+              const { card } = cardItem
+              card.style.removeProperty('transform')
+              card.style.removeProperty('opacity')
+              card.style.removeProperty('z-index')
+              card.style.removeProperty('visibility')
+              cardItem.transform = ''
+              cardItem.opacity = ''
+              cardItem.zIndex = ''
+              cardItem.visibility = ''
+            })
+          }
+          item.simplified = true
+          return
+        }
+
+        item.simplified = false
+        const mobile = viewportWidth <= 680
+        const outgoingTravel = viewportWidth * (mobile ? .10 : .085)
+        const incomingTravel = viewportWidth * (mobile ? .44 : .40)
+
+        cards.forEach((cardItem, index) => {
+          const { card } = cardItem
+          const isOutgoing = index === baseIndex
+          const isIncoming = index === baseIndex + 1
+          let horizontal = 0
+          let vertical = 0
+          let opacity = 0
+          let scale = .95
+          let rotation = 0
+
+          if (isOutgoing) {
+            horizontal = -outgoingTravel * handoff
+            vertical = (mobile ? 16 : 22) * handoff
+            opacity = 1 - .7 * smoothStep(clamp((handoff - .55) / .45))
+            scale = 1 - .035 * handoff
+            rotation = (mobile ? -2.4 : -3) * handoff
+          } else if (isIncoming) {
+            horizontal = incomingTravel * (1 - handoff)
+            vertical = (mobile ? 26 : 34) * (1 - handoff)
+            opacity = .12 + .88 * smoothStep(clamp(handoff / .42))
+            scale = .96 + .04 * handoff
+            rotation = (mobile ? 3.4 : 4.5) * (1 - handoff)
+          }
+
+          const transform = `translate3d(calc(-50% + ${horizontal.toFixed(1)}px), calc(-50% + ${vertical.toFixed(1)}px), 0) rotate(${rotation.toFixed(2)}deg) scale(${scale.toFixed(3)})`
+          const opacityValue = opacity.toFixed(3)
+          const zIndex = String(isIncoming ? 22 : isOutgoing ? 20 : 1)
+          const visibility = isOutgoing || isIncoming ? 'visible' : 'hidden'
+
+          if (cardItem.transform !== transform) {
+            card.style.transform = transform
+            cardItem.transform = transform
+          }
+          if (cardItem.opacity !== opacityValue) {
+            card.style.opacity = opacityValue
+            cardItem.opacity = opacityValue
+          }
+          if (cardItem.zIndex !== zIndex) {
+            card.style.zIndex = zIndex
+            cardItem.zIndex = zIndex
+          }
+          if (cardItem.visibility !== visibility) {
+            card.style.visibility = visibility
+            cardItem.visibility = visibility
+          }
         })
       })
       frame = 0
@@ -317,16 +545,33 @@ function useScrollTypography(storyRef) {
       if (!frame) frame = window.requestAnimationFrame(paint)
     }
 
+    const handleLayoutChange = () => {
+      measureLayout()
+      schedule()
+    }
+
+    let disposed = false
+    const resizeObserver = 'ResizeObserver' in window ? new ResizeObserver(handleLayoutChange) : null
+
     window.addEventListener('scroll', schedule, { passive: true })
-    window.addEventListener('resize', schedule)
+    window.addEventListener('resize', handleLayoutChange)
+    story.addEventListener('load', handleLayoutChange, true)
+    resizeObserver?.observe(story)
+    document.fonts?.ready.then(() => {
+      if (!disposed) handleLayoutChange()
+    })
+    measureLayout()
     schedule()
 
     return () => {
+      disposed = true
       window.removeEventListener('scroll', schedule)
-      window.removeEventListener('resize', schedule)
+      window.removeEventListener('resize', handleLayoutChange)
+      story.removeEventListener('load', handleLayoutChange, true)
+      resizeObserver?.disconnect()
       window.cancelAnimationFrame(frame)
     }
-  }, [storyRef])
+  }, [reducedMotion, storyRef])
 }
 
 function ScrollLine({ as: Tag = 'span', children, className = '', tone = 1 }) {
@@ -516,7 +761,12 @@ function DayPlan({ config }) {
       style={{ '--venue-color': venue.color, '--venue-index': index }}
     >
       <div className="sw-venue__photo">
-        <img src={venue.image} alt="" loading="lazy" decoding="async" />
+        <img
+          src={venue.image}
+          alt=""
+          loading={config.dayPlanMotion === 'orbit' ? 'eager' : 'lazy'}
+          decoding={config.dayPlanMotion === 'orbit' ? 'sync' : 'async'}
+        />
         <span>{venue.title}</span>
       </div>
       <div className="sw-venue__details">

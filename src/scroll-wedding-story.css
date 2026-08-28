@@ -2424,7 +2424,7 @@
 .sw-plan__stack--orbit {
   position: relative;
   max-width: none;
-  height: 330svh;
+  height: 290svh;
   margin-right: calc(clamp(18px, 5vw, 78px) * -1);
   margin-left: calc(clamp(18px, 5vw, 78px) * -1);
 }
@@ -2437,7 +2437,10 @@
   min-height: 620px;
   place-items: center;
   overflow: hidden;
+  overflow-anchor: none;
   perspective: 1400px;
+  touch-action: pan-y pinch-zoom;
+  contain: layout paint style;
 }
 
 .sw-plan__carousel::before {
@@ -2465,7 +2468,8 @@
   opacity: var(--card-opacity, 0);
   transform: translate3d(calc(-50% + var(--card-x, 86vw)), calc(-50% + var(--card-y, 112px)), 0) rotate(var(--card-turn, 9deg)) scale(var(--card-scale, .88));
   transform-origin: 50% 145%;
-  transition: opacity 90ms linear, filter 90ms linear;
+  backface-visibility: hidden;
+  contain: layout style;
   will-change: transform, opacity;
 }
 
@@ -2478,7 +2482,7 @@
 }
 
 .sw-plan__carousel .sw-venue[aria-hidden="true"] {
-  filter: saturate(.72) brightness(.84);
+  pointer-events: none;
 }
 
 .sw-plan__carousel-index {
@@ -2493,8 +2497,7 @@
   transform: translateX(-50%);
   border: 1px solid rgb(255 255 255 / 42%);
   border-radius: 999px;
-  background: rgb(16 14 17 / 54%);
-  backdrop-filter: blur(12px);
+  background: rgb(16 14 17 / 82%);
 }
 
 .sw-plan__carousel-index i {
@@ -2517,6 +2520,15 @@
 }
 
 @media (max-width: 680px) {
+  .sw-story--soft-launch .sw-film-bg__video {
+    filter: none;
+  }
+
+  .sw-story--soft-launch .sw-film-bg__grain {
+    opacity: .045;
+    mix-blend-mode: normal;
+  }
+
   .sw-story--soft-launch {
     --rose-x: 26.4vw;
   }
@@ -2526,7 +2538,7 @@
   }
 
   .sw-plan__stack--orbit {
-    height: 320svh;
+    height: 270svh;
     margin-right: -14px;
     margin-left: -14px;
   }
@@ -2544,19 +2556,20 @@
 
   .sw-plan__carousel .sw-venue {
     top: 48%;
-    width: calc(100vw - 28px);
-    height: min(690px, calc(100svh - 105px));
+    width: calc(100vw - 46px);
+    height: min(650px, calc(100svh - 148px));
     min-height: 0;
-    grid-template-rows: minmax(225px, 43%) 1fr;
+    grid-template-rows: minmax(200px, 40%) 1fr;
     transform-origin: 50% 128%;
   }
 
   .sw-plan__carousel .sw-venue__photo {
-    min-height: 225px;
+    min-height: 200px;
   }
 
   .sw-plan__carousel .sw-venue__photo img {
-    min-height: 190px;
+    min-height: 165px;
+    filter: none;
   }
 }
 
@@ -2600,8 +2613,11 @@
     width: 100%;
     height: auto;
     min-height: auto;
-    opacity: 1;
-    transform: none;
+    z-index: auto !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: none !important;
+    pointer-events: auto;
   }
 }
 
@@ -2633,7 +2649,10 @@
     width: 100%;
     height: auto;
     min-height: auto;
-    opacity: 1;
-    transform: none;
+    z-index: auto !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: none !important;
+    pointer-events: auto;
   }
 }
