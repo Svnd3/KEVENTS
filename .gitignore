@@ -15,3 +15,14 @@ www.thedigitalyes.com.zip
 # Keep the supplied music library local. The one track used by Karibu is bundled explicitly.
 songs/*
 !songs/CHAI YA SAA KUMI (LYRIC VIDEO) - YWAYA TAJIRI \[7b5aUIQ-sUc\].mp3
+
+# Original supplied media and license-restricted font source folders stay local.
+15484550-hd_1080_1920_30fps.mp4
+5874500-uhd_2160_4096_30fps.mp4
+Gemini_Generated_Image_bmfu12bmfu12bmfu.jpeg
+Gemini_Generated_Image_vwjluwvwjluwvwjl.jpeg
+back-wild/
+bombing-regular/
+decog-font/
+nok-font/
+papernotes/

@@ -46,6 +46,8 @@ const rawDesigns = [
   ['Monogram Blanc', 'Minimal', 5000, 'Two letters. One life.', 'monogram', ['#eeeae1', '#55504b', '#b59a63', '#d7d0c4'], null, 'Nora', 'Theo', ['Metallic', 'Gentle Motion', 'Single Page']],
   ['Terracotta Type', 'Minimal', 4000, 'Warm words for a modern love.', 'clay', ['#b85d3e', '#f4e4cf', '#d59771', '#2c2925'], null, 'Sana', 'Owen', ['Earthy', 'Still', 'Single Page']],
   ['Silver Thread', 'Minimal', 6000, 'Connected by the finest detail.', 'thread', ['#efefed', '#414a53', '#afb6bd', '#fafafa'], null, 'Elle', 'Remy', ['Neutral', 'Gentle Motion', 'Single Page']],
+  ['Soft Launch: Forever', 'Cinematic', 24000, 'The soft launch is over. Forever starts here.', 'scroll-blue', ['#a9dbe7', '#171316', '#ae0f2f', '#f8f2e7'], 'soft-launch-cover.webp', 'Nia', 'Julian', ['Scroll Film', 'Interactive', 'RSVP-Ready']],
+  ['Love Bomb', 'Cinematic', 26000, 'Big love. Main-character motion.', 'scroll-candy', ['#ec6ba9', '#171316', '#8ce9d4', '#ffcf3d'], 'love-bomb-cover.webp', 'Amara', 'Kai', ['Bold', 'Scroll Film', 'RSVP-Ready']],
   ['First Light', 'Cinematic', 16000, 'The story begins at sunrise.', 'dawn', ['#eaa56a', '#fff4da', '#84add0', '#725848'], 'wedding-field.webp', 'Aria', 'Theo', ['Romantic', 'Cinematic', 'Photo-Led']],
   ['Film Noir Vows', 'Cinematic', 18000, 'A timeless love, dramatically told.', 'noir', ['#111111', '#f4f2ed', '#8b8b8b', '#d7d7d2'], 'wedding-dance.webp', 'Vivian', 'Cole', ['Dark', 'Cinematic', 'Photo-Led']],
   ['Celestial Overture', 'Cinematic', 22000, 'Written in the stars. Revealed in motion.', 'cosmos', ['#0f1024', '#f5e9c9', '#6a4fb7', '#c7b078'], null, 'Luna', 'Atlas', ['Jewel', 'Cinematic', 'Story Scroll']],
@@ -76,7 +78,7 @@ export const designs = rawDesigns.map((design, index) => {
     couple: [personOne, personTwo],
     tags,
     eventType,
-    featured: ['Lamu Moon', 'Ivory Issue', 'Celestial Overture', 'Savannah Vows', 'Nairobi Noir'].includes(name),
+    featured: ['Soft Launch: Forever', 'Love Bomb', 'Lamu Moon', 'Ivory Issue', 'Celestial Overture', 'Savannah Vows', 'Nairobi Noir'].includes(name),
   }
 })
 
