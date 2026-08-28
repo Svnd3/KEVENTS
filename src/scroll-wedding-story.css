@@ -2395,11 +2395,29 @@
 .sw-film-bg__scrim { z-index: 3; }
 .sw-film-bg__grain { z-index: 4; }
 
+.sw-story--soft-launch {
+  --rose-x: 30vw;
+  --rose-y: -1vh;
+  --rose-turn: 90deg;
+  --rose-scale: .85;
+  --rose-opacity: 1;
+}
+
 .sw-film-bg__rose.sw-film__rose {
-  z-index: 2;
-  width: min(68vw, 920px);
-  opacity: var(--rose-opacity, .84);
-  filter: drop-shadow(0 18px 22px rgb(23 8 13 / 22%));
+  z-index: 5;
+  width: min(68vw, 920px, 92svh);
+  opacity: var(--rose-opacity, 1);
+  filter: none;
+  mix-blend-mode: normal;
+}
+
+.sw-story--soft-launch .sw-film__stage::before,
+.sw-story--soft-launch .sw-note::before,
+.sw-story--soft-launch .sw-map::before,
+.sw-story--soft-launch .sw-plan::before,
+.sw-story--soft-launch .sw-vibes::before,
+.sw-story--soft-launch .sw-rsvp::before {
+  background: none;
 }
 
 /* Soft Launch shallow-orbit day carousel ------------------------------ */
@@ -2499,6 +2517,10 @@
 }
 
 @media (max-width: 680px) {
+  .sw-story--soft-launch {
+    --rose-x: 26.4vw;
+  }
+
   .sw-film-bg__rose.sw-film__rose {
     width: 98vw;
   }
@@ -2535,6 +2557,18 @@
 
   .sw-plan__carousel .sw-venue__photo img {
     min-height: 190px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sw-story--soft-launch.is-reduced-motion .sw-film-bg__rose.sw-film__rose {
+    top: 50%;
+    right: auto;
+    bottom: auto;
+    left: 50%;
+    opacity: 1;
+    transform: translate(-50%, -50%) translate3d(var(--rose-x), var(--rose-y), 0) rotate(var(--rose-turn)) scale(var(--rose-scale));
+    filter: none;
   }
 }
 

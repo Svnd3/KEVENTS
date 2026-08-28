@@ -4,6 +4,18 @@ import '../scroll-wedding-story.css'
 
 const clamp = (value, min = 0, max = 1) => Math.min(max, Math.max(min, value))
 
+const persistentRosePath = [
+  { x: 30, y: -1, turn: 90 },
+  { x: -23, y: 9, turn: -13 },
+  { x: 23, y: -8, turn: 14 },
+  { x: -23, y: 7, turn: -10 },
+  { x: 23, y: -5, turn: 13 },
+  { x: -21, y: 8, turn: -8 },
+  { x: 22, y: -4, turn: 12 },
+]
+
+const smoothStep = (value) => value * value * (3 - 2 * value)
+
 function ArrowIcon() {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -40,6 +52,7 @@ function useScrollFilm(storyRef, filmRef, worldRef, videoRef, config) {
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches || navigator.connection?.saveData
     const words = [...film.querySelectorAll('[data-scroll-word]')]
     const sceneCounter = film.querySelector('[data-scene-counter]')
+    const roseSections = config.persistentRose ? [...world.querySelectorAll('.sw-film-world__content > section')] : []
     let heroTarget = 0
     let heroCurrent = 0
     let worldTarget = 0
@@ -49,6 +62,9 @@ function useScrollFilm(storyRef, filmRef, worldRef, videoRef, config) {
     let worldIsNear = true
     let previousTick = performance.now()
     let lastSeek = 0
+    let roseStops = persistentRosePath.map((_, index) => index / (persistentRosePath.length - 1))
+    let measuredWorldHeight = -1
+    let measuredViewportHeight = -1
 
     const setPalette = (progress) => {
       if (config.id === 'love-bomb') {
@@ -84,11 +100,31 @@ function useScrollFilm(storyRef, filmRef, worldRef, videoRef, config) {
       let roseRotation
       let roseScale
       if (config.persistentRose) {
-        const orbit = worldProgress * Math.PI * 6
-        roseX = 37 * Math.cos(orbit)
-        roseY = 6 + 19 * Math.sin(orbit + .55)
-        roseRotation = 6 + 26 * Math.cos(orbit)
-        roseScale = .54 + Math.sin(orbit + .8) * .035
+        const matchingStop = roseStops.findIndex((stop) => worldProgress <= stop)
+        const toIndex = matchingStop === -1 ? roseStops.length - 1 : Math.max(1, matchingStop)
+        const fromIndex = Math.min(toIndex - 1, persistentRosePath.length - 2)
+        const segmentStart = roseStops[fromIndex]
+        const segmentEnd = roseStops[toIndex] ?? 1
+        const segmentProgress = clamp((worldProgress - segmentStart) / Math.max(.0001, segmentEnd - segmentStart))
+        const easedProgress = smoothStep(segmentProgress)
+        const from = persistentRosePath[fromIndex]
+        const to = persistentRosePath[toIndex] ?? persistentRosePath.at(-1)
+        const isMobile = window.innerWidth <= 680
+        const fromTravel = isMobile ? (fromIndex === 0 ? .88 : .65) : 1
+        const toTravel = isMobile ? (toIndex === 0 ? .88 : .65) : 1
+        const curve = Math.sin(segmentProgress * Math.PI)
+        const arrivalPulse = toIndex === persistentRosePath.length - 1
+          ? Math.pow(1 - segmentProgress, 4)
+          : Math.pow(Math.abs(Math.cos(segmentProgress * Math.PI)), 5)
+        const introWindow = Math.max(.018, (roseStops[1] ?? .08) * .16)
+        const introScale = 1 - clamp(worldProgress / introWindow)
+
+        const fromX = from.x * fromTravel
+        const toX = to.x * toTravel
+        roseX = fromX + (toX - fromX) * easedProgress
+        roseY = from.y + (to.y - from.y) * easedProgress + curve * 4
+        roseRotation = from.turn + (to.turn - from.turn) * easedProgress + curve * (to.x > from.x ? 4 : -4)
+        roseScale = .44 + arrivalPulse * .24 + introScale * .17
       } else if (config.roseKind === 'stem') {
         roseX = -54 + heroProgress * 111
         roseY = 34 - heroProgress * 69 + Math.sin(heroProgress * Math.PI) * 8
@@ -104,7 +140,7 @@ function useScrollFilm(storyRef, filmRef, worldRef, videoRef, config) {
       story.style.setProperty('--rose-y', `${roseY.toFixed(2)}vh`)
       story.style.setProperty('--rose-turn', `${roseRotation.toFixed(2)}deg`)
       story.style.setProperty('--rose-scale', roseScale.toFixed(3))
-      story.style.setProperty('--rose-opacity', config.persistentRose ? '.84' : clamp((0.94 - heroProgress) / 0.11).toFixed(3))
+      story.style.setProperty('--rose-opacity', config.persistentRose ? '1' : clamp((0.94 - heroProgress) / 0.11).toFixed(3))
 
       if (video.duration && Number.isFinite(video.duration) && video.readyState >= 2) {
         const desiredTime = worldProgress * Math.max(0, video.duration - 0.08)
@@ -139,6 +175,15 @@ function useScrollFilm(storyRef, filmRef, worldRef, videoRef, config) {
       const worldDistance = Math.max(1, worldRect.height - window.innerHeight)
       heroTarget = clamp(-filmRect.top / heroDistance)
       worldTarget = clamp(-worldRect.top / worldDistance)
+      if (config.persistentRose && (Math.abs(measuredWorldHeight - worldRect.height) > 1 || measuredViewportHeight !== window.innerHeight)) {
+        const sectionStops = roseSections.map((section, index) => {
+          if (index === 0) return 0
+          return clamp((section.offsetTop - window.innerHeight * .32) / worldDistance)
+        })
+        roseStops = [...sectionStops, 1]
+        measuredWorldHeight = worldRect.height
+        measuredViewportHeight = window.innerHeight
+      }
       if (!frame) frame = window.requestAnimationFrame(tick)
     }
 
