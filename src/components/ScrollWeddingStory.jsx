@@ -5,13 +5,14 @@ import '../scroll-wedding-story.css'
 const clamp = (value, min = 0, max = 1) => Math.min(max, Math.max(min, value))
 
 const persistentRosePath = [
-  { x: 30, y: -1, turn: 90 },
-  { x: -23, y: 9, turn: -13 },
-  { x: 23, y: -8, turn: 14 },
-  { x: -23, y: 7, turn: -10 },
-  { x: 23, y: -5, turn: 13 },
-  { x: -21, y: 8, turn: -8 },
-  { x: 22, y: -4, turn: 12 },
+  { x: 30, y: -1, turn: 90, scale: .85, mobile: { x: 26.4, y: -1, turn: 90, scale: .82 } },
+  { x: -27, y: 8, turn: -4, scale: .7, mobile: { x: -16, y: 8, turn: -4, scale: .67 } },
+  { x: -10, y: -5, turn: 45, scale: .66, mobile: { x: -8, y: -5, turn: 45, scale: .63 } },
+  { x: 30, y: -6, turn: 90, scale: .72, mobile: { x: 31.5, y: -6, turn: 90, scale: .68 } },
+  { x: -28, y: -10, turn: -12, scale: .68, mobile: { x: -16.5, y: -10, turn: -12, scale: .64 } },
+  { x: 28, y: -9, turn: 10, scale: .67, mobile: { x: 18, y: -9, turn: 10, scale: .64 } },
+  { x: -27, y: 15, turn: 72, scale: .66, mobile: { x: 27, y: -12, turn: 72, scale: .62 } },
+  { x: 24, y: -4, turn: 15, scale: .52, mobile: { x: 16, y: -4, turn: 15, scale: .48 } },
 ]
 
 const smoothStep = (value) => value * value * (3 - 2 * value)
@@ -84,7 +85,15 @@ function useScrollFilm(storyRef, filmRef, worldRef, videoRef, config) {
     const words = [...film.querySelectorAll('[data-scroll-word]')]
     const wordValues = words.map(() => '')
     const sceneCounter = film.querySelector('[data-scene-counter]')
-    const roseSections = config.persistentRose ? [...world.querySelectorAll('.sw-film-world__content > section')] : []
+    const roseAnchors = config.persistentRose
+      ? [
+          '.sw-note__copy h2',
+          '.sw-map .sw-section-heading h2',
+          '.sw-plan .sw-section-heading h2',
+          '.sw-vibes > header h2',
+          '.sw-rsvp__intro h2',
+        ].map((selector) => world.querySelector(selector)).filter(Boolean)
+      : []
     const rose = config.persistentRose
       ? story.querySelector('.sw-film-bg__rose')
       : film.querySelector('.sw-film__rose')
@@ -106,6 +115,7 @@ function useScrollFilm(storyRef, filmRef, worldRef, videoRef, config) {
     let lastPalette = ''
     let lastRoseTransform = ''
     let lastRoseOpacity = ''
+    let mobileLayout = window.innerWidth <= 680
 
     const setPalette = (progress) => {
       const hues = config.id === 'love-bomb'
@@ -165,22 +175,14 @@ function useScrollFilm(storyRef, filmRef, worldRef, videoRef, config) {
         const easedProgress = smoothStep(segmentProgress)
         const from = persistentRosePath[fromIndex]
         const to = persistentRosePath[toIndex] ?? persistentRosePath.at(-1)
-        const isMobile = window.innerWidth <= 680
-        const fromTravel = isMobile ? (fromIndex === 0 ? .88 : .65) : 1
-        const toTravel = isMobile ? (toIndex === 0 ? .88 : .65) : 1
+        const fromPose = mobileLayout ? from.mobile : from
+        const toPose = mobileLayout ? to.mobile : to
         const curve = Math.sin(segmentProgress * Math.PI)
-        const arrivalPulse = toIndex === persistentRosePath.length - 1
-          ? Math.pow(1 - segmentProgress, 4)
-          : Math.pow(Math.abs(Math.cos(segmentProgress * Math.PI)), 5)
-        const introWindow = Math.max(.018, (roseStops[1] ?? .08) * .16)
-        const introScale = 1 - clamp(worldProgress / introWindow)
 
-        const fromX = from.x * fromTravel
-        const toX = to.x * toTravel
-        roseX = fromX + (toX - fromX) * easedProgress
-        roseY = from.y + (to.y - from.y) * easedProgress + curve * 4
-        roseRotation = from.turn + (to.turn - from.turn) * easedProgress + curve * (to.x > from.x ? 4 : -4)
-        roseScale = .44 + arrivalPulse * .24 + introScale * .17
+        roseX = fromPose.x + (toPose.x - fromPose.x) * easedProgress
+        roseY = fromPose.y + (toPose.y - fromPose.y) * easedProgress + curve * 4
+        roseRotation = fromPose.turn + (toPose.turn - fromPose.turn) * easedProgress + curve * (toPose.x > fromPose.x ? 4 : -4)
+        roseScale = Math.max(.43, fromPose.scale + (toPose.scale - fromPose.scale) * easedProgress - curve * .18)
       } else if (config.roseKind === 'stem') {
         roseX = -54 + heroProgress * 111
         roseY = 34 - heroProgress * 69 + Math.sin(heroProgress * Math.PI) * 8
@@ -208,8 +210,8 @@ function useScrollFilm(storyRef, filmRef, worldRef, videoRef, config) {
       if (video.duration && Number.isFinite(video.duration) && video.readyState >= 2) {
         const desiredTime = worldProgress * Math.max(0, video.duration - 0.08)
         const carouselIsActive = config.dayPlanMotion === 'orbit'
-          && worldProgress >= (roseStops[3] ?? 0) - .015
-          && worldProgress <= (roseStops[4] ?? 1) + .015
+          && worldProgress >= (roseStops[4] ?? 0) - .015
+          && worldProgress <= (roseStops[5] ?? 1) + .015
         const seekInterval = carouselIsActive && window.innerWidth <= 680 ? 66 : 33
         if (!video.seeking && now - lastSeek >= seekInterval && Math.abs(desiredTime - video.currentTime) > 0.032) {
           video.currentTime = desiredTime
@@ -240,13 +242,14 @@ function useScrollFilm(storyRef, filmRef, worldRef, videoRef, config) {
       filmHeight = film.offsetHeight
       worldTop = getDocumentTop(world)
       worldHeight = world.offsetHeight
-      if (config.persistentRose) {
+      mobileLayout = window.innerWidth <= 680
+      if (config.persistentRose && roseAnchors.length === persistentRosePath.length - 3) {
         const worldDistance = Math.max(1, worldHeight - window.innerHeight)
-        const sectionStops = roseSections.map((section, index) => {
-          if (index === 0) return 0
-          return clamp((section.offsetTop - window.innerHeight * .32) / worldDistance)
-        })
-        roseStops = [...sectionStops, 1]
+        const dateStop = clamp((filmTop - worldTop + Math.max(0, filmHeight - window.innerHeight) * .83) / worldDistance)
+        const anchorStops = roseAnchors.map((anchor) => (
+          clamp((getDocumentTop(anchor) - worldTop - window.innerHeight * .32) / worldDistance)
+        ))
+        roseStops = [0, dateStop, ...anchorStops, 1]
       }
     }
 
@@ -840,9 +843,15 @@ function VibeCheck({ config }) {
 
 function RSVP({ config }) {
   const formId = useId()
+  const headingId = `${formId}-heading`
+  const successRef = useRef(null)
   const [attendance, setAttendance] = useState('yes')
   const [status, setStatus] = useState('idle')
   const endpoint = import.meta.env.VITE_RSVP_ENDPOINT || import.meta.env.VITE_ENQUIRY_ENDPOINT
+
+  useEffect(() => {
+    if (status === 'success') successRef.current?.focus()
+  }, [status])
 
   const submit = async (event) => {
     event.preventDefault()
@@ -870,63 +879,87 @@ function RSVP({ config }) {
 
   if (status === 'success') {
     return (
-      <section className="sw-rsvp sw-rsvp--success" aria-live="polite">
-        <HeartIcon />
-        <p>RSVP received</p>
-        <h2>You’re officially part of the plot.</h2>
-        <span>{endpoint ? 'We’ll see you there.' : 'Demo complete — connect VITE_RSVP_ENDPOINT to receive guest replies.'}</span>
+      <section className="sw-rsvp sw-rsvp--success" aria-live="polite" aria-labelledby={headingId} role="status" ref={successRef} tabIndex={-1}>
+        <div className="sw-rsvp__success-card">
+          <span className="sw-rsvp__folio">RSVP / RECEIVED</span>
+          <HeartIcon />
+          <p>You’re on the list</p>
+          <h2 id={headingId}>You’re officially part of the plot.</h2>
+          <span>Thank you — {config.couple[0]} &amp; {config.couple[1]} can’t wait to celebrate with you.</span>
+        </div>
       </section>
     )
   }
 
   return (
-    <section className="sw-rsvp">
+    <section className="sw-rsvp" aria-labelledby={headingId}>
       <div className="sw-rsvp__intro">
-        <span>Reply by {config.replyBy}</span>
-        <h2>
+        <div className="sw-rsvp__folio"><span>RSVP</span><i aria-hidden="true">01 / 01</i></div>
+        <span className="sw-rsvp__deadline">Reply by {config.replyBy}</span>
+        <h2 id={headingId}>
           <ScrollLine tone={1}>Are you</ScrollLine>
           <ScrollLine tone={2}>in?</ScrollLine>
         </h2>
         <p>Save your seat, your plate, and your place on the dance floor.</p>
+        <div className="sw-rsvp__intro-stamp" aria-hidden="true"><HeartIcon /><span>say yes<br />to the plot</span></div>
       </div>
 
-      <form className="sw-rsvp__form" onSubmit={submit}>
-        <fieldset>
+      <form className="sw-rsvp__form" onSubmit={submit} aria-busy={status === 'sending'}>
+        <div className="sw-rsvp__form-head">
+          <span>Kindly reply</span>
+          <strong>{config.couple[0]} <i>&amp;</i> {config.couple[1]}</strong>
+          <small>{config.dateShort} · {config.city}</small>
+        </div>
+
+        <div className="sw-rsvp__perforation" aria-hidden="true"><i /><span>✦</span><i /></div>
+
+        <fieldset className="sw-rsvp__choice">
           <legend>Can you make it?</legend>
           <label className={attendance === 'yes' ? 'is-selected' : ''}>
             <input type="radio" name="attendance" value="yes" checked={attendance === 'yes'} onChange={() => setAttendance('yes')} />
-            <span>{config.attendance[0]}</span><i>Yes</i>
+            <span>{config.attendance[0]}</span><i aria-hidden="true">✓</i>
           </label>
           <label className={attendance === 'no' ? 'is-selected' : ''}>
             <input type="radio" name="attendance" value="no" checked={attendance === 'no'} onChange={() => setAttendance('no')} />
-            <span>{config.attendance[1]}</span><i>No</i>
+            <span>{config.attendance[1]}</span><i aria-hidden="true">✓</i>
           </label>
         </fieldset>
 
-        <label htmlFor={`${formId}-name`}><span>Your full name</span><input id={`${formId}-name`} name="name" autoComplete="name" required /></label>
-        <label htmlFor={`${formId}-contact`}><span>Email or phone</span><input id={`${formId}-contact`} name="contact" autoComplete="email" required /></label>
+        <div className="sw-rsvp__row sw-rsvp__row--identity">
+          <label className="sw-rsvp__field" htmlFor={`${formId}-name`}><span>Your full name</span><input id={`${formId}-name`} name="name" autoComplete="name" placeholder="Your name" required /></label>
+          <label className="sw-rsvp__field" htmlFor={`${formId}-contact`}><span>Email address</span><input id={`${formId}-contact`} name="contact" type="email" inputMode="email" autoComplete="email" placeholder="you@example.com" required /></label>
+        </div>
 
-        {attendance === 'yes' && (
-          <>
+        <div className="sw-rsvp__attendance-panel">
+          {attendance === 'yes' ? (
+            <div className="sw-rsvp__attending-fields">
             <div className="sw-rsvp__row">
-              <label htmlFor={`${formId}-guest`}><span>Plus-one name</span><input id={`${formId}-guest`} name="guest" /></label>
-              <label htmlFor={`${formId}-meal`}>
+              <label className="sw-rsvp__field" htmlFor={`${formId}-guest`}><span>Plus-one name</span><input id={`${formId}-guest`} name="guest" placeholder="Optional" /></label>
+              <label className="sw-rsvp__field" htmlFor={`${formId}-meal`}>
                 <span>Meal</span>
-                <select id={`${formId}-meal`} name="meal" defaultValue="">
+                <select id={`${formId}-meal`} name="meal" defaultValue="" required>
                   <option value="" disabled>Choose one</option>
                   <option>Chicken</option><option>Beef</option><option>Vegetarian</option><option>Vegan</option>
                 </select>
               </label>
             </div>
-            <label htmlFor={`${formId}-dietary`}><span>Allergies or accessibility needs</span><input id={`${formId}-dietary`} name="dietary" /></label>
-            <label htmlFor={`${formId}-song`}><span>One song that gets you dancing</span><input id={`${formId}-song`} name="song" /></label>
-          </>
-        )}
+            <div className="sw-rsvp__row">
+              <label className="sw-rsvp__field" htmlFor={`${formId}-dietary`}><span>Dietary or access needs</span><input id={`${formId}-dietary`} name="dietary" placeholder="Tell us what you need" /></label>
+              <label className="sw-rsvp__field" htmlFor={`${formId}-song`}><span>Your dance-floor song</span><input id={`${formId}-song`} name="song" placeholder="One guaranteed hit" /></label>
+            </div>
+            </div>
+          ) : (
+            <div className="sw-rsvp__away-note">
+              <HeartIcon />
+              <div><strong>We’ll raise a glass for you.</strong><span>Leave us a note below and we’ll send some love back.</span></div>
+            </div>
+          )}
+        </div>
 
-        <label htmlFor={`${formId}-note`}><span>Leave us a note</span><textarea id={`${formId}-note`} name="note" rows="3" /></label>
+        <label className="sw-rsvp__field sw-rsvp__field--note" htmlFor={`${formId}-note`}><span>Leave us a note</span><textarea id={`${formId}-note`} name="note" rows="2" placeholder="Advice, hype, or a tiny love note…" /></label>
         {status === 'error' && <p className="sw-rsvp__error" role="alert">That didn’t send. Please try once more.</p>}
         <button type="submit" disabled={status === 'sending'}>
-          <span>{status === 'sending' ? 'Sending…' : config.submitLabel}</span><ArrowIcon />
+          <span><strong>{status === 'sending' ? 'Sending…' : config.submitLabel}</strong><small>{attendance === 'yes' ? 'See you on the dance floor' : 'Sending love from afar'}</small></span><ArrowIcon />
         </button>
       </form>
     </section>
