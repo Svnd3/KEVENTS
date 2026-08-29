@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useId, useRef, useState } from 'react'
 import { cinematicWeddingTemplates } from '../data/cinematicWeddingTemplates.js'
+import EventRevealMoment from './EventRevealMoment.jsx'
 import '../cinematic-wedding-story.css'
 
 const clamp = (value, min = 0, max = 1) => Math.min(max, Math.max(min, value))
@@ -577,6 +578,7 @@ export default function CinematicWeddingStory({ design }) {
       <div className="cw-story__content">
         <Hero config={config} />
         <InvitationNote config={config} />
+        <EventRevealMoment config={config} family="cinematic" />
         <StoryMap config={config} />
         <DayPlan config={config} />
         <VibeList config={config} />

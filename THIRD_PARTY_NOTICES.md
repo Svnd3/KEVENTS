@@ -42,6 +42,14 @@ The following archival works were resized and converted to WebP for use in invit
 - `ornament-arabian-jones.webp`: Plate XXXV, “Arabian No. 5,” from *The Grammar of Ornament*, Owen Jones, 1868. Public-domain scan (`PD-scan`, underlying work `PD-old-100-1923`); scan credit: Wikimedia Commons contributor Aristeas. Wikimedia Commons file page: https://commons.wikimedia.org/wiki/File:Owen_Jones_-_Grammar_of_Ornament_-_1868_-_plate_035_-_300ppi.jpg
 - `lamu-coast-chart-1827.webp`: “The Bays of Lamo, Patta, & Kwyhoo on the East Coast of Africa,” United Kingdom Hydrographic Office, 1827. Public domain under `PD-UKGov`. Source collection: American Geographical Society Library, University of Wisconsin–Milwaukee Libraries, https://collections.lib.uwm.edu/digital/collection/agdm/id/8796/rec/266. Wikimedia Commons file page: https://commons.wikimedia.org/wiki/File:Admiralty_Chart_No_669_Africa_east_coast_Bays_of_Lamo_Patta_%26_Kwyhoo,_Published_1827.jpg
 
+## Sound effects
+
+The following interaction sounds were trimmed, filtered, level-adjusted, and converted to mono MP3 for browser playback:
+
+- `public/audio/sfx/flip-clock.mp3`: derived from “Clock ticking” by natalie (PDSounds), marked public domain. Source: https://commons.wikimedia.org/wiki/File:Clock_ticking.ogg
+- `public/audio/sfx/scratch-card.mp3`: derived from “Scratching metal door” by [Gravity Sound](https://www.gravitysound.studio/), licensed under Creative Commons Attribution 4.0. Source: <https://commons.wikimedia.org/wiki/File:Scratching_metal_door_(Gravity_Sound).wav>. License: https://creativecommons.org/licenses/by/4.0/
+- `public/audio/sfx/reveal-pop.mp3`: derived from “Airplane Chime Sound Effect” by Sharelk, dedicated to the public domain under CC0 1.0. Source: https://commons.wikimedia.org/wiki/File:Airplane_Chime_Sound_Effect.ogg. License: https://creativecommons.org/publicdomain/zero/1.0/
+
 ## Project-supplied media
 
 The scroll-film videos, poster/cover frames, rose cutouts, RSVP animation, and soundtrack excerpts used by the `Soft Launch: Forever`, `Love Bomb`, `Love, in Transit`, `Scarlet Hour`, `Velvet Signal`, `Heart Parade`, and `Up, Up & Always` templates are optimized derivatives of media supplied by the project owner. Rights and provenance for those supplied originals remain the project owner’s responsibility.

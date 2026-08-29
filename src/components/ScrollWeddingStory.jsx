@@ -1,5 +1,6 @@
 import { useEffect, useId, useRef, useState } from 'react'
 import { scrollWeddingTemplates } from '../data/scrollWeddingTemplates.js'
+import EventRevealMoment from './EventRevealMoment.jsx'
 import '../scroll-wedding-story.css'
 
 const clamp = (value, min = 0, max = 1) => Math.min(max, Math.max(min, value))
@@ -981,6 +982,7 @@ export default function ScrollWeddingStory({ design }) {
         <div className="sw-film-world__content">
           <FilmHero config={config} storyRef={storyRef} worldRef={worldRef} videoRef={videoRef} />
           <InvitationNote config={config} />
+          <EventRevealMoment config={config} family="scroll" />
           <WeddingMap config={config} />
           <DayPlan config={config} />
           <VibeCheck config={config} />
