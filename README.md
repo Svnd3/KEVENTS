@@ -1,6 +1,6 @@
 # K EVENTS
 
-A fast, responsive storefront for bespoke digital wedding invitations. The site includes a catalog of 66 designs, dedicated interactive previews, category filters, pricing in Kenyan shillings, and an enquiry flow.
+A fast, responsive storefront for bespoke digital wedding invitations. The site includes a catalog of 70 designs, dedicated interactive previews, category filters, pricing in Kenyan shillings, and an enquiry flow.
 
 ## Run locally
 
@@ -38,6 +38,13 @@ Direct preview routes for the imported designs are:
 - `/#preview/royal-gold`
 - `/#preview/minimalist`
 
+The latest background-film invitations are available at:
+
+- `/#preview/crimson-orbit`
+- `/#preview/heartburst-after-dark`
+- `/#preview/electric-vow`
+- `/#preview/blush-forecast`
+
 After running `npm run sync:webgency`, you can inspect its generated recovery copy independently by serving the repository root and opening `/webgencyinvitations.com/`:
 
 ```bash
@@ -58,7 +65,7 @@ Every design submits the same compact `kevents-rsvp-v1` payload. `name` and `att
 - Catalog artwork lives in `src/components/InvitationArtwork.jsx`.
 - Every design uses the shared lace-and-wax envelope opener in `src/components/SponsaliaEnvelopeIntro.jsx`.
 - Full invitation stories and the demo RSVP flow live in `src/components/InvitationStory.jsx`.
-- The two cinematic scroll-film stories live in `src/components/ScrollWeddingStory.jsx`, with editable copy and venue details in `src/data/scrollWeddingTemplates.js`.
+- The scroll-film stories live in `src/components/CinematicWeddingStory.jsx` and `src/components/ScrollWeddingStory.jsx`, with editable copy and venue details in their matching files under `src/data`.
 - Each design has a direct preview route at `#preview/<design-slug>`.
 - The eight Webgency designs use locally mirrored documents in an isolated preview sandbox; their files live in `public/templates/webgency` and their catalog covers in `public/images/webgency`.
 - Photography and font sources are documented in `THIRD_PARTY_NOTICES.md`.

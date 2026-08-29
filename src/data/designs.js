@@ -53,6 +53,10 @@ const rawDesigns = [
   ['Velvet Signal', 'Cinematic', 31000, 'Low light. High feeling. Your forever frequency.', 'scroll-velvet', ['#32172d', '#f7eadf', '#d74163', '#90b8b4'], 'velvet-signal-cover.webp', 'Amali', 'Ezra', ['Editorial', 'Scroll Film', 'Music']],
   ['Heart Parade', 'Cinematic', 28500, 'Good news, loud colour, and love on the move.', 'scroll-parade', ['#ff6585', '#171316', '#ffd34f', '#75cfe4'], 'heart-parade-cover.webp', 'Safi', 'Noah', ['Playful', 'Scroll Film', 'RSVP-Ready']],
   ['Up, Up & Always', 'Cinematic', 30000, 'An open-sky love story with a very soft landing.', 'scroll-airborne', ['#83c7df', '#17324a', '#f6a65a', '#fff2d8'], 'up-up-always-cover.webp', 'Imani', 'Theo', ['Destination', 'Scroll Film', 'Music']],
+  ['Crimson Orbit', 'Cinematic', 32000, 'A love with its own gravity.', 'scroll-crimson-orbit', ['#050505', '#8f1028', '#ee334e', '#f7f1e8'], 'crimson-orbit-poster.webp', 'Nuru', 'Adrian', ['Dark', 'Scroll Film', 'RSVP-Ready']],
+  ['Heartburst: After Dark', 'Cinematic', 27500, 'Small hearts. Main event.', 'scroll-heartburst', ['#090303', '#d40f25', '#ff4354', '#e8c6a3'], 'heartburst-after-dark-poster.webp', 'Zuri', 'Micah', ['Bold', 'Scroll Film', 'Music']],
+  ['Electric Vow', 'Cinematic', 30500, 'A little neon. A lifetime, officially.', 'scroll-electric-vow', ['#030006', '#ff2b8b', '#a92cff', '#f5edf7'], 'electric-vow-poster.webp', 'Amina', 'Leon', ['Neon', 'Scroll Film', 'RSVP-Ready']],
+  ['Blush Forecast', 'Cinematic', 28000, 'Forecast: vows, fizz, and a full dance floor.', 'scroll-blush-forecast', ['#fffcf8', '#f7d6dd', '#e2213b', '#251a1d'], 'blush-forecast-poster.webp', 'Talia', 'Sam', ['Romantic', 'Scroll Film', 'Music']],
   ['First Light', 'Cinematic', 16000, 'The story begins at sunrise.', 'dawn', ['#eaa56a', '#fff4da', '#84add0', '#725848'], 'wedding-field.webp', 'Aria', 'Theo', ['Romantic', 'Cinematic', 'Photo-Led']],
   ['Film Noir Vows', 'Cinematic', 18000, 'A timeless love, dramatically told.', 'noir', ['#111111', '#f4f2ed', '#8b8b8b', '#d7d7d2'], 'wedding-dance.webp', 'Vivian', 'Cole', ['Dark', 'Cinematic', 'Photo-Led']],
   ['Celestial Overture', 'Cinematic', 22000, 'Written in the stars. Revealed in motion.', 'cosmos', ['#0f1024', '#f5e9c9', '#6a4fb7', '#c7b078'], null, 'Luna', 'Atlas', ['Jewel', 'Cinematic', 'Story Scroll']],
@@ -92,7 +96,7 @@ export const designs = rawDesigns.map((design, index) => {
     tags,
     eventType,
     templatePath,
-    featured: ['Soft Launch: Forever', 'Love Bomb', 'Love, in Transit', 'Scarlet Hour', 'Velvet Signal', 'Heart Parade', 'Up, Up & Always', 'Lamu Moon', 'Ivory Issue', 'Celestial Overture', 'Savannah Vows', 'Nairobi Noir'].includes(name),
+    featured: ['Soft Launch: Forever', 'Love Bomb', 'Love, in Transit', 'Scarlet Hour', 'Velvet Signal', 'Heart Parade', 'Up, Up & Always', 'Crimson Orbit', 'Heartburst: After Dark', 'Electric Vow', 'Blush Forecast', 'Lamu Moon', 'Ivory Issue', 'Celestial Overture', 'Savannah Vows', 'Nairobi Noir'].includes(name),
   }
 })
 

@@ -15,8 +15,20 @@ import InvitationArtwork from './components/InvitationArtwork.jsx'
 import BrandLogo from './components/BrandLogo.jsx'
 import { categories, designs, formatPrice } from './data/designs.js'
 
-const featuredNames = ['Velvet Signal', 'Heart Parade', 'Up, Up & Always', 'Love, in Transit', 'Scarlet Hour', 'Soft Launch: Forever', 'Love Bomb']
-const heroFeaturedNames = featuredNames.slice(0, 3)
+const featuredNames = [
+  'Crimson Orbit',
+  'Heartburst: After Dark',
+  'Electric Vow',
+  'Blush Forecast',
+  'Velvet Signal',
+  'Heart Parade',
+  'Up, Up & Always',
+  'Love, in Transit',
+  'Scarlet Hour',
+  'Soft Launch: Forever',
+  'Love Bomb',
+]
+const heroFeaturedNames = featuredNames.slice(0, 4)
 const loadTemplatePreview = () => import('./components/TemplatePreview.jsx')
 const TemplatePreview = lazy(loadTemplatePreview)
 const COLLECTION_PREFERENCES_KEY = 'kevents-collection-preferences'

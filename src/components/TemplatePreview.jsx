@@ -101,7 +101,9 @@ export default function TemplatePreview({ design, onBack, onEnquire }) {
   const isSandeSignature = design?.variant === 'sande'
   const isScrollWedding = scrollWeddingVariants.has(design?.variant)
   const isCinematicWedding = cinematicWeddingVariants.has(design?.variant)
-  const soundtrack = getSoundtrack(design)
+  const cinematicMusic = isCinematicWedding ? cinematicWeddingTemplates[design?.variant]?.music : null
+  const scrollMusic = isScrollWedding ? scrollWeddingTemplates[design?.variant]?.music : null
+  const soundtrack = cinematicMusic ?? scrollMusic ?? getSoundtrack(design)
 
   useEffect(() => {
     setIntroComplete(false)

@@ -556,6 +556,315 @@
   background: linear-gradient(180deg, #174f78, #102b43);
 }
 
+/* New full-film reveal identities ------------------------------------ */
+.er-moment[data-er-theme="crimson-orbit"],
+.er-moment[data-er-theme="heartburst"],
+.er-moment[data-er-theme="electric-vow"] {
+  color: #fff8f1;
+}
+
+.er-moment[data-er-theme="crimson-orbit"] .er-moment__inner,
+.er-moment[data-er-theme="heartburst"] .er-moment__inner,
+.er-moment[data-er-theme="electric-vow"] .er-moment__inner,
+.er-moment[data-er-theme="blush-forecast"] .er-moment__inner {
+  contain: paint;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+.er-moment[data-er-theme="crimson-orbit"] .er-moment__glow,
+.er-moment[data-er-theme="heartburst"] .er-moment__glow,
+.er-moment[data-er-theme="electric-vow"] .er-moment__glow,
+.er-moment[data-er-theme="blush-forecast"] .er-moment__glow {
+  inset: 0;
+  border-radius: 0;
+  filter: none;
+}
+
+.er-moment[data-er-theme="crimson-orbit"] .er-flip__card,
+.er-moment[data-er-theme="heartburst"] .er-flip__card,
+.er-moment[data-er-theme="electric-vow"] .er-flip__card,
+.er-moment[data-er-theme="blush-forecast"] .er-flip__card {
+  animation-name: er-card-flip-lite;
+}
+
+.er-moment[data-er-theme="crimson-orbit"] .er-scratch.is-revealed .er-scratch__canvas,
+.er-moment[data-er-theme="heartburst"] .er-scratch.is-revealed .er-scratch__canvas,
+.er-moment[data-er-theme="electric-vow"] .er-scratch.is-revealed .er-scratch__canvas,
+.er-moment[data-er-theme="blush-forecast"] .er-scratch.is-revealed .er-scratch__canvas {
+  filter: none;
+}
+
+@keyframes er-card-flip-lite {
+  0% { transform: rotateX(-82deg); }
+  52% { transform: rotateX(7deg); }
+  100% { transform: rotateX(0); }
+}
+
+.er-moment[data-er-theme="crimson-orbit"] {
+  --er-ink: #fff4e8;
+  --er-paper: #fff4e8;
+  --er-panel: rgb(21 5 10 / 96%);
+  --er-line: rgb(255 244 232 / 24%);
+  --er-accent: #df244f;
+  --er-accent-two: #f0a8b8;
+  --er-shadow: rgb(0 0 0 / 58%);
+}
+
+.er-moment[data-er-theme="crimson-orbit"] .er-moment__glow {
+  background: radial-gradient(circle, rgb(223 36 79 / 55%), transparent 66%);
+  opacity: .34;
+}
+
+.er-moment[data-er-theme="crimson-orbit"] .er-moment__inner {
+  border-color: rgb(240 168 184 / 58%);
+  border-radius: 72px 14px 72px 14px;
+  background:
+    radial-gradient(circle at 88% 12%, rgb(223 36 79 / 16%), transparent 30%),
+    var(--er-panel);
+  box-shadow: 18px 18px 0 rgb(124 23 48 / 78%), 0 32px 84px var(--er-shadow);
+}
+
+.er-moment[data-er-theme="crimson-orbit"] .er-moment__header h2 {
+  font-family: "Cormorant Local", Georgia, serif;
+}
+
+.er-moment[data-er-theme="crimson-orbit"] .er-flip__card {
+  border-color: rgb(240 168 184 / 68%);
+  border-radius: 999px;
+  background: radial-gradient(circle at 36% 25%, #9d2845, #3d0a19 70%);
+  color: #fff4e8;
+  box-shadow: 0 14px 30px rgb(0 0 0 / 34%);
+}
+
+.er-moment[data-er-theme="crimson-orbit"] .er-flip__card::before,
+.er-moment[data-er-theme="crimson-orbit"] .er-flip__card::after {
+  background: #f0a8b8;
+}
+
+.er-moment[data-er-theme="crimson-orbit"] .er-scratch__shape {
+  background: #fff4e8;
+  box-shadow: 0 0 0 1px #f0a8b8, 0 24px 54px rgb(0 0 0 / 40%);
+  filter: none;
+}
+
+.er-moment[data-er-theme="crimson-orbit"] .er-scratch__message {
+  background:
+    radial-gradient(circle at 30% 20%, rgb(255 255 255 / 88%), transparent 27%),
+    linear-gradient(145deg, #fff4e8, #efb2bf);
+  color: #19070d;
+}
+
+.er-moment[data-er-theme="crimson-orbit"] .er-sound--on {
+  background: #fff4e8;
+  color: #19070d;
+}
+
+.er-moment[data-er-theme="heartburst"] {
+  --er-ink: #fff7ec;
+  --er-paper: #fff7ec;
+  --er-panel: rgb(16 4 6 / 97%);
+  --er-line: rgb(255 247 236 / 28%);
+  --er-accent: #f12b46;
+  --er-accent-two: #ffd35c;
+  --er-shadow: rgb(0 0 0 / 62%);
+}
+
+.er-moment[data-er-theme="heartburst"] .er-moment__glow {
+  background: radial-gradient(circle, rgb(241 43 70 / 54%), transparent 65%);
+  opacity: .28;
+}
+
+.er-moment[data-er-theme="heartburst"] .er-moment__inner {
+  border: 3px solid #fff7ec;
+  border-radius: 3px;
+  background: var(--er-panel);
+  box-shadow: 16px 16px 0 #f12b46, 0 32px 82px var(--er-shadow);
+}
+
+.er-moment[data-er-theme="heartburst"] .er-moment__header h2 {
+  font-family: "Bricolage Local", "Inter Local", sans-serif;
+  font-weight: 760;
+  letter-spacing: -.075em;
+  text-transform: uppercase;
+}
+
+.er-moment[data-er-theme="heartburst"] .er-flip__card {
+  border: 2px solid #fff7ec;
+  border-radius: 2px;
+  background: #f12b46;
+  box-shadow: 6px 6px 0 rgb(255 247 236 / 26%);
+  color: #fff7ec;
+}
+
+.er-moment[data-er-theme="heartburst"] .er-flip__unit:nth-child(2) .er-flip__card {
+  background: #ffabb9;
+  color: #170608;
+}
+
+.er-moment[data-er-theme="heartburst"] .er-flip__unit:nth-child(3) .er-flip__card {
+  background: #ffd35c;
+  color: #170608;
+}
+
+.er-moment[data-er-theme="heartburst"] .er-flip__unit:nth-child(4) .er-flip__card {
+  background: #fff7ec;
+  color: #170608;
+}
+
+.er-moment[data-er-theme="heartburst"] .er-scratch__shape {
+  background: #ffd35c;
+  box-shadow: 0 26px 50px rgb(0 0 0 / 44%);
+  filter: none;
+}
+
+.er-moment[data-er-theme="heartburst"] .er-scratch__message {
+  background: linear-gradient(145deg, #fff7ec, #ffd35c);
+  color: #170608;
+}
+
+.er-moment[data-er-theme="heartburst"] .er-scratch__message strong {
+  font-family: "Bricolage Local", "Inter Local", sans-serif;
+  font-weight: 760;
+  letter-spacing: -.07em;
+  text-transform: uppercase;
+}
+
+.er-moment[data-er-theme="heartburst"] .er-sound--on {
+  background: #ffd35c;
+  color: #170608;
+}
+
+.er-moment[data-er-theme="electric-vow"] {
+  --er-ink: #fff8fd;
+  --er-paper: #fff8fd;
+  --er-panel: rgb(8 4 13 / 97%);
+  --er-line: rgb(115 231 235 / 32%);
+  --er-accent: #ff2c9c;
+  --er-accent-two: #73e7eb;
+  --er-shadow: rgb(0 0 0 / 66%);
+}
+
+.er-moment[data-er-theme="electric-vow"] .er-moment__glow {
+  background:
+    radial-gradient(circle at 38% 45%, rgb(255 44 156 / 46%), transparent 38%),
+    radial-gradient(circle at 68% 54%, rgb(115 231 235 / 38%), transparent 36%);
+  opacity: .32;
+}
+
+.er-moment[data-er-theme="electric-vow"] .er-moment__inner {
+  border-color: rgb(115 231 235 / 72%);
+  border-radius: 24px;
+  background:
+    linear-gradient(135deg, rgb(181 120 255 / 9%), transparent 42%),
+    var(--er-panel);
+  box-shadow: 0 0 0 1px rgb(255 44 156 / 45%), 0 32px 84px var(--er-shadow);
+}
+
+.er-moment[data-er-theme="electric-vow"] .er-moment__header h2 {
+  font-family: "Bricolage Local", "Inter Local", sans-serif;
+  font-weight: 700;
+  letter-spacing: -.075em;
+}
+
+.er-moment[data-er-theme="electric-vow"] .er-flip__card {
+  border-color: rgb(115 231 235 / 72%);
+  border-radius: 14px;
+  background: linear-gradient(155deg, #2a0a35, #0b0711);
+  box-shadow: 0 0 0 1px rgb(255 44 156 / 48%), 0 14px 30px rgb(0 0 0 / 42%);
+  color: #fff8fd;
+}
+
+.er-moment[data-er-theme="electric-vow"] .er-flip__unit:nth-child(2) .er-flip__card,
+.er-moment[data-er-theme="electric-vow"] .er-flip__unit:nth-child(4) .er-flip__card {
+  background: linear-gradient(155deg, #10333a, #0b0711);
+}
+
+.er-moment[data-er-theme="electric-vow"] .er-flip__card::before,
+.er-moment[data-er-theme="electric-vow"] .er-flip__card::after {
+  background: #73e7eb;
+}
+
+.er-moment[data-er-theme="electric-vow"] .er-scratch__shape {
+  background: #14091d;
+  box-shadow: 0 0 0 1px #73e7eb, 0 24px 56px rgb(0 0 0 / 54%);
+  filter: none;
+}
+
+.er-moment[data-er-theme="electric-vow"] .er-scratch__message {
+  background:
+    radial-gradient(circle at 28% 20%, rgb(255 255 255 / 82%), transparent 27%),
+    linear-gradient(145deg, #fff8fd, #d9c0ff);
+  color: #0b0711;
+}
+
+.er-moment[data-er-theme="electric-vow"] .er-sound--on {
+  background: #73e7eb;
+  color: #0b0711;
+}
+
+.er-moment[data-er-theme="blush-forecast"] {
+  --er-ink: #3d1d28;
+  --er-paper: #fffdf8;
+  --er-panel: rgb(255 253 248 / 97%);
+  --er-line: rgb(61 29 40 / 20%);
+  --er-accent: #c9365b;
+  --er-accent-two: #efb4c4;
+  --er-shadow: rgb(95 44 61 / 20%);
+  color: #3d1d28;
+}
+
+.er-moment[data-er-theme="blush-forecast"] .er-moment__glow {
+  background:
+    radial-gradient(circle at 40% 45%, rgb(239 180 196 / 68%), transparent 40%),
+    radial-gradient(circle at 66% 54%, rgb(215 227 238 / 72%), transparent 38%);
+  opacity: .45;
+}
+
+.er-moment[data-er-theme="blush-forecast"] .er-moment__inner {
+  border-color: rgb(61 29 40 / 22%);
+  border-radius: 34px;
+  background:
+    radial-gradient(circle at 88% 12%, rgb(239 180 196 / 24%), transparent 28%),
+    var(--er-panel);
+  box-shadow: 14px 14px 0 rgb(239 180 196 / 82%), 0 28px 72px var(--er-shadow);
+}
+
+.er-moment[data-er-theme="blush-forecast"] .er-moment__header h2 {
+  font-family: "Cormorant Local", Georgia, serif;
+}
+
+.er-moment[data-er-theme="blush-forecast"] .er-flip__card {
+  border-color: rgb(61 29 40 / 20%);
+  border-radius: 18px;
+  background: linear-gradient(180deg, #5e2638, #3d1d28);
+  color: #fffdf8;
+  box-shadow: 0 12px 26px rgb(95 44 61 / 18%);
+}
+
+.er-moment[data-er-theme="blush-forecast"] .er-flip__unit:nth-child(2) .er-flip__card,
+.er-moment[data-er-theme="blush-forecast"] .er-flip__unit:nth-child(4) .er-flip__card {
+  background: linear-gradient(180deg, #d65373, #a82749);
+}
+
+.er-moment[data-er-theme="blush-forecast"] .er-scratch__shape {
+  background: #fffdf8;
+  box-shadow: 0 0 0 1px rgb(61 29 40 / 18%), 0 22px 46px rgb(95 44 61 / 18%);
+  filter: none;
+}
+
+.er-moment[data-er-theme="blush-forecast"] .er-scratch__message {
+  background:
+    radial-gradient(circle at 28% 20%, rgb(255 255 255 / 90%), transparent 28%),
+    linear-gradient(145deg, #fffdf8, #f4cbd5);
+  color: #3d1d28;
+}
+
+.er-moment[data-er-theme="blush-forecast"] .er-sound--on {
+  background: #3d1d28;
+  color: #fffdf8;
+}
+
 @media (hover: hover) {
   .er-sound:hover { transform: translateY(-2px); }
   .er-scratch__fallback:hover { color: var(--er-accent); }
@@ -617,6 +926,40 @@
 
   .er-scratch__message strong {
     font-size: clamp(32px, 10vw, 52px);
+  }
+
+  .er-moment[data-er-theme="crimson-orbit"] .er-moment__inner {
+    border-radius: 34px 10px 34px 10px;
+    box-shadow: 8px 8px 0 rgb(124 23 48 / 78%), 0 24px 56px var(--er-shadow);
+  }
+
+  .er-moment[data-er-theme="heartburst"] .er-moment__inner {
+    border-width: 2px;
+    border-radius: 2px;
+    box-shadow: 8px 8px 0 #f12b46, 0 24px 56px var(--er-shadow);
+  }
+
+  .er-moment[data-er-theme="electric-vow"] .er-moment__inner {
+    border-radius: 18px;
+    box-shadow: 0 0 0 1px rgb(255 44 156 / 40%), 0 24px 58px var(--er-shadow);
+  }
+
+  .er-moment[data-er-theme="blush-forecast"] .er-moment__inner {
+    border-radius: 24px;
+    box-shadow: 8px 8px 0 rgb(239 180 196 / 82%), 0 22px 52px var(--er-shadow);
+  }
+
+  .er-moment[data-er-theme="crimson-orbit"] .er-flip__card {
+    border-radius: 18px;
+  }
+
+  .er-moment[data-er-theme="heartburst"] .er-flip__card {
+    box-shadow: 3px 3px 0 rgb(255 247 236 / 24%);
+  }
+
+  .er-moment[data-er-theme="electric-vow"] .er-flip__card,
+  .er-moment[data-er-theme="blush-forecast"] .er-flip__card {
+    border-radius: 10px;
   }
 }
 

@@ -71,7 +71,7 @@ The following interaction sounds were trimmed, filtered, level-adjusted, and con
 
 ## Project-supplied media
 
-The scroll-film videos, poster/cover frames, rose cutouts, RSVP animation, and soundtrack excerpts used by the `Soft Launch: Forever`, `Love Bomb`, `Love, in Transit`, `Scarlet Hour`, `Velvet Signal`, `Heart Parade`, `Up, Up & Always`, and imported Webgency templates are optimized derivatives of media supplied by the project owner. Rights and provenance for those supplied originals remain the project owner’s responsibility.
+The scroll-film videos, poster/cover frames, rose cutouts, RSVP animation, and soundtrack excerpts used by the `Soft Launch: Forever`, `Love Bomb`, `Love, in Transit`, `Scarlet Hour`, `Velvet Signal`, `Heart Parade`, `Up, Up & Always`, `Crimson Orbit`, `Heartburst: After Dark`, `Electric Vow`, `Blush Forecast`, and imported Webgency templates are optimized derivatives of media supplied by the project owner. Rights and provenance for those supplied originals remain the project owner’s responsibility.
 
 The K EVENTS interface and invitation compositions are original implementation work. Except for the specifically documented Sponsalia envelope media below, downloaded third-party websites in the local workspace were used only as visual references and are excluded from this repository.
 
