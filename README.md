@@ -50,6 +50,8 @@ The enquiry experience runs in preview mode until a form endpoint is configured.
 
 The scroll-film invitations and imported Webgency templates have guest RSVP forms. Set `VITE_RSVP_ENDPOINT` to a compatible endpoint to receive those replies. Imported templates never send RSVP details to their original form service and clearly run in demo mode when this endpoint is omitted.
 
+Every design submits the same compact `kevents-rsvp-v1` payload. `name` and `attendance` (`attending` or `declined`) are always required. Attendees also provide `partySize`; `requirements` combines guest names, children’s ages, dietary needs, and accessibility needs in one optional answer, while `song` is optional. Declining guests can leave an optional `message`. The payload also includes `template`, `templateId`, and `eventType` where available.
+
 ## Content
 
 - Invitation names, prices, palettes and categories live in `src/data/designs.js`.

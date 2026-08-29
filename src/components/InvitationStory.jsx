@@ -339,11 +339,15 @@ function StoryMedia({ design, mode, priority = false, caption }) {
 
 function RSVP({ design, mode, prompt = 'Can you make it?' }) {
   const fieldId = useId()
-  const [attendance, setAttendance] = useState('yes')
+  const successRef = useRef(null)
+  const [attendance, setAttendance] = useState('')
   const [guestName, setGuestName] = useState('')
-  const [note, setNote] = useState('')
   const [status, setStatus] = useState('idle')
   const [submission, setSubmission] = useState(null)
+
+  useEffect(() => {
+    if (status === 'success') successRef.current?.focus()
+  }, [status])
 
   const handleSubmit = async (event) => {
     event.preventDefault()
@@ -358,14 +362,20 @@ function RSVP({ design, mode, prompt = 'Can you make it?' }) {
       return
     }
 
+    const data = new FormData(form)
     setStatus('sending')
     try {
       const result = await submitRsvp(form, design?.name, {
         name: cleanName,
+        templateId: design?.slug,
         eventType: design?.eventType || 'Wedding',
       })
       setGuestName(cleanName)
-      setSubmission({ attendance, demo: result.demo, noteIncluded: Boolean(note.trim()) })
+      setSubmission({
+        attendance,
+        demo: result.demo,
+        extrasIncluded: ['requirements', 'song', 'message'].some((key) => String(data.get(key) || '').trim()),
+      })
       setStatus('success')
     } catch {
       setStatus('error')
@@ -378,7 +388,7 @@ function RSVP({ design, mode, prompt = 'Can you make it?' }) {
         <p>RSVP by 20 September 2027</p>
         <h2>{prompt}</h2>
         {status === 'success' ? (
-          <div className="is-rsvp__confirmation" role="status" aria-live="polite">
+          <div className="is-rsvp__confirmation" role="status" aria-live="polite" ref={successRef} tabIndex={-1}>
             <strong>{submission.demo ? `Preview complete, ${guestName}.` : `Thank you, ${guestName}.`}</strong>
             <span>
               {submission.demo
@@ -387,8 +397,8 @@ function RSVP({ design, mode, prompt = 'Can you make it?' }) {
                   ? 'Your RSVP was sent. We cannot wait to celebrate with you.'
                   : 'Your reply was sent. We will miss you on the day.'}
             </span>
-            {submission.noteIncluded && (
-              <small>{submission.demo ? 'Your note was included in the preview.' : 'Your note was sent too.'}</small>
+            {submission.extrasIncluded && (
+              <small>{submission.demo ? 'Your extra details were included in the preview.' : 'Your extra details were sent too.'}</small>
             )}
             <button type="button" onClick={() => { setSubmission(null); setStatus('idle') }}>Edit response</button>
           </div>
@@ -397,23 +407,25 @@ function RSVP({ design, mode, prompt = 'Can you make it?' }) {
             <fieldset>
               <legend>Will you attend?</legend>
               <div className="is-rsvp__choice">
-                <label>
+                <label className={attendance === 'yes' ? 'is-selected' : ''}>
                   <input
                     type="radio"
                     name="attendance"
                     value="yes"
                     checked={attendance === 'yes'}
                     onChange={(event) => setAttendance(event.target.value)}
+                    required
                   />
                   <span>Joyfully attending</span>
                 </label>
-                <label>
+                <label className={attendance === 'no' ? 'is-selected' : ''}>
                   <input
                     type="radio"
                     name="attendance"
                     value="no"
                     checked={attendance === 'no'}
                     onChange={(event) => setAttendance(event.target.value)}
+                    required
                   />
                   <span>Sorry to miss it</span>
                 </label>
@@ -434,16 +446,42 @@ function RSVP({ design, mode, prompt = 'Can you make it?' }) {
                 required
               />
             </label>
-            <label className="is-rsvp__field" htmlFor={`${fieldId}-note`}>
-              <span>Dietary needs or a note</span>
-              <textarea
-                id={`${fieldId}-note`}
-                name="note"
-                rows="2"
-                value={note}
-                onChange={(event) => setNote(event.target.value)}
-              />
-            </label>
+            {attendance === 'yes' && (
+              <div className="is-rsvp__attending">
+                <div className="is-rsvp__row">
+                  <label className="is-rsvp__field" htmlFor={`${fieldId}-party-size`}>
+                    <span>Seats needed <small>(including you)</small></span>
+                    <select id={`${fieldId}-party-size`} name="partySize" defaultValue="1" required>
+                      <option value="1">1 — Just me</option>
+                      <option value="2">2 guests</option>
+                      <option value="3">3 guests</option>
+                      <option value="4">4 guests</option>
+                      <option value="5">5 guests</option>
+                      <option value="6+">6 or more</option>
+                    </select>
+                  </label>
+                  <label className="is-rsvp__field" htmlFor={`${fieldId}-song`}>
+                    <span>Song request <small>(optional)</small></span>
+                    <input id={`${fieldId}-song`} name="song" placeholder="One dance-floor favourite" />
+                  </label>
+                </div>
+                <label className="is-rsvp__field" htmlFor={`${fieldId}-requirements`}>
+                  <span>Anything we should plan for? <small>(optional)</small></span>
+                  <textarea
+                    id={`${fieldId}-requirements`}
+                    name="requirements"
+                    rows="2"
+                    placeholder="Guest names, children’s ages, dietary or accessibility needs"
+                  />
+                </label>
+              </div>
+            )}
+            {attendance === 'no' && (
+              <label className="is-rsvp__field" htmlFor={`${fieldId}-message`}>
+                <span>Leave a note <small>(optional)</small></span>
+                <textarea id={`${fieldId}-message`} name="message" rows="2" placeholder="Send a little love from afar" />
+              </label>
+            )}
             {status === 'error' && (
               <p className="is-rsvp__error" role="alert">Your reply could not be sent. Check your connection and try again.</p>
             )}

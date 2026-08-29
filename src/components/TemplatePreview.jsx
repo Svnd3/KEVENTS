@@ -216,7 +216,12 @@ export default function TemplatePreview({ design, onBack, onEnquire }) {
           Object.entries(message.fields || {}).slice(0, 50).forEach(([key, value]) => {
             if (typeof value === 'string') payload.append(key, value.slice(0, 4000))
           })
+          if (payload.get('attendance') === 'yes') payload.set('attendance', 'attending')
+          if (payload.get('attendance') === 'no') payload.set('attendance', 'declined')
+          payload.set('rsvpSchema', 'kevents-rsvp-v1')
           payload.set('template', design.name)
+          payload.set('templateId', design.slug)
+          payload.set('eventType', design.eventType || 'Wedding')
           payload.set('price', formatPrice(design.price))
 
           const response = await fetch(endpoint, {

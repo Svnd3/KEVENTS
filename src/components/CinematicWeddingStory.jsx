@@ -488,7 +488,7 @@ function RSVP({ config }) {
   const fieldId = useId()
   const reducedMotion = useReducedMotion()
   const successRef = useRef(null)
-  const [attendance, setAttendance] = useState('yes')
+  const [attendance, setAttendance] = useState('')
   const [guestName, setGuestName] = useState('')
   const [status, setStatus] = useState('idle')
   const [demo, setDemo] = useState(false)
@@ -499,6 +499,7 @@ function RSVP({ config }) {
 
   const submit = async (event) => {
     event.preventDefault()
+    if (status === 'sending') return
     const form = event.currentTarget
     setGuestName(new FormData(form).get('name')?.trim() || 'You')
     setStatus('sending')
@@ -540,22 +541,41 @@ function RSVP({ config }) {
             <fieldset>
               <legend>Can you make it?</legend>
               <label className={attendance === 'yes' ? 'is-selected' : ''}>
-                <input type="radio" name="attendance" value="yes" checked={attendance === 'yes'} onChange={() => setAttendance('yes')} />
+                <input type="radio" name="attendance" value="yes" checked={attendance === 'yes'} onChange={() => setAttendance('yes')} required />
                 <span>{config.rsvp.yes}</span><i>Yes</i>
               </label>
               <label className={attendance === 'no' ? 'is-selected' : ''}>
-                <input type="radio" name="attendance" value="no" checked={attendance === 'no'} onChange={() => setAttendance('no')} />
+                <input type="radio" name="attendance" value="no" checked={attendance === 'no'} onChange={() => setAttendance('no')} required />
                 <span>{config.rsvp.no}</span><i>No</i>
               </label>
             </fieldset>
             <label htmlFor={`${fieldId}-name`}>Your full name</label>
             <input id={`${fieldId}-name`} name="name" autoComplete="name" required />
-            <label htmlFor={`${fieldId}-contact`}>Email address</label>
-            <input id={`${fieldId}-contact`} name="contact" type="email" inputMode="email" autoComplete="email" required />
-            <label htmlFor={`${fieldId}-note`}>Leave us a note <span>(optional)</span></label>
-            <textarea id={`${fieldId}-note`} name="note" rows="2" />
+            {attendance === 'yes' && (
+              <>
+                <label htmlFor={`${fieldId}-party-size`}>Seats needed <span>(including you)</span></label>
+                <select id={`${fieldId}-party-size`} name="partySize" defaultValue="1" required>
+                  <option value="1">1 — Just me</option>
+                  <option value="2">2 guests</option>
+                  <option value="3">3 guests</option>
+                  <option value="4">4 guests</option>
+                  <option value="5">5 guests</option>
+                  <option value="6+">6 or more</option>
+                </select>
+                <label htmlFor={`${fieldId}-requirements`}>Anything we should plan for? <span>(optional)</span></label>
+                <textarea id={`${fieldId}-requirements`} name="requirements" rows="2" placeholder="Guest names, children’s ages, dietary or accessibility needs" />
+                <label htmlFor={`${fieldId}-song`}>Song request <span>(optional)</span></label>
+                <input id={`${fieldId}-song`} name="song" placeholder="One dance-floor favourite" />
+              </>
+            )}
+            {attendance === 'no' && (
+              <>
+                <label htmlFor={`${fieldId}-message`}>Leave us a note <span>(optional)</span></label>
+                <textarea id={`${fieldId}-message`} name="message" rows="2" placeholder="Send a little love from afar" />
+              </>
+            )}
             {status === 'error' && <p className="cw-rsvp__error" role="alert">That reply did not send. Please try again.</p>}
-            <button type="submit" disabled={status === 'sending'}><span>{status === 'sending' ? 'Sending…' : attendance === 'yes' ? config.rsvp.cta : config.rsvp.declineCta}</span><ArrowIcon /></button>
+            <button type="submit" disabled={status === 'sending'}><span>{status === 'sending' ? 'Sending…' : attendance === 'yes' ? config.rsvp.cta : attendance === 'no' ? config.rsvp.declineCta : 'Send RSVP'}</span><ArrowIcon /></button>
           </form>
         )}
       </div>

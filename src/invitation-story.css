@@ -528,6 +528,13 @@
   cursor: pointer;
   font-size: 12px;
   font-weight: 700;
+  transition: background-color 160ms ease, color 160ms ease, transform 160ms ease;
+}
+
+.is-rsvp__choice label.is-selected {
+  transform: translateY(-1px);
+  background: rgb(255 255 255 / 78%);
+  box-shadow: inset 0 0 0 1px currentColor;
 }
 
 .is-rsvp__choice input {
@@ -538,6 +545,7 @@
 }
 
 .is-rsvp__field input,
+.is-rsvp__field select,
 .is-rsvp__field textarea {
   display: block;
   width: 100%;
@@ -549,9 +557,14 @@
   font-size: 14px;
 }
 
-.is-rsvp__field input {
+.is-rsvp__field input,
+.is-rsvp__field select {
   height: 48px;
   padding: 0 14px;
+}
+
+.is-rsvp__field select {
+  appearance: auto;
 }
 
 .is-rsvp__field textarea {
@@ -561,10 +574,29 @@
 }
 
 .is-rsvp__field input:focus-visible,
+.is-rsvp__field select:focus-visible,
 .is-rsvp__field textarea:focus-visible,
 .is-rsvp__choice input:focus-visible {
   outline: 3px solid #478bff;
   outline-offset: 2px;
+}
+
+.is-rsvp__field > span small {
+  font: inherit;
+  letter-spacing: 0;
+  opacity: .62;
+  text-transform: none;
+}
+
+.is-rsvp__attending {
+  display: grid;
+  gap: 15px;
+}
+
+.is-rsvp__row {
+  display: grid;
+  grid-template-columns: minmax(0, .72fr) minmax(0, 1.28fr);
+  gap: 15px;
 }
 
 .is-rsvp__form > button {
@@ -3191,6 +3223,7 @@
   .is-rsvp { min-height: 570px; padding: 80px 22px; }
   .is-rsvp h2 { font-size: clamp(50px, 16vw, 82px); }
   .is-rsvp__choice { grid-template-columns: 1fr; }
+  .is-rsvp__row { grid-template-columns: 1fr; }
   .is-rsvp__form { margin-top: 30px; }
   .is-footer { flex-direction: column; align-items: flex-start; }
 

@@ -134,9 +134,14 @@ function Countdown({ date }) {
 
 function RsvpForm({ design, first, second }) {
   const formId = useId()
-  const [attending, setAttending] = useState('yes')
+  const successRef = useRef(null)
+  const [attending, setAttending] = useState('')
   const [status, setStatus] = useState('idle')
   const [response, setResponse] = useState(null)
+
+  useEffect(() => {
+    if (status === 'success') successRef.current?.focus()
+  }, [status])
 
   async function handleSubmit(event) {
     event.preventDefault()
@@ -151,6 +156,7 @@ function RsvpForm({ design, first, second }) {
     try {
       const result = await submitRsvp(form, design?.name, {
         name: fullName,
+        templateId: design?.slug,
         eventType: design?.eventType || 'Wedding',
       })
       setResponse({
@@ -166,7 +172,7 @@ function RsvpForm({ design, first, second }) {
 
   if (status === 'success' && response) {
     return (
-      <div className="ss-rsvp-success" role="status" aria-live="polite">
+      <div className="ss-rsvp-success" role="status" aria-live="polite" ref={successRef} tabIndex={-1}>
         <span aria-hidden="true">✓</span>
         <h3>
           {response.demo
@@ -196,32 +202,51 @@ function RsvpForm({ design, first, second }) {
 
       <fieldset className="ss-rsvp-attendance">
         <legend>Will you be there?</legend>
-        <label>
-          <input type="radio" name="attendance" value="yes" checked={attending === 'yes'} onChange={() => setAttending('yes')} />
+        <label className={attending === 'yes' ? 'is-selected' : ''}>
+          <input type="radio" name="attendance" value="yes" checked={attending === 'yes'} onChange={() => setAttending('yes')} required />
           <span>Absolutely</span>
         </label>
-        <label>
-          <input type="radio" name="attendance" value="no" checked={attending === 'no'} onChange={() => setAttending('no')} />
+        <label className={attending === 'no' ? 'is-selected' : ''}>
+          <input type="radio" name="attendance" value="no" checked={attending === 'no'} onChange={() => setAttending('no')} required />
           <span>Can’t make it</span>
         </label>
       </fieldset>
 
       {attending === 'yes' && (
-        <label className="ss-rsvp-field" htmlFor={`${formId}-guests`}>
-          <span>Seats needed</span>
-          <select id={`${formId}-guests`} name="guests" defaultValue="1">
-            <option value="1">Just me</option>
-            <option value="2">Two seats</option>
-            <option value="3">Three seats</option>
-            <option value="4">Four seats</option>
-          </select>
-        </label>
+        <>
+          <label className="ss-rsvp-field" htmlFor={`${formId}-party-size`}>
+            <span>Seats needed <small>(including you)</small></span>
+            <select id={`${formId}-party-size`} name="partySize" defaultValue="1" required>
+              <option value="1">1 — Just me</option>
+              <option value="2">2 guests</option>
+              <option value="3">3 guests</option>
+              <option value="4">4 guests</option>
+              <option value="5">5 guests</option>
+              <option value="6+">6 or more</option>
+            </select>
+          </label>
+          <label className="ss-rsvp-field" htmlFor={`${formId}-song`}>
+            <span>Song request <small>(optional)</small></span>
+            <input id={`${formId}-song`} name="song" placeholder="One dance-floor favourite" />
+          </label>
+          <label className="ss-rsvp-field ss-rsvp-field--wide" htmlFor={`${formId}-requirements`}>
+            <span>Anything we should plan for? <small>(optional)</small></span>
+            <textarea
+              id={`${formId}-requirements`}
+              name="requirements"
+              rows="3"
+              placeholder="Guest names, children’s ages, dietary or accessibility needs"
+            />
+          </label>
+        </>
       )}
 
-      <label className="ss-rsvp-field ss-rsvp-field--wide" htmlFor={`${formId}-note`}>
-        <span>Leave a note</span>
-        <textarea id={`${formId}-note`} name="note" rows="3" placeholder="A message, a song request, or both" />
-      </label>
+      {attending === 'no' && (
+        <label className="ss-rsvp-field ss-rsvp-field--wide" htmlFor={`${formId}-message`}>
+          <span>Leave a note <small>(optional)</small></span>
+          <textarea id={`${formId}-message`} name="message" rows="3" placeholder="Send a little love from afar" />
+        </label>
+      )}
 
       {status === 'error' && (
         <p className="ss-rsvp-error" role="alert">Your RSVP could not be sent. Check your connection and try again.</p>

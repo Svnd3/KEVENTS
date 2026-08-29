@@ -62,6 +62,7 @@ function envelopeTheme(design) {
     '--spei-backdrop': backdrop,
     '--spei-ink': ink,
     '--spei-accent': accent,
+    '--spei-seal': focus,
     '--spei-focus': focus,
     '--spei-tone-strength': design?.category === 'Minimal' ? 0.22 : 0.46,
   }

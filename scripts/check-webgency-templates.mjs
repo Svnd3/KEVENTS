@@ -28,10 +28,31 @@ const expectedEditorialFilenames = expectedSlugs.flatMap((slug) => (
   expectedPhotoRoles.map((role) => `${slug}-${role}.webp`)
 ))
 const hiddenVideoRecords = new Map([
-  ['blossom-oud', '2443433693'],
+  ['sacred-garden', '2487446043'],
   ['dolce-vita', '2442650993'],
   ['vibrant-vows', '2049114373'],
   ['royal-gold', '2225136913'],
+])
+
+const nativeIntroSelectors = new Map([
+  ['sacred-garden', ['#weiOverlay', '#weiVideoWrap']],
+  ['blossom-oud', ['#rec2443433693']],
+  ['dolce-vita', ['#rec2442650973']],
+  ['vibrant-vows', ['#rec2052880283']],
+  ['destination-love', ['#popup-overlay']],
+  ['eternal-romance', ['#popup-overlay']],
+  ['royal-gold', ['#preloader', '#curtain-overlay']],
+  ['minimalist', ['#rec2072082223']],
+])
+const removedNativeIntroRecords = new Map([
+  ['sacred-garden', ['2487446003']],
+  ['blossom-oud', ['2443433693', '2443433703']],
+  ['dolce-vita', ['2442650973', '2442650983']],
+  ['vibrant-vows', ['2052880283', '2052873013']],
+  ['destination-love', ['2132511073']],
+  ['eternal-romance', ['1875002831']],
+  ['royal-gold', ['2225137013']],
+  ['minimalist', ['2072082223', '2072083833']],
 ])
 const failures = []
 let checkedReferences = 0
@@ -163,8 +184,62 @@ for (const slug of ['catalog', ...expectedSlugs]) {
     if (html.includes("textContent.replace(/s+/g, ' ')")) fail(`${slug}: broken whitespace normalization regex remains`)
     if (!html.includes('function setupTravelingRose()')) fail(`${slug}: traveling rose runtime is missing`)
     if (!html.includes('@media (prefers-reduced-motion:reduce)')) fail(`${slug}: traveling rose does not respect reduced motion`)
+    if (!html.includes("var RSVP_SCHEMA_VERSION = 'kevents-rsvp-v1'")) fail(`${slug}: canonical RSVP schema version is missing`)
+    if (!html.includes('function setupRsvpForms(root)')) fail(`${slug}: canonical RSVP normalizer is missing`)
+    if (!html.includes('function normalizeZeroFormHost(host)')) fail(`${slug}: dynamic zero-form normalization is missing`)
+    if (!html.includes('function canonicalRsvpFields(form)')) fail(`${slug}: canonical RSVP serializer is missing`)
+    if (!html.includes('class="kevents-rsvp__status" role="status" aria-live="polite"')) fail(`${slug}: inline RSVP status is missing`)
+    if (!html.includes('if (rsvpRuntimeReady) setupRsvpForms(node);')) fail(`${slug}: dynamically inserted RSVP forms are not normalized`)
+    if (
+      !html.includes('name="attendance" type="radio" value="attending" required') ||
+      !html.includes('name="attendance" type="radio" value="declined" required')
+    ) {
+      fail(`${slug}: RSVP attendance is not an exclusive required choice`)
+    }
+    const expectedRsvpFields = ['name', 'attendance', 'partySize', 'requirements', 'song', 'message']
+    const generatedBlock = html.match(/<!-- kevents-generated:start -->[\s\S]*?<!-- kevents-generated:end -->/)?.[0] || ''
+    const generatedRsvpFields = new Set(
+      [...generatedBlock.matchAll(/<(?:input|select|textarea)\b[^>]*\bname="([^"]+)"/gi)].map((match) => match[1]),
+    )
+    for (const fieldName of expectedRsvpFields) {
+      if (!html.includes(`name="${fieldName}"`)) fail(`${slug}: canonical RSVP field ${fieldName} is missing`)
+    }
+    for (const fieldName of generatedRsvpFields) {
+      if (!expectedRsvpFields.includes(fieldName)) fail(`${slug}: unexpected RSVP field ${fieldName} is present`)
+    }
+    if (!html.includes('name="name" type="text" autocomplete="name" maxlength="120" required')) {
+      fail(`${slug}: RSVP name is not required`)
+    }
+    if (!html.includes('name="partySize" type="number" inputmode="numeric" min="1" max="20" step="1" value="1" required disabled')) {
+      fail(`${slug}: conditional RSVP party size is not required`)
+    }
+    if (!html.includes('data-kevents-rsvp-when="attending"') || !html.includes('data-kevents-rsvp-when="declined"')) {
+      fail(`${slug}: RSVP conditional field groups are missing`)
+    }
+    if (!html.includes('form.kevents-rsvp .kevents-rsvp__control') || !html.includes('form.kevents-rsvp .kevents-rsvp__submit')) {
+      fail(`${slug}: canonical RSVP styling is missing`)
+    }
+    if (html.includes('new FormData(form).forEach(function (value, key)')) {
+      fail(`${slug}: legacy arbitrary RSVP field serialization remains`)
+    }
+
+    const openerSelectors = nativeIntroSelectors.get(slug) || []
+    if (!html.includes(`${openerSelectors.join(',')}{display:none!important}`)) {
+      fail(`${slug}: native intro is not disabled`)
+    }
+    if (slug === 'royal-gold' && !html.includes('body.loading{overflow:auto!important}')) {
+      fail(`${slug}: native loading scroll lock is not disabled`)
+    }
+    if (slug === 'sacred-garden' && !html.includes('#rec2487446043 .js-delay-anim{opacity:1!important;transform:none!important}')) {
+      fail(`${slug}: content reveal still depends on the removed native intro`)
+    }
 
     const markupHtml = markupWithoutInertContent(html)
+    for (const recordId of removedNativeIntroRecords.get(slug) || []) {
+      if (new RegExp(`<div\\b[^>]*\\bid=["']rec${recordId}["']`, 'i').test(markupHtml)) {
+        fail(`${slug}: redundant native intro record ${recordId} remains`)
+      }
+    }
     const mainTag = markupHtml.match(/<div\b(?=[^>]*\bid=["']allrecords["'])[^>]*>/i)?.[0]
     if (!mainTag || !/\srole=["']main["']/i.test(mainTag)) fail(`${slug}: #allrecords is not a main landmark`)
 
@@ -185,16 +260,6 @@ for (const slug of ['catalog', ...expectedSlugs]) {
         fail(`${slug}: below-fold image ${index + 1} is not lazy-loaded`)
       }
     })
-
-    if (slug === 'sacred-garden') {
-      if (!html.includes('#weiOverlay,#weiVideoWrap{display:none!important}')) fail(`${slug}: native opener is not disabled`)
-      const openerVideo = html.match(/<video\b(?=[^>]*\bid=["']weiVideo["'])[^>]*>[\s\S]*?<\/video>/i)?.[0]
-      if (!openerVideo) fail(`${slug}: native opener video marker is missing`)
-      else if (videoHasNetworkSource(openerVideo)) fail(`${slug}: native opener video still has a network source`)
-    }
-    if (slug === 'blossom-oud' && !html.includes('#rec2443433693{display:none!important}')) {
-      fail(`${slug}: native opener is not disabled`)
-    }
 
     const hiddenVideoRecord = hiddenVideoRecords.get(slug)
     if (hiddenVideoRecord) {

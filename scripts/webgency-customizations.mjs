@@ -156,6 +156,7 @@ export const templateCustomizations = {
   'sacred-garden': {
     title: 'Olivia & Louis — The Sacred Garden',
     displayFont: 'Cormorant Garamond',
+    heroRecord: '2487446043',
     colors: [
       ['#a67d2b', '#5b745e'],
       ['#b48c3d', '#71866d'],

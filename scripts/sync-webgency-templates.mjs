@@ -72,6 +72,28 @@ const templates = [
   },
 ]
 
+const nativeIntroSelectors = new Map([
+  ['sacred-garden', ['#weiOverlay', '#weiVideoWrap']],
+  ['blossom-oud', ['#rec2443433693']],
+  ['dolce-vita', ['#rec2442650973']],
+  ['vibrant-vows', ['#rec2052880283']],
+  ['destination-love', ['#popup-overlay']],
+  ['eternal-romance', ['#popup-overlay']],
+  ['royal-gold', ['#preloader', '#curtain-overlay']],
+  ['minimalist', ['#rec2072082223']],
+])
+
+const removableNativeIntroRecords = new Map([
+  ['sacred-garden', ['2487446003']],
+  ['blossom-oud', ['2443433693', '2443433703']],
+  ['dolce-vita', ['2442650973', '2442650983']],
+  ['vibrant-vows', ['2052880283', '2052873013']],
+  ['destination-love', ['2132511073']],
+  ['eternal-romance', ['1875002831']],
+  ['royal-gold', ['2225137013']],
+  ['minimalist', ['2072082223', '2072083833']],
+])
+
 const catalog = {
   slug: 'catalog',
   name: 'Webgency Invitations',
@@ -274,14 +296,19 @@ function customizationMarkup(page) {
     photos: photos.map(({ filename, alt }) => ({ filename, alt })),
   }).replaceAll('<', '\\u003c')
 
+  const heroOverlay = page.slug === 'sacred-garden'
+    ? 'linear-gradient(180deg,rgba(245,241,231,.58),rgba(245,241,231,.42))'
+    : 'linear-gradient(180deg,rgba(22,16,19,.12),rgba(22,16,19,.42))'
   const heroRecordCss = customization.heroRecord && hero
-    ? `#rec${customization.heroRecord} .t396__carrier{background-image:linear-gradient(180deg,rgba(22,16,19,.12),rgba(22,16,19,.42)),url("../editorial/${hero.filename}")!important;background-position:center!important;background-size:cover!important}#rec${customization.heroRecord} video,#rec${customization.heroRecord} canvas{opacity:0!important;pointer-events:none!important}#rec${customization.heroRecord} img[src*="Gemini"],#rec${customization.heroRecord} img[data-original*="Gemini"]{opacity:0!important}`
+    ? `#rec${customization.heroRecord} .t396__carrier{background-image:${heroOverlay},url("../editorial/${hero.filename}")!important;background-position:center!important;background-size:cover!important}#rec${customization.heroRecord} video,#rec${customization.heroRecord} canvas{opacity:0!important;pointer-events:none!important}#rec${customization.heroRecord} img[src*="Gemini"],#rec${customization.heroRecord} img[data-original*="Gemini"]{opacity:0!important}`
     : ''
-  const openerCss = page.slug === 'sacred-garden'
-    ? '#weiOverlay,#weiVideoWrap{display:none!important}'
-    : page.slug === 'blossom-oud' && customization.heroRecord
-      ? `#rec${customization.heroRecord}{display:none!important}`
-      : ''
+  const openerSelectors = nativeIntroSelectors.get(page.slug) || []
+  const openerCss = openerSelectors.length
+    ? `${openerSelectors.join(',')}{display:none!important}${page.slug === 'royal-gold' ? 'body.loading{overflow:auto!important}' : ''}`
+    : ''
+  const introBypassCss = page.slug === 'sacred-garden'
+    ? '#rec2487446043 .js-delay-anim{opacity:1!important;transform:none!important}'
+    : ''
 
   return `<script id="kevents-customization-data">window.__KEVENTS_TEMPLATE=${data};</script>
 <style id="kevents-customization-style">
@@ -291,7 +318,7 @@ function customizationMarkup(page) {
   .kevents-display{font-family:var(--kevents-display)!important;font-kerning:normal!important;letter-spacing:-.018em}
   input,select,textarea,.t-submit,button{font-family:var(--kevents-sans)!important}
   img[src*="../editorial/"],img[data-original*="../editorial/"]{object-fit:cover}
-${heroRecordCss ? `  ${heroRecordCss}\n` : ''}${openerCss ? `  ${openerCss}\n` : ''}</style>`
+${heroRecordCss ? `  ${heroRecordCss}\n` : ''}${openerCss ? `  ${openerCss}\n` : ''}${introBypassCss ? `  ${introBypassCss}\n` : ''}</style>`
 }
 
 const localRuntime = `<meta name="referrer" content="no-referrer">
@@ -306,12 +333,48 @@ const localRuntime = `<meta name="referrer" content="no-referrer">
   .kevents-venue-card__link{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 18px;border:1px solid currentColor;border-radius:999px;color:inherit;text-decoration:none;font-size:13px;font-weight:700}
   .kevents-traveling-rose{position:fixed;left:clamp(12px,4vw,36px);bottom:clamp(14px,5vh,46px);z-index:40;width:clamp(44px,7vw,70px);pointer-events:none;opacity:.38;transform:rotate(-12deg);filter:drop-shadow(0 5px 9px #2a14162b)}
   .kevents-traveling-rose img{display:block;width:100%;height:auto}
+  .kevents-rsvp-host,.kevents-rsvp-host>.tn-atom{height:auto!important;min-height:0!important}
+  .kevents-rsvp-shell{max-height:min(88vh,860px);overflow-y:auto;overscroll-behavior:contain;scrollbar-gutter:stable}
+  form.kevents-rsvp{--kevents-rsvp-ink:color-mix(in srgb,var(--kevents-accent,#665a50) 30%,#171714);box-sizing:border-box;width:100%;max-width:560px;margin-inline:auto;color:var(--kevents-rsvp-ink);font:400 15px/1.45 var(--kevents-sans,Arial,sans-serif);text-align:left}
+  form.kevents-rsvp *,form.kevents-rsvp *::before,form.kevents-rsvp *::after{box-sizing:border-box}
+  .kevents-rsvp__intro{margin:0 0 20px;color:color-mix(in srgb,var(--kevents-rsvp-ink) 68%,transparent);font-size:13px;text-align:center}
+  .kevents-rsvp__fields{display:grid;gap:18px}
+  .kevents-rsvp__field,.kevents-rsvp__attendance{min-width:0;margin:0;padding:0;border:0}
+  .kevents-rsvp__label,.kevents-rsvp__legend{display:block;margin:0 0 8px;padding:0;color:inherit;font:600 15px/1.3 var(--kevents-sans,Arial,sans-serif)}
+  .kevents-rsvp__required{margin-left:5px;color:color-mix(in srgb,var(--kevents-accent,#665a50) 82%,#8a2525);font-size:11px;font-weight:700;letter-spacing:.055em;text-transform:uppercase}
+  .kevents-rsvp__hint{display:block;margin:7px 0 0;color:color-mix(in srgb,var(--kevents-rsvp-ink) 62%,transparent);font-size:12px;line-height:1.45}
+  form.kevents-rsvp .kevents-rsvp__control{display:block;width:100%!important;min-height:48px!important;margin:0!important;padding:11px 13px!important;border:1px solid color-mix(in srgb,var(--kevents-accent,#665a50) 30%,#b9b4ae)!important;border-radius:10px!important;outline:0;background:color-mix(in srgb,#fff 88%,var(--kevents-accent,#665a50))!important;box-shadow:0 1px 0 #fff8 inset;color:#171714!important;font:400 16px/1.4 var(--kevents-sans,Arial,sans-serif)!important;transition:border-color .18s ease,box-shadow .18s ease,background-color .18s ease}
+  form.kevents-rsvp textarea.kevents-rsvp__control{min-height:88px!important;resize:vertical}
+  form.kevents-rsvp .kevents-rsvp__control:focus{border-color:var(--kevents-accent,#665a50)!important;box-shadow:0 0 0 3px color-mix(in srgb,var(--kevents-accent,#665a50) 18%,transparent)!important;background:#fff!important}
+  form.kevents-rsvp .kevents-rsvp__control[aria-invalid="true"]{border-color:#a43131!important;box-shadow:0 0 0 3px #a4313118!important}
+  .kevents-rsvp__choices{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+  .kevents-rsvp__choice{display:flex;min-height:48px;align-items:center;gap:10px;padding:10px 12px;border:1px solid color-mix(in srgb,var(--kevents-accent,#665a50) 25%,#c6c1bb);border-radius:10px;background:color-mix(in srgb,#fff 82%,var(--kevents-accent,#665a50));cursor:pointer;transition:border-color .18s ease,background-color .18s ease,transform .18s ease}
+  .kevents-rsvp__choice:hover{border-color:var(--kevents-accent,#665a50);background:color-mix(in srgb,#fff 72%,var(--kevents-accent,#665a50))}
+  .kevents-rsvp__choice:has(input:checked){border-color:var(--kevents-accent,#665a50);background:color-mix(in srgb,#fff 67%,var(--kevents-accent,#665a50));box-shadow:0 0 0 1px var(--kevents-accent,#665a50) inset}
+  .kevents-rsvp__choice input{flex:0 0 auto;width:19px;height:19px;margin:0;accent-color:var(--kevents-accent,#665a50)}
+  .kevents-rsvp__conditional{display:grid;gap:18px;padding-top:2px}
+  .kevents-rsvp__conditional[hidden]{display:none!important}
+  form.kevents-rsvp .kevents-rsvp__submit{display:flex!important;width:100%!important;min-height:50px!important;align-items:center;justify-content:center;margin:4px 0 0!important;padding:11px 20px!important;border:1px solid transparent!important;border-radius:999px!important;background:var(--kevents-accent,#665a50)!important;box-shadow:0 8px 22px color-mix(in srgb,var(--kevents-accent,#665a50) 24%,transparent);color:#fff!important;font:700 14px/1 var(--kevents-sans,Arial,sans-serif)!important;letter-spacing:.04em!important;text-transform:none!important;cursor:pointer;transition:filter .18s ease,transform .18s ease,box-shadow .18s ease}
+  form.kevents-rsvp .kevents-rsvp__submit:hover{filter:brightness(.94);transform:translateY(-1px);box-shadow:0 10px 26px color-mix(in srgb,var(--kevents-accent,#665a50) 31%,transparent)}
+  form.kevents-rsvp .kevents-rsvp__submit:focus-visible{outline:3px solid color-mix(in srgb,var(--kevents-accent,#665a50) 30%,transparent);outline-offset:3px}
+  form.kevents-rsvp .kevents-rsvp__submit:disabled{cursor:wait;filter:saturate(.6);opacity:.72;transform:none}
+  .kevents-rsvp__status{display:block;min-height:0;margin:0;padding:0;border-radius:9px;font-size:13px;font-weight:600;line-height:1.45;text-align:center}
+  .kevents-rsvp__status:empty{display:none}
+  .kevents-rsvp__status:not(:empty){padding:11px 13px}
+  .kevents-rsvp__status[data-state="sending"]{background:color-mix(in srgb,var(--kevents-accent,#665a50) 12%,transparent);color:inherit}
+  .kevents-rsvp__status[data-state="success"]{background:#1e6b3b14;color:#165b31}
+  .kevents-rsvp__status[data-state="error"]{background:#a4313114;color:#8a2525}
+  .kevents-rsvp__sr-only{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
+  @media (max-width:479px){form.kevents-rsvp{font-size:14px}.kevents-rsvp__fields,.kevents-rsvp__conditional{gap:15px}.kevents-rsvp__choices{grid-template-columns:1fr}.kevents-rsvp__choice{min-height:44px}form.kevents-rsvp .kevents-rsvp__control{min-height:46px!important;font-size:16px!important}}
   @media (prefers-reduced-motion:reduce){.kevents-traveling-rose{left:auto!important;right:14px!important;top:auto!important;bottom:14px!important;transform:none!important;transition:none!important}}
 </style>
 <script id="kevents-local-runtime">
 (function () {
   var bridgeToken = '__KEVENTS_BRIDGE_TOKEN__';
   var templateConfig = window.__KEVENTS_TEMPLATE || {};
+  var RSVP_SCHEMA_VERSION = 'kevents-rsvp-v1';
+  var rsvpFormCount = 0;
+  var rsvpRuntimeReady = false;
   var pendingForm = null;
   var pendingRequest = null;
 
@@ -441,6 +504,8 @@ const localRuntime = `<meta name="referrer" content="no-referrer">
     silenceSourceAudio(document);
     replaceMapFrames(document);
     setupTravelingRose();
+    rsvpRuntimeReady = true;
+    setupRsvpForms(document);
   }
 
   document.addEventListener('play', function (event) {
@@ -463,6 +528,7 @@ const localRuntime = `<meta name="referrer" content="no-referrer">
         removeHiddenVideoSources(node);
         silenceSourceAudio(node);
         replaceMapFrames(node);
+        if (rsvpRuntimeReady) setupRsvpForms(node);
         if (node.matches && node.matches('iframe[src*="google.com/maps"],iframe[src*="maps.google"]')) makeVenueCard(node);
       });
     });
@@ -472,6 +538,143 @@ const localRuntime = `<meta name="referrer" content="no-referrer">
     attributes: true,
     attributeFilter: ['src', 'srcset', 'poster', 'data-original', 'autoplay']
   });
+
+  function matchingElements(root, selector) {
+    var matches = [];
+    if (!root) return matches;
+    if (root.nodeType === 1 && root.matches && root.matches(selector)) matches.push(root);
+    if (root.querySelectorAll) {
+      Array.prototype.forEach.call(root.querySelectorAll(selector), function (element) {
+        if (matches.indexOf(element) === -1) matches.push(element);
+      });
+    }
+    return matches;
+  }
+
+  function isRsvpForm(form) {
+    if (!form || form.tagName !== 'FORM') return false;
+    if (form.dataset.keventsRsvpSchema === RSVP_SCHEMA_VERSION) return true;
+    if (form.closest('[data-elem-type="form"]')) return true;
+    var popup = form.closest('.t702,.t-popup');
+    return Boolean(popup && /rsvp|attendance|attend|will you/i.test(popup.textContent || ''));
+  }
+
+  function rsvpFormMarkup(prefix) {
+    return [
+      '<p class="kevents-rsvp__intro">A quick reply is all we need.</p>',
+      '<div class="kevents-rsvp__fields">',
+        '<div class="kevents-rsvp__field">',
+          '<label class="kevents-rsvp__label" for="' + prefix + '-name">Full name <span class="kevents-rsvp__required">Required</span></label>',
+          '<input class="kevents-rsvp__control" id="' + prefix + '-name" name="name" type="text" autocomplete="name" maxlength="120" required>',
+        '</div>',
+        '<fieldset class="kevents-rsvp__attendance">',
+          '<legend class="kevents-rsvp__legend">Will you be attending? <span class="kevents-rsvp__required">Required</span></legend>',
+          '<div class="kevents-rsvp__choices">',
+            '<label class="kevents-rsvp__choice" for="' + prefix + '-attending"><input id="' + prefix + '-attending" name="attendance" type="radio" value="attending" required><span>Yes, happily</span></label>',
+            '<label class="kevents-rsvp__choice" for="' + prefix + '-declined"><input id="' + prefix + '-declined" name="attendance" type="radio" value="declined" required><span>Sorry, can’t make it</span></label>',
+          '</div>',
+        '</fieldset>',
+        '<div class="kevents-rsvp__conditional" data-kevents-rsvp-when="attending" hidden aria-hidden="true">',
+          '<div class="kevents-rsvp__field">',
+            '<label class="kevents-rsvp__label" for="' + prefix + '-party-size">How many are attending? <span class="kevents-rsvp__required">Required</span></label>',
+            '<input class="kevents-rsvp__control" id="' + prefix + '-party-size" name="partySize" type="number" inputmode="numeric" min="1" max="20" step="1" value="1" required disabled>',
+            '<span class="kevents-rsvp__hint">Include yourself in the total.</span>',
+          '</div>',
+          '<div class="kevents-rsvp__field">',
+            '<label class="kevents-rsvp__label" for="' + prefix + '-requirements">Guest details &amp; requirements <span class="kevents-rsvp__hint">Optional</span></label>',
+            '<textarea class="kevents-rsvp__control" id="' + prefix + '-requirements" name="requirements" maxlength="1000" aria-describedby="' + prefix + '-requirements-hint" disabled></textarea>',
+            '<span class="kevents-rsvp__hint" id="' + prefix + '-requirements-hint">Share additional guest names, children’s names and ages, dietary needs, or accessibility needs.</span>',
+          '</div>',
+          '<div class="kevents-rsvp__field">',
+            '<label class="kevents-rsvp__label" for="' + prefix + '-song">Song request <span class="kevents-rsvp__hint">Optional</span></label>',
+            '<input class="kevents-rsvp__control" id="' + prefix + '-song" name="song" type="text" maxlength="160" placeholder="A song that gets you dancing" disabled>',
+          '</div>',
+        '</div>',
+        '<div class="kevents-rsvp__conditional" data-kevents-rsvp-when="declined" hidden aria-hidden="true">',
+          '<div class="kevents-rsvp__field">',
+            '<label class="kevents-rsvp__label" for="' + prefix + '-message">Leave a message <span class="kevents-rsvp__hint">Optional</span></label>',
+            '<textarea class="kevents-rsvp__control" id="' + prefix + '-message" name="message" maxlength="1000" placeholder="Send your wishes to the couple" disabled></textarea>',
+          '</div>',
+        '</div>',
+        '<button class="kevents-rsvp__submit t-submit" type="submit">Send RSVP</button>',
+        '<p class="kevents-rsvp__status" role="status" aria-live="polite" aria-atomic="true"></p>',
+      '</div>'
+    ].join('');
+  }
+
+  function setConditionalFields(form) {
+    var selected = form.querySelector('input[name="attendance"]:checked');
+    var attendance = selected ? selected.value : '';
+    Array.prototype.forEach.call(form.querySelectorAll('[data-kevents-rsvp-when]'), function (section) {
+      var visible = section.dataset.keventsRsvpWhen === attendance;
+      section.hidden = !visible;
+      section.setAttribute('aria-hidden', visible ? 'false' : 'true');
+      Array.prototype.forEach.call(section.querySelectorAll('input,select,textarea'), function (field) {
+        field.disabled = !visible;
+      });
+    });
+  }
+
+  function normalizeRsvpForm(form) {
+    if (!isRsvpForm(form)) return;
+    if (form.dataset.keventsRsvpSchema === RSVP_SCHEMA_VERSION && form.querySelector('[name="partySize"]')) return;
+    rsvpFormCount += 1;
+    var prefix = 'kevents-rsvp-' + rsvpFormCount;
+    form.classList.add('kevents-rsvp');
+    form.dataset.keventsRsvpSchema = RSVP_SCHEMA_VERSION;
+    form.setAttribute('aria-label', 'Wedding RSVP');
+    form.setAttribute('novalidate', '');
+    form.removeAttribute('action');
+    form.removeAttribute('method');
+    form.innerHTML = rsvpFormMarkup(prefix);
+    var shell = form.closest('.t-popup__container,.t702__wrapper');
+    if (shell) shell.classList.add('kevents-rsvp-shell');
+    var host = form.closest('[data-elem-type="form"]');
+    if (host) host.classList.add('kevents-rsvp-host');
+    form.addEventListener('change', function (event) {
+      if (event.target && event.target.removeAttribute) event.target.removeAttribute('aria-invalid');
+      setConditionalFields(form);
+    });
+    form.addEventListener('input', function (event) {
+      if (event.target && event.target.removeAttribute) event.target.removeAttribute('aria-invalid');
+      var status = form.querySelector('.kevents-rsvp__status');
+      if (status && status.dataset.state === 'error') {
+        status.textContent = '';
+        delete status.dataset.state;
+      }
+    });
+    setConditionalFields(form);
+  }
+
+  function normalizeZeroFormHost(host) {
+    if (!host) return;
+    var holder = host.querySelector('.tn-atom__form') || host;
+    var forms = holder.querySelectorAll('form');
+    var form = Array.prototype.find.call(forms, function (candidate) {
+      return candidate.dataset.keventsRsvpSchema === RSVP_SCHEMA_VERSION;
+    }) || forms[0];
+    if (!form) {
+      form = document.createElement('form');
+      form.className = 't-form';
+      holder.appendChild(form);
+    }
+    normalizeRsvpForm(form);
+    Array.prototype.forEach.call(holder.querySelectorAll('form'), function (candidate) {
+      if (candidate !== form) candidate.remove();
+    });
+  }
+
+  function setupRsvpForms(root) {
+    var hosts = matchingElements(root, '[data-elem-type="form"]');
+    if (root && root.nodeType === 1 && root.closest) {
+      var parentHost = root.closest('[data-elem-type="form"]');
+      if (parentHost && hosts.indexOf(parentHost) === -1) hosts.push(parentHost);
+    }
+    hosts.forEach(normalizeZeroFormHost);
+    matchingElements(root, 'form').forEach(function (form) {
+      if (form.isConnected !== false) normalizeRsvpForm(form);
+    });
+  }
 
   function firstInvalidField(form) {
     var fields = form.querySelectorAll('input,select,textarea');
@@ -507,7 +710,16 @@ const localRuntime = `<meta name="referrer" content="no-referrer">
     return null;
   }
 
-  function notify(message, isError) {
+  function notify(message, isError, form) {
+    var activeForm = form || pendingForm;
+    var inlineStatus = activeForm && activeForm.querySelector('.kevents-rsvp__status');
+    if (inlineStatus) {
+      inlineStatus.textContent = message;
+      inlineStatus.dataset.state = isError ? 'error' : (/sending/i.test(message) ? 'sending' : 'success');
+      inlineStatus.setAttribute('role', isError ? 'alert' : 'status');
+      inlineStatus.setAttribute('aria-live', isError ? 'assertive' : 'polite');
+      return;
+    }
     var notice = document.querySelector('.kevents-local-notice');
     if (!notice) {
       notice = document.createElement('div');
@@ -523,10 +735,33 @@ const localRuntime = `<meta name="referrer" content="no-referrer">
   function enableForm() {
     if (!pendingForm) return;
     delete pendingForm.dataset.keventsSending;
+    pendingForm.removeAttribute('aria-busy');
     Array.prototype.forEach.call(pendingForm.querySelectorAll('[type="submit"],button'), function (control) {
       control.disabled = false;
     });
     pendingForm = null;
+  }
+
+  function canonicalRsvpFields(form) {
+    var data = new FormData(form);
+    var attendance = String(data.get('attendance') || '').trim();
+    var fields = {
+      rsvpSchema: RSVP_SCHEMA_VERSION,
+      name: String(data.get('name') || '').trim(),
+      attendance: attendance,
+      partySize: '',
+      requirements: '',
+      song: '',
+      message: ''
+    };
+    if (attendance === 'attending') {
+      fields.partySize = String(data.get('partySize') || '').trim();
+      fields.requirements = String(data.get('requirements') || '').trim();
+      fields.song = String(data.get('song') || '').trim();
+    } else if (attendance === 'declined') {
+      fields.message = String(data.get('message') || '').trim();
+    }
+    return fields;
   }
 
   function submitRsvp(form, event) {
@@ -535,35 +770,32 @@ const localRuntime = `<meta name="referrer" content="no-referrer">
     event.stopImmediatePropagation();
     if (form.dataset.keventsSending === 'true') return;
 
+    normalizeRsvpForm(form);
     var invalidField = firstInvalidField(form);
     if (invalidField) {
       invalidField.setAttribute('aria-invalid', 'true');
       invalidField.focus();
-      notify('Please complete the required RSVP details.', true);
+      notify('Please complete the required RSVP details.', true, form);
       return;
     }
 
-    var fields = {};
-    new FormData(form).forEach(function (value, key) {
-      if (typeof value !== 'string' || !value.trim()) return;
-      if (/^(?:tildaspec-|form-spec-|formservices|formid|formname|formprojectid)/i.test(key)) return;
-      fields[key] = fields[key] ? fields[key] + ', ' + value.trim() : value.trim();
-    });
+    var fields = canonicalRsvpFields(form);
 
     pendingForm = form;
     form.dataset.keventsSending = 'true';
+    form.setAttribute('aria-busy', 'true');
     pendingRequest = String(Date.now()) + '-' + Math.random().toString(36).slice(2);
     Array.prototype.forEach.call(form.querySelectorAll('[type="submit"],button'), function (control) {
       control.disabled = true;
     });
 
     if (!hasKeventsParent()) {
-      notify('Preview RSVP received. Connect this template through KEvents to deliver it.');
+      notify('Preview RSVP received. Connect this template through KEvents to deliver it.', false, form);
       enableForm();
       return;
     }
 
-    notify('Sending your RSVP…');
+    notify('Sending your RSVP…', false, form);
     window.parent.postMessage({
       source: 'kevents-template',
       type: 'rsvp',
@@ -618,10 +850,13 @@ const localRuntime = `<meta name="referrer" content="no-referrer">
     if (message.token !== bridgeToken) return;
     if (message.requestId !== pendingRequest) return;
     if (message.ok) {
-      notify(message.demo ? 'Demo RSVP received. Connect an RSVP endpoint before publishing.' : 'Thank you — your RSVP was sent.');
-      if (!message.demo && pendingForm) pendingForm.reset();
+      notify(message.demo ? 'Demo RSVP received. Connect an RSVP endpoint before publishing.' : 'Thank you — your RSVP was sent.', false, pendingForm);
+      if (!message.demo && pendingForm) {
+        pendingForm.reset();
+        setConditionalFields(pendingForm);
+      }
     } else {
-      notify('We could not send your RSVP. Please try again.', true);
+      notify('We could not send your RSVP. Please try again.', true, pendingForm);
     }
     enableForm();
   });
@@ -673,7 +908,15 @@ function transformRecordHtml(html, recordId, transform) {
   const nextRecordPattern = /<div\b[^>]*\bid=(['"])rec\d+\1[^>]*>/gi
   nextRecordPattern.lastIndex = recordMatch.index + recordMatch[0].length
   const nextRecord = nextRecordPattern.exec(html)
-  const recordEnd = nextRecord ? nextRecord.index : html.length
+  const allRecordsMarker = html.indexOf('<!--/allrecords-->', recordMatch.index)
+  const allRecordsClose = allRecordsMarker < 0
+    ? -1
+    : html.toLowerCase().lastIndexOf('</div>', allRecordsMarker)
+  const recordEnd = nextRecord
+    ? nextRecord.index
+    : allRecordsClose > recordMatch.index
+      ? allRecordsClose
+      : html.length
   return `${html.slice(0, recordMatch.index)}${transform(html.slice(recordMatch.index, recordEnd))}${html.slice(recordEnd)}`
 }
 
@@ -688,6 +931,14 @@ function stripHiddenVideoSources(page, html) {
       /<video\b(?=[^>]*\bid=['"]weiVideo['"])[^>]*>[\s\S]*?<\/video>/gi,
       stripVideoNetworkSources,
     )
+  }
+  return updatedHtml
+}
+
+function removeNativeIntroRecords(page, html) {
+  let updatedHtml = html
+  for (const recordId of removableNativeIntroRecords.get(page.slug) || []) {
+    updatedHtml = transformRecordHtml(updatedHtml, recordId, () => '')
   }
   return updatedHtml
 }
@@ -725,6 +976,7 @@ function addTravelingRose(html) {
 
 function finalizeTemplateHtml(page, html) {
   let updatedHtml = stripHiddenVideoSources(page, html)
+  updatedHtml = removeNativeIntroRecords(page, updatedHtml)
   updatedHtml = enhanceTemplateImages(page, updatedHtml)
   updatedHtml = addMainLandmark(updatedHtml)
   return addTravelingRose(updatedHtml)

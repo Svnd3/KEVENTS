@@ -1134,6 +1134,13 @@
   text-transform: uppercase;
 }
 
+.ss-rsvp-field > span small {
+  font: inherit;
+  letter-spacing: 0;
+  opacity: .62;
+  text-transform: none;
+}
+
 .ss-rsvp-field input,
 .ss-rsvp-field select,
 .ss-rsvp-field textarea {
@@ -1189,6 +1196,13 @@
   cursor: pointer;
   font-size: 13px;
   font-weight: 680;
+  transition: border-color .2s ease, background-color .2s ease, transform .2s ease;
+}
+
+.ss-rsvp-attendance label.is-selected {
+  transform: translateY(-1px);
+  border-color: var(--ss-cobalt);
+  background: rgb(21 70 189 / 7%);
 }
 
 .ss-rsvp-attendance input {

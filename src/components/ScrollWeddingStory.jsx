@@ -864,7 +864,8 @@ function RSVP({ config }) {
   const formId = useId()
   const headingId = `${formId}-heading`
   const successRef = useRef(null)
-  const [attendance, setAttendance] = useState('yes')
+  const [attendance, setAttendance] = useState('')
+  const [submittedAttendance, setSubmittedAttendance] = useState('')
   const [status, setStatus] = useState('idle')
   const [demo, setDemo] = useState(false)
 
@@ -874,12 +875,15 @@ function RSVP({ config }) {
 
   const submit = async (event) => {
     event.preventDefault()
+    if (status === 'sending') return
+    const attendanceSnapshot = attendance
     setStatus('sending')
     const form = event.currentTarget
 
     try {
       const result = await submitRsvp(form, config.label, { templateId: config.id })
       setDemo(result.demo)
+      setSubmittedAttendance(attendanceSnapshot)
       setStatus('success')
     } catch {
       setStatus('error')
@@ -892,11 +896,13 @@ function RSVP({ config }) {
         <div className="sw-rsvp__success-card">
           <span className="sw-rsvp__folio">RSVP / {demo ? 'PREVIEW' : 'RECEIVED'}</span>
           <HeartIcon />
-          <p>{demo ? 'Demo response' : 'You’re on the list'}</p>
-          <h2 id={headingId}>You’re officially part of the plot.</h2>
+          <p>{demo ? 'Demo response' : submittedAttendance === 'yes' ? 'You’re on the list' : 'Reply received'}</p>
+          <h2 id={headingId}>{submittedAttendance === 'yes' ? 'You’re officially part of the plot.' : 'We’ll miss you in this chapter.'}</h2>
           <span>{demo
             ? 'This preview is not connected, so your reply was not sent.'
-            : `Thank you — ${config.couple[0]} & ${config.couple[1]} can’t wait to celebrate with you.`}</span>
+            : submittedAttendance === 'yes'
+              ? `Thank you — ${config.couple[0]} & ${config.couple[1]} can’t wait to celebrate with you.`
+              : `Thank you for letting ${config.couple[0]} & ${config.couple[1]} know.`}</span>
         </div>
       </section>
     )
@@ -927,50 +933,60 @@ function RSVP({ config }) {
         <fieldset className="sw-rsvp__choice">
           <legend>Can you make it?</legend>
           <label className={attendance === 'yes' ? 'is-selected' : ''}>
-            <input type="radio" name="attendance" value="yes" checked={attendance === 'yes'} onChange={() => setAttendance('yes')} />
+            <input type="radio" name="attendance" value="yes" checked={attendance === 'yes'} onChange={() => setAttendance('yes')} required />
             <span>{config.attendance[0]}</span><i aria-hidden="true">✓</i>
           </label>
           <label className={attendance === 'no' ? 'is-selected' : ''}>
-            <input type="radio" name="attendance" value="no" checked={attendance === 'no'} onChange={() => setAttendance('no')} />
+            <input type="radio" name="attendance" value="no" checked={attendance === 'no'} onChange={() => setAttendance('no')} required />
             <span>{config.attendance[1]}</span><i aria-hidden="true">✓</i>
           </label>
         </fieldset>
 
         <div className="sw-rsvp__row sw-rsvp__row--identity">
           <label className="sw-rsvp__field" htmlFor={`${formId}-name`}><span>Your full name</span><input id={`${formId}-name`} name="name" autoComplete="name" placeholder="Your name" required /></label>
-          <label className="sw-rsvp__field" htmlFor={`${formId}-contact`}><span>Email address</span><input id={`${formId}-contact`} name="contact" type="email" inputMode="email" autoComplete="email" placeholder="you@example.com" required /></label>
         </div>
 
         <div className="sw-rsvp__attendance-panel">
           {attendance === 'yes' ? (
             <div className="sw-rsvp__attending-fields">
-            <div className="sw-rsvp__row">
-              <label className="sw-rsvp__field" htmlFor={`${formId}-guest`}><span>Plus-one name</span><input id={`${formId}-guest`} name="guest" placeholder="Optional" /></label>
-              <label className="sw-rsvp__field" htmlFor={`${formId}-meal`}>
-                <span>Meal</span>
-                <select id={`${formId}-meal`} name="meal" defaultValue="" required>
-                  <option value="" disabled>Choose one</option>
-                  <option>Chicken</option><option>Beef</option><option>Vegetarian</option><option>Vegan</option>
-                </select>
+              <div className="sw-rsvp__row">
+                <label className="sw-rsvp__field" htmlFor={`${formId}-party-size`}>
+                  <span>Seats needed <small>(including you)</small></span>
+                  <select id={`${formId}-party-size`} name="partySize" defaultValue="1" required>
+                    <option value="1">1 — Just me</option>
+                    <option value="2">2 guests</option>
+                    <option value="3">3 guests</option>
+                    <option value="4">4 guests</option>
+                    <option value="5">5 guests</option>
+                    <option value="6+">6 or more</option>
+                  </select>
+                </label>
+                <label className="sw-rsvp__field" htmlFor={`${formId}-song`}>
+                  <span>Song request <small>(optional)</small></span>
+                  <input id={`${formId}-song`} name="song" placeholder="One dance-floor favourite" />
+                </label>
+              </div>
+              <label className="sw-rsvp__field sw-rsvp__field--note" htmlFor={`${formId}-requirements`}>
+                <span>Anything we should plan for? <small>(optional)</small></span>
+                <textarea id={`${formId}-requirements`} name="requirements" rows="2" placeholder="Guest names, children’s ages, dietary or accessibility needs" />
               </label>
             </div>
-            <div className="sw-rsvp__row">
-              <label className="sw-rsvp__field" htmlFor={`${formId}-dietary`}><span>Dietary or access needs</span><input id={`${formId}-dietary`} name="dietary" placeholder="Tell us what you need" /></label>
-              <label className="sw-rsvp__field" htmlFor={`${formId}-song`}><span>Your dance-floor song</span><input id={`${formId}-song`} name="song" placeholder="One guaranteed hit" /></label>
-            </div>
-            </div>
-          ) : (
+          ) : attendance === 'no' ? (
             <div className="sw-rsvp__away-note">
               <HeartIcon />
-              <div><strong>We’ll raise a glass for you.</strong><span>Leave us a note below and we’ll send some love back.</span></div>
+              <div><strong>We’ll raise a glass for you.</strong><span>Thank you for letting us know.</span></div>
             </div>
+          ) : (
+            <div className="sw-rsvp__choice-prompt">Choose an answer above to finish your reply.</div>
           )}
         </div>
 
-        <label className="sw-rsvp__field sw-rsvp__field--note" htmlFor={`${formId}-note`}><span>Leave us a note</span><textarea id={`${formId}-note`} name="note" rows="2" placeholder="Advice, hype, or a tiny love note…" /></label>
+        {attendance === 'no' && (
+          <label className="sw-rsvp__field sw-rsvp__field--note" htmlFor={`${formId}-message`}><span>Leave us a note <small>(optional)</small></span><textarea id={`${formId}-message`} name="message" rows="2" placeholder="Send a little love from afar" /></label>
+        )}
         {status === 'error' && <p className="sw-rsvp__error" role="alert">That didn’t send. Please try once more.</p>}
         <button type="submit" disabled={status === 'sending'}>
-          <span><strong>{status === 'sending' ? 'Sending…' : config.submitLabel}</strong><small>{attendance === 'yes' ? 'See you on the dance floor' : 'Sending love from afar'}</small></span><ArrowIcon />
+          <span><strong>{status === 'sending' ? 'Sending…' : config.submitLabel}</strong><small>{attendance === 'yes' ? 'See you on the dance floor' : attendance === 'no' ? 'Sending love from afar' : 'A few details, one quick reply'}</small></span><ArrowIcon />
         </button>
       </form>
     </section>

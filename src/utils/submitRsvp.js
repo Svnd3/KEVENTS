@@ -7,6 +7,12 @@ const RSVP_ENDPOINT = (
 export async function submitRsvp(form, templateName, metadata = {}) {
   const payload = new FormData(form)
 
+  const attendance = payload.get('attendance')
+  if (attendance === 'yes') payload.set('attendance', 'attending')
+  if (attendance === 'no') payload.set('attendance', 'declined')
+  payload.set('rsvpSchema', 'kevents-rsvp-v1')
+  if (!payload.has('eventType')) payload.set('eventType', 'Wedding')
+
   if (templateName) payload.set('template', String(templateName))
 
   Object.entries(metadata).forEach(([key, value]) => {

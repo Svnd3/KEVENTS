@@ -1085,6 +1085,7 @@
 }
 
 .cw-rsvp__form > input,
+.cw-rsvp__form > select,
 .cw-rsvp__form textarea {
   display: block;
   width: 100%;
@@ -1100,7 +1101,13 @@
   resize: vertical;
 }
 
+.cw-rsvp__form > select {
+  appearance: auto;
+  cursor: pointer;
+}
+
 .cw-rsvp__form > input:focus,
+.cw-rsvp__form > select:focus,
 .cw-rsvp__form textarea:focus {
   border-bottom-color: var(--cw-accent);
   box-shadow: 0 2px 0 var(--cw-accent);
@@ -1942,6 +1949,7 @@
   }
 
   .cw-rsvp__form > input,
+  .cw-rsvp__form > select,
   .cw-rsvp__form textarea {
     margin-bottom: 18px;
     padding-block: 8px;
