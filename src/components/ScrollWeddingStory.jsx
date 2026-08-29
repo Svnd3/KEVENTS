@@ -47,49 +47,6 @@ function useReducedMotionPreference() {
   return reducedMotion
 }
 
-function useDeferredVideoPolicy() {
-  const reducedMotion = useReducedMotionPreference()
-  const [constrainedConnection, setConstrainedConnection] = useState(() => {
-    const connection = typeof navigator !== 'undefined' ? navigator.connection : null
-    return Boolean(connection?.saveData || /(^|-)2g$/.test(connection?.effectiveType || ''))
-  })
-  const [ready, setReady] = useState(false)
-
-  useEffect(() => {
-    const connection = navigator.connection
-    if (!connection) return undefined
-    const updateConnection = () => {
-      setConstrainedConnection(Boolean(connection.saveData || /(^|-)2g$/.test(connection.effectiveType || '')))
-    }
-    updateConnection()
-    connection.addEventListener?.('change', updateConnection)
-    return () => connection.removeEventListener?.('change', updateConnection)
-  }, [])
-
-  useEffect(() => {
-    if (reducedMotion || constrainedConnection) {
-      setReady(false)
-      return undefined
-    }
-
-    let idleId = 0
-    let timeoutId = 0
-    const revealVideo = () => setReady(true)
-    if ('requestIdleCallback' in window) {
-      idleId = window.requestIdleCallback(revealVideo, { timeout: 900 })
-    } else {
-      timeoutId = window.setTimeout(revealVideo, 280)
-    }
-
-    return () => {
-      if (idleId) window.cancelIdleCallback?.(idleId)
-      if (timeoutId) window.clearTimeout(timeoutId)
-    }
-  }, [constrainedConnection, reducedMotion])
-
-  return ready && !reducedMotion && !constrainedConnection
-}
-
 function ArrowIcon() {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -115,7 +72,7 @@ function HeartIcon() {
   )
 }
 
-function useScrollFilm(storyRef, filmRef, worldRef, videoRef, config, allowVideo) {
+function useScrollFilm(storyRef, filmRef, worldRef, videoRef, config) {
   const reducedMotion = useReducedMotionPreference()
 
   useEffect(() => {
@@ -124,23 +81,19 @@ function useScrollFilm(storyRef, filmRef, worldRef, videoRef, config, allowVideo
     const world = worldRef.current
     const video = videoRef.current
     if (!story || !film || !world || !video) return undefined
-    if (!allowVideo) {
-      video.pause()
-      video.removeAttribute('src')
-      video.load()
-    }
 
     const words = [...film.querySelectorAll('[data-scroll-word]')]
     const wordValues = words.map(() => '')
     const sceneCounter = film.querySelector('[data-scene-counter]')
-    const sectionAnchors = [
-      '.sw-note__copy h2',
-      '.sw-map .sw-section-heading h2',
-      '.sw-plan .sw-section-heading h2',
-      '.sw-vibes > header h2',
-      '.sw-rsvp__intro h2',
-    ].map((selector) => world.querySelector(selector)).filter(Boolean)
-    const roseAnchors = config.persistentRose ? sectionAnchors : []
+    const roseAnchors = config.persistentRose
+      ? [
+          '.sw-note__copy h2',
+          '.sw-map .sw-section-heading h2',
+          '.sw-plan .sw-section-heading h2',
+          '.sw-vibes > header h2',
+          '.sw-rsvp__intro h2',
+        ].map((selector) => world.querySelector(selector)).filter(Boolean)
+      : []
     const rose = config.persistentRose
       ? story.querySelector('.sw-film-bg__rose')
       : film.querySelector('.sw-film__rose')
@@ -154,7 +107,6 @@ function useScrollFilm(storyRef, filmRef, worldRef, videoRef, config, allowVideo
     let previousTick = performance.now()
     let lastSeek = 0
     let roseStops = persistentRosePath.map((_, index) => index / (persistentRosePath.length - 1))
-    let videoStops = config.videoCues.map((_, index) => index / (config.videoCues.length - 1))
     let filmTop = 0
     let filmHeight = 1
     let worldTop = 0
@@ -163,7 +115,6 @@ function useScrollFilm(storyRef, filmRef, worldRef, videoRef, config, allowVideo
     let lastPalette = ''
     let lastRoseTransform = ''
     let lastRoseOpacity = ''
-    let lastMediaChapter = -1
     let mobileLayout = window.innerWidth <= 680
 
     const setPalette = (progress) => {
@@ -256,27 +207,13 @@ function useScrollFilm(storyRef, filmRef, worldRef, videoRef, config, allowVideo
         }
       }
 
-      const matchingVideoStop = videoStops.findIndex((stop) => worldProgress <= stop)
-      const videoToIndex = matchingVideoStop === -1 ? videoStops.length - 1 : Math.max(1, matchingVideoStop)
-      const videoFromIndex = Math.max(0, videoToIndex - 1)
-      const videoStopStart = videoStops[videoFromIndex] ?? 0
-      const videoStopEnd = videoStops[videoToIndex] ?? 1
-      const videoSegmentProgress = smoothStep(clamp((worldProgress - videoStopStart) / Math.max(.0001, videoStopEnd - videoStopStart)))
-      if (videoFromIndex !== lastMediaChapter) {
-        story.dataset.mediaChapter = String(videoFromIndex)
-        lastMediaChapter = videoFromIndex
-      }
-
-      if (allowVideo && video.duration && Number.isFinite(video.duration) && video.readyState >= 2) {
-        const cueStart = config.videoCues[videoFromIndex] ?? videoStopStart
-        const cueEnd = config.videoCues[videoToIndex] ?? videoStopEnd
-        const desiredProgress = cueStart + (cueEnd - cueStart) * videoSegmentProgress
-        const desiredTime = desiredProgress * Math.max(0, video.duration - 0.08)
+      if (video.duration && Number.isFinite(video.duration) && video.readyState >= 2) {
+        const desiredTime = worldProgress * Math.max(0, video.duration - 0.08)
         const carouselIsActive = config.dayPlanMotion === 'orbit'
-          && worldProgress >= (videoStops[7] ?? 0) - .02
-          && worldProgress <= (videoStops[8] ?? 1) + .02
-        const seekInterval = mobileLayout && carouselIsActive ? 72 : mobileLayout ? 50 : 42
-        if (!video.seeking && now - lastSeek >= seekInterval && Math.abs(desiredTime - video.currentTime) > 0.042) {
+          && worldProgress >= (roseStops[4] ?? 0) - .015
+          && worldProgress <= (roseStops[5] ?? 1) + .015
+        const seekInterval = carouselIsActive && window.innerWidth <= 680 ? 66 : 33
+        if (!video.seeking && now - lastSeek >= seekInterval && Math.abs(desiredTime - video.currentTime) > 0.032) {
           video.currentTime = desiredTime
           lastSeek = now
         }
@@ -306,16 +243,8 @@ function useScrollFilm(storyRef, filmRef, worldRef, videoRef, config, allowVideo
       worldTop = getDocumentTop(world)
       worldHeight = world.offsetHeight
       mobileLayout = window.innerWidth <= 680
-      const worldDistance = Math.max(1, worldHeight - window.innerHeight)
-      const heroDistance = Math.max(1, filmHeight - window.innerHeight)
-      const heroStops = [0, .22, .44, .66, .86].map((progress) => (
-        clamp((filmTop - worldTop + heroDistance * progress) / worldDistance)
-      ))
-      const sectionStops = sectionAnchors.map((anchor) => (
-        clamp((getDocumentTop(anchor) - worldTop - window.innerHeight * .32) / worldDistance)
-      ))
-      videoStops = [...heroStops, ...sectionStops, 1]
       if (config.persistentRose && roseAnchors.length === persistentRosePath.length - 3) {
+        const worldDistance = Math.max(1, worldHeight - window.innerHeight)
         const dateStop = clamp((filmTop - worldTop + Math.max(0, filmHeight - window.innerHeight) * .83) / worldDistance)
         const anchorStops = roseAnchors.map((anchor) => (
           clamp((getDocumentTop(anchor) - worldTop - window.innerHeight * .32) / worldDistance)
@@ -359,7 +288,13 @@ function useScrollFilm(storyRef, filmRef, worldRef, videoRef, config, allowVideo
       rose?.style.removeProperty('opacity')
       words.forEach((word) => word.style.setProperty('--word-reveal', '1'))
       setPalette(0.35)
+      const seekPosterFrame = () => {
+        if (video.duration && Number.isFinite(video.duration)) video.currentTime = video.duration * 0.45
+      }
+      video.addEventListener('loadedmetadata', seekPosterFrame, { once: true })
+      seekPosterFrame()
       return () => {
+        video.removeEventListener('loadedmetadata', seekPosterFrame)
         story.classList.remove('is-reduced-motion')
       }
     }
@@ -369,7 +304,7 @@ function useScrollFilm(storyRef, filmRef, worldRef, videoRef, config, allowVideo
     story.classList.remove('is-reduced-motion')
     let disposed = false
     const resizeObserver = 'ResizeObserver' in window ? new ResizeObserver(handleLayoutChange) : null
-    if (allowVideo) video.load()
+    video.load()
     video.addEventListener('seeked', resumeAfterSeek)
     video.addEventListener('loadedmetadata', measure)
     window.addEventListener('scroll', handleScroll, { passive: true })
@@ -394,7 +329,7 @@ function useScrollFilm(storyRef, filmRef, worldRef, videoRef, config, allowVideo
       resizeObserver?.disconnect()
       window.cancelAnimationFrame(frame)
     }
-  }, [allowVideo, config, filmRef, reducedMotion, storyRef, videoRef, worldRef])
+  }, [config, filmRef, reducedMotion, storyRef, videoRef, worldRef])
 }
 
 function useScrollTypography(storyRef) {
@@ -664,20 +599,21 @@ function ScrollLine({ as: Tag = 'span', children, className = '', tone = 1 }) {
   )
 }
 
-function PersistentFilm({ config, videoRef, allowVideo }) {
+function PersistentFilm({ config, videoRef }) {
   return (
-    <div className="sw-film-bg" data-poster-only={allowVideo ? undefined : 'true'} aria-hidden="true">
+    <div className="sw-film-bg" aria-hidden="true">
       <div className="sw-film-bg__wash" />
       <video
         className="sw-film-bg__video"
         ref={videoRef}
         muted
         playsInline
-        preload={allowVideo ? 'auto' : 'none'}
+        preload="auto"
         poster={config.poster}
-        src={allowVideo ? config.video : undefined}
         tabIndex={-1}
-      />
+      >
+        <source src={config.video} type="video/mp4" />
+      </video>
       {config.persistentRose && (
         <img className={`sw-film-bg__rose sw-film__rose sw-film__rose--${config.roseKind}`} src={config.rose} alt="" />
       )}
@@ -687,9 +623,9 @@ function PersistentFilm({ config, videoRef, allowVideo }) {
   )
 }
 
-function FilmHero({ config, storyRef, worldRef, videoRef, allowVideo }) {
+function FilmHero({ config, storyRef, worldRef, videoRef }) {
   const filmRef = useRef(null)
-  useScrollFilm(storyRef, filmRef, worldRef, videoRef, config, allowVideo)
+  useScrollFilm(storyRef, filmRef, worldRef, videoRef, config)
 
   const movePastFilm = () => {
     document.getElementById(`${config.id}-invitation`)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
@@ -831,8 +767,8 @@ function DayPlan({ config }) {
         <img
           src={venue.image}
           alt=""
-          loading="lazy"
-          decoding="async"
+          loading={config.dayPlanMotion === 'orbit' ? 'eager' : 'lazy'}
+          decoding={config.dayPlanMotion === 'orbit' ? 'sync' : 'async'}
         />
         <span>{venue.title}</span>
       </div>
@@ -905,28 +841,6 @@ function VibeCheck({ config }) {
   )
 }
 
-function RSVPDeliveryCharm() {
-  const reducedMotion = useReducedMotionPreference()
-
-  return (
-    <figure className="sw-rsvp__delivery">
-      {reducedMotion ? (
-        <img src="/images/delivered-with-love-poster.webp" alt="" />
-      ) : (
-        <video
-          src="/media/delivered-with-love.mp4"
-          poster="/images/delivered-with-love-poster.webp"
-          muted
-          playsInline
-          autoPlay
-          preload="metadata"
-        />
-      )}
-      <figcaption>delivered<br />with love</figcaption>
-    </figure>
-  )
-}
-
 function RSVP({ config }) {
   const formId = useId()
   const headingId = `${formId}-heading`
@@ -972,7 +886,6 @@ function RSVP({ config }) {
           <p>You’re on the list</p>
           <h2 id={headingId}>You’re officially part of the plot.</h2>
           <span>Thank you — {config.couple[0]} &amp; {config.couple[1]} can’t wait to celebrate with you.</span>
-          <RSVPDeliveryCharm />
         </div>
       </section>
     )
@@ -1058,16 +971,15 @@ export default function ScrollWeddingStory({ design }) {
   const storyRef = useRef(null)
   const worldRef = useRef(null)
   const videoRef = useRef(null)
-  const allowVideo = useDeferredVideoPolicy()
   useScrollTypography(storyRef)
   if (!config) return null
 
   return (
     <div className={`sw-story sw-story--${config.id}`} ref={storyRef}>
       <div className="sw-film-world" ref={worldRef}>
-        <PersistentFilm config={config} videoRef={videoRef} allowVideo={allowVideo} />
+        <PersistentFilm config={config} videoRef={videoRef} />
         <div className="sw-film-world__content">
-          <FilmHero config={config} storyRef={storyRef} worldRef={worldRef} videoRef={videoRef} allowVideo={allowVideo} />
+          <FilmHero config={config} storyRef={storyRef} worldRef={worldRef} videoRef={videoRef} />
           <InvitationNote config={config} />
           <WeddingMap config={config} />
           <DayPlan config={config} />

@@ -6,86 +6,35 @@
 }
 
 .tp-soundtrack {
-  --soundtrack-bg: rgb(18 18 18 / 96%);
-  --soundtrack-border: rgb(255 255 255 / 28%);
-  --soundtrack-color: #fff;
-  --soundtrack-active-bg: #1f4bb9;
-  --soundtrack-active-border: rgb(255 255 255 / 48%);
-  --soundtrack-active-color: #fff;
   position: fixed;
   z-index: 90;
   right: 20px;
-  bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+  bottom: 20px;
   display: inline-flex;
   min-height: 48px;
   align-items: center;
   gap: 9px;
   padding: 0 17px;
-  border: 1px solid var(--soundtrack-border);
+  border: 1px solid rgb(255 255 255 / 28%);
   border-radius: 999px;
-  background: var(--soundtrack-bg);
+  background: rgb(18 18 18 / 88%);
   box-shadow: 0 16px 38px rgb(0 0 0 / 22%);
-  color: var(--soundtrack-color);
+  color: #fff;
   cursor: pointer;
   font-size: 11px;
   font-weight: 700;
   letter-spacing: .06em;
   text-transform: uppercase;
-  transition: transform .2s ease, background-color .25s ease, border-color .25s ease, color .25s ease, box-shadow .25s ease;
+  transition: transform .2s ease, background-color .2s ease;
+  backdrop-filter: blur(14px);
 }
 
-.tp-soundtrack--scroll {
-  font-family: "Bricolage Local", "Inter Local", Inter, sans-serif;
-  letter-spacing: .095em;
+.tp-soundtrack:hover {
+  transform: translateY(-2px);
 }
 
 .tp-soundtrack.is-playing {
-  border-color: var(--soundtrack-active-border);
-  background: var(--soundtrack-active-bg);
-  color: var(--soundtrack-active-color);
-}
-
-.tp-soundtrack--soft-launch {
-  --soundtrack-bg: #173d48;
-  --soundtrack-border: rgb(190 234 241 / 72%);
-  --soundtrack-active-bg: #bce6ec;
-  --soundtrack-active-border: #fffaf1;
-  --soundtrack-active-color: #102c35;
-  box-shadow: 0 13px 34px rgb(15 50 60 / 30%), 5px 5px 0 rgb(174 15 47 / 75%);
-}
-
-.tp-soundtrack--soft-launch.is-playing {
-  box-shadow: 0 13px 34px rgb(15 50 60 / 27%), 5px 5px 0 #ae0f2f;
-}
-
-.tp-soundtrack--love-bomb {
-  --soundtrack-bg: #7b174d;
-  --soundtrack-border: rgb(255 211 230 / 76%);
-  --soundtrack-active-bg: #ffcf3d;
-  --soundtrack-active-border: #171316;
-  --soundtrack-active-color: #171316;
-  border-radius: 14px;
-  box-shadow: 0 13px 34px rgb(73 8 43 / 32%), 5px 5px 0 #8ce9d4;
-}
-
-.tp-soundtrack--love-bomb.is-playing {
-  box-shadow: 0 13px 34px rgb(73 8 43 / 26%), 5px 5px 0 #ec6ba9;
-}
-
-@media (hover: hover) {
-  .tp-soundtrack:hover {
-    transform: translateY(-2px);
-  }
-}
-
-.tp-soundtrack:active {
-  transform: translateY(1px) scale(.98);
-}
-
-.tp-soundtrack:focus-visible {
-  outline: 3px solid #fff;
-  outline-offset: 3px;
-  box-shadow: 0 0 0 6px #171316;
+  background: #1f4bb9;
 }
 
 .tp-soundtrack svg {
@@ -212,7 +161,7 @@
 @media (max-width: 680px) {
   .tp-soundtrack {
     right: 12px;
-    bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+    bottom: 12px;
     width: 46px;
     min-height: 46px;
     justify-content: center;
