@@ -1,4 +1,4 @@
-# K EVENTS
+# Tell & Wed
 
 A fast, responsive storefront for bespoke digital wedding invitations. The site includes a catalog of 70 designs, dedicated interactive previews, category filters, pricing in Kenyan shillings, and an enquiry flow.
 
@@ -25,7 +25,7 @@ To refresh the eight locally mirrored Webgency templates and their shared assets
 npm run sync:webgency
 ```
 
-The imported designs have been editorially adapted for K EVENTS: the phone-frame catalog artwork is replaced with portrait photography, visible copy is in English, each design has its own palette and display typeface, and original template audio is disabled in favour of the project soundtracks. Internet-sourced photography is downloaded locally, so previews do not depend on third-party image hosts at runtime.
+The imported designs have been editorially adapted for Tell & Wed: the phone-frame catalog artwork is replaced with portrait photography, visible copy is in English, each design has its own palette and display typeface, and original template audio is disabled in favour of the project soundtracks. Internet-sourced photography is downloaded locally, so previews do not depend on third-party image hosts at runtime.
 
 Direct preview routes for the imported designs are:
 

@@ -88,7 +88,7 @@ export default function InvitationArtwork({ design, className = '', priority = f
       {hasBotanical && <BotanicalLines />}
 
       <div className="invitation">
-        <span className="invitation__issue">{isEditorial ? 'THE WEDDING EDIT' : 'K EVENTS • NAIROBI'}</span>
+        <span className="invitation__issue">{isEditorial ? 'THE WEDDING EDIT' : 'TELL & WED • NAIROBI'}</span>
         <span className="invitation__kicker">{isCinematic ? 'A LOVE STORY' : 'TOGETHER WITH OUR FAMILIES'}</span>
         <div className="invitation__monogram" aria-hidden="true">{first[0]}{second[0]}</div>
         <h3 className="invitation__names">

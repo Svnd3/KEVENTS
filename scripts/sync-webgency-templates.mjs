@@ -790,7 +790,7 @@ const localRuntime = `<meta name="referrer" content="no-referrer">
     });
 
     if (!hasKeventsParent()) {
-      notify('Preview RSVP received. Connect this template through KEvents to deliver it.', false, form);
+      notify('Preview RSVP received. Connect this template through Tell & Wed to deliver it.', false, form);
       enableForm();
       return;
     }
@@ -1060,7 +1060,7 @@ async function downloadEditorialPhoto(photo) {
     '--silent',
     '--show-error',
     '--retry', '3',
-    '--user-agent', 'K Events template editor/1.0',
+    '--user-agent', 'Tell & Wed template editor/1.0',
     photo.downloadUrl,
   ], { encoding: null, maxBuffer: 32 * 1024 * 1024 })
   const body = Buffer.from(stdout)

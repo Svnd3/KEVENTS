@@ -179,7 +179,7 @@ function Header({ view, navigate, onEnquire }) {
 
   return (
     <header className="site-header">
-      <button className="brand" type="button" onClick={() => move('home')} aria-label="K EVENTS home">
+      <button className="brand" type="button" onClick={() => move('home')} aria-label="Tell & Wed home">
         <BrandLogo />
       </button>
       <nav ref={navigationRef} id="main-navigation" className={`main-nav ${open ? 'is-open' : ''}`} aria-label="Main navigation">
@@ -512,7 +512,7 @@ function Footer({ navigate, onEnquire }) {
         <button type="button" onClick={() => navigate('home')}>Home</button>
         <button type="button" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>Back to top</button>
       </div>
-      <div className="footer-bottom"><span>© 2026 K EVENTS</span></div>
+      <div className="footer-bottom"><span>© 2026 Tell &amp; Wed</span></div>
     </footer>
   )
 }
@@ -564,10 +564,10 @@ export default function App() {
 
   useEffect(() => {
     document.title = previewDesign
-      ? `${previewDesign.name} | K EVENTS`
+      ? `${previewDesign.name} | Tell & Wed`
       : view === 'collection'
-        ? 'Invitation designs | K EVENTS'
-        : 'K EVENTS | Digital invitations'
+        ? 'Invitation designs | Tell & Wed'
+        : 'Tell & Wed | Digital invitations'
   }, [previewDesign, view])
 
   const navigate = (destination) => {

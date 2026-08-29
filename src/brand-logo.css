@@ -1,73 +1,90 @@
-.ke-logo {
-  --ke-logo-accent: #3767e8;
+.tw-logo {
+  --tw-logo-accent: #8f3f50;
   display: inline-flex;
   min-width: 0;
   align-items: center;
-  gap: 11px;
-  color: #171816;
+  gap: 10px;
+  color: #1e2420;
   line-height: 1;
   user-select: none;
 }
 
-.ke-logo__mark {
+.tw-logo__mark {
   display: block;
-  width: 32px;
-  height: 32px;
+  width: 31px;
+  height: 31px;
   flex: 0 0 auto;
   overflow: visible;
 }
 
-.ke-logo__ink {
-  fill: currentColor;
+.tw-logo__thread,
+.tw-logo__ribbon {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
-.ke-logo__fold {
-  fill: var(--ke-logo-accent);
+.tw-logo__thread {
+  stroke: currentColor;
+  stroke-width: 3.2;
 }
 
-.ke-logo__cut {
-  fill: var(--ke-logo-surface, #f7f6f2);
+.tw-logo__ribbon {
+  stroke: var(--tw-logo-accent);
+  stroke-width: 3.2;
 }
 
-.ke-logo__wordmark {
+.tw-logo__wordmark {
   display: grid;
-  gap: 4px;
-  transform: translateY(1px);
+  gap: 3px;
+  transform: translateY(-1px);
   white-space: nowrap;
 }
 
-.ke-logo__name,
-.ke-logo__descriptor {
-  font-family: var(--sans, "Inter Local", Inter, Arial, Helvetica, sans-serif);
+.tw-logo__name {
+  display: flex;
+  align-items: baseline;
+  gap: .13em;
+  font-family: "Instrument Serif Local", "Iowan Old Style", Georgia, serif;
+  font-size: 23px;
   font-style: normal;
+  font-weight: 400;
+  letter-spacing: -.045em;
+}
+
+.tw-logo__ampersand {
+  color: var(--tw-logo-accent);
+  font-size: .78em;
+  letter-spacing: -.08em;
+}
+
+.tw-logo__descriptor {
+  padding-left: 1px;
+  color: #676c64;
+  font-family: "Bricolage Local", "Inter Local", Arial, sans-serif;
+  font-size: 5.5px;
+  font-style: normal;
+  font-weight: 600;
+  letter-spacing: .22em;
   text-transform: uppercase;
 }
 
-.ke-logo__name {
-  font-size: 12px;
-  font-weight: 780;
-  letter-spacing: .16em;
-}
-
-.ke-logo__descriptor {
-  color: #62645f;
-  font-size: 6px;
-  font-weight: 650;
-  letter-spacing: .28em;
-}
-
-.ke-logo--compact {
+.tw-logo--compact {
   display: inline-grid;
   place-items: center;
 }
 
-.ke-logo--compact .ke-logo__mark {
+.tw-logo--compact .tw-logo__mark {
   width: 28px;
   height: 28px;
 }
 
 @media (max-width: 520px) {
-  .ke-logo__descriptor {
+  .tw-logo__descriptor {
     display: none;
+  }
+
+  .tw-logo__name {
+    font-size: 21px;
   }
 }
