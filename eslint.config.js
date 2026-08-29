@@ -12,6 +12,9 @@ export default [
       'www.apple.com',
       'www.dreamsinvite.com',
       'www.thedigitalyes.com',
+      'webgencyinvitations.com',
+      'sponsalia.app',
+      'public/templates',
     ],
   },
   {

@@ -26,6 +26,24 @@ function BotanicalLines() {
 }
 
 export default function InvitationArtwork({ design, className = '', priority = false }) {
+  if (design.templatePath) {
+    return (
+      <div
+        className={`artwork artwork--imported ${className}`}
+        aria-label={`${design.name} invitation preview`}
+      >
+        <img
+          className="artwork__imported-cover"
+          src={design.image}
+          alt=""
+          loading={priority ? 'eager' : 'lazy'}
+          decoding="async"
+          fetchPriority={priority ? 'high' : 'auto'}
+        />
+      </div>
+    )
+  }
+
   const [first, second] = design.couple
   const [background, ink, accent, accentTwo] = design.palette
   const isEditorial = editorialVariants.has(design.variant)

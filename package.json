@@ -7,7 +7,9 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "sync:webgency": "node scripts/sync-webgency-templates.mjs",
+    "check:webgency": "node scripts/check-webgency-templates.mjs"
   },
   "dependencies": {
     "lucide-react": "0.468.0",

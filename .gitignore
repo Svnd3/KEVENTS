@@ -8,9 +8,14 @@ dist/
 www.apple.com/
 www.dreamsinvite.com/
 www.thedigitalyes.com/
+sponsalia.app/
+webgencyinvitations.com/
 www.apple.com.zip
 www.dreamsinvite.com.zip
 www.thedigitalyes.com.zip
+
+# Project-supplied source songs stay local; optimized runtime audio lives in public/audio.
+/*.mp3
 
 # Keep the supplied music library local. The one track used by Karibu is bundled explicitly.
 songs/*

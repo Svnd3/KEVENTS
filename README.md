@@ -1,6 +1,6 @@
 # K EVENTS
 
-A fast, responsive storefront for bespoke digital wedding invitations. The site includes an original catalog of 53 designs, dedicated interactive previews, category filters, pricing in Kenyan shillings, and an enquiry flow.
+A fast, responsive storefront for bespoke digital wedding invitations. The site includes a catalog of 66 designs, dedicated interactive previews, category filters, pricing in Kenyan shillings, and an enquiry flow.
 
 ## Run locally
 
@@ -16,22 +16,49 @@ Open `http://localhost:5173/`.
 ```bash
 npm run lint
 npm run build
+npm run check:webgency
+```
+
+To refresh the eight locally mirrored Webgency templates and their shared assets from their source pages, run:
+
+```bash
+npm run sync:webgency
+```
+
+The imported designs have been editorially adapted for K EVENTS: the phone-frame catalog artwork is replaced with portrait photography, visible copy is in English, each design has its own palette and display typeface, and original template audio is disabled in favour of the project soundtracks. Internet-sourced photography is downloaded locally, so previews do not depend on third-party image hosts at runtime.
+
+Direct preview routes for the imported designs are:
+
+- `/#preview/the-sacred-garden`
+- `/#preview/blossom-oud`
+- `/#preview/dolce-vita`
+- `/#preview/vibrant-vows`
+- `/#preview/destination-love`
+- `/#preview/eternal-romance`
+- `/#preview/royal-gold`
+- `/#preview/minimalist`
+
+After running `npm run sync:webgency`, you can inspect its generated recovery copy independently by serving the repository root and opening `/webgencyinvitations.com/`:
+
+```bash
+python3 -m http.server 4190 --bind 127.0.0.1
 ```
 
 ## Enquiry delivery
 
 The enquiry experience runs in preview mode until a form endpoint is configured. Copy `.env.example` to `.env` and set `VITE_ENQUIRY_ENDPOINT` to a Formspree, Basin, or compatible endpoint before publishing.
 
-The two scroll-film invitations have a guest RSVP form. Set `VITE_RSVP_ENDPOINT` to a compatible endpoint to receive those replies; when omitted, it falls back to `VITE_ENQUIRY_ENDPOINT`, then clearly runs in demo mode if neither is configured.
+The scroll-film invitations and imported Webgency templates have guest RSVP forms. Set `VITE_RSVP_ENDPOINT` to a compatible endpoint to receive those replies. Imported templates never send RSVP details to their original form service and clearly run in demo mode when this endpoint is omitted.
 
 ## Content
 
 - Invitation names, prices, palettes and categories live in `src/data/designs.js`.
 - Catalog artwork lives in `src/components/InvitationArtwork.jsx`.
-- Tactile opening interactions live in `src/components/InvitationIntro.jsx`.
+- Every design uses the shared lace-and-wax envelope opener in `src/components/SponsaliaEnvelopeIntro.jsx`.
 - Full invitation stories and the demo RSVP flow live in `src/components/InvitationStory.jsx`.
 - The two cinematic scroll-film stories live in `src/components/ScrollWeddingStory.jsx`, with editable copy and venue details in `src/data/scrollWeddingTemplates.js`.
 - Each design has a direct preview route at `#preview/<design-slug>`.
+- The eight Webgency designs use locally mirrored documents in an isolated preview sandbox; their files live in `public/templates/webgency` and their catalog covers in `public/images/webgency`.
 - Photography and font sources are documented in `THIRD_PARTY_NOTICES.md`.
 
-The downloaded Dreams Invite and Digital Yes sites were run locally to study interaction pacing and information architecture. They are excluded from source control and are not part of the application; all shipped components and artwork are original.
+The downloaded Dreams Invite, Digital Yes, and Sponsalia sites were run locally to study interaction pacing and information architecture. These reference captures are excluded from source control; the one licensed envelope poster used by the app is bundled in `public/media`. The Webgency pages remain the explicit imported template set, with source metadata retained in `public/templates/webgency/templates.json`.

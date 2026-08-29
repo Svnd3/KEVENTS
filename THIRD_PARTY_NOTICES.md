@@ -34,6 +34,25 @@ The photographs in `public/images` were sourced from Unsplash and are used under
 - `venue-botanical.webp`: https://images.unsplash.com/photo-1470058869958-2a77ade41c02
 - `venue-hotel-pool.webp`: https://images.unsplash.com/photo-1566073771259-6a8506099945
 
+The replacement photography in `public/templates/webgency/editorial` was also sourced from Unsplash. Machine-readable credits are retained in `public/templates/webgency/photography.json`.
+
+- `sacred-garden-hero.webp` — Shardayyy Photography: https://unsplash.com/photos/fJzmPe-a0eU
+- `sacred-garden-detail.webp` — Oksana Zub: https://unsplash.com/photos/Su7ePCJYwCw
+- `blossom-oud-hero.webp` — Seif Eddin Khayat: https://unsplash.com/photos/l91HPje8IjI
+- `blossom-oud-detail.webp` — rigel: https://unsplash.com/photos/kOv-kR7HLI4
+- `dolce-vita-hero.webp` — Gabriella Clare Marino: https://unsplash.com/photos/3n5gTGXwt84
+- `dolce-vita-detail.webp` — Chris Boland: https://unsplash.com/photos/K7HkxnJbWok
+- `vibrant-vows-hero.webp` — Ellie Cooper: https://unsplash.com/photos/VwTu1xQ5vSA
+- `vibrant-vows-detail.webp` — Samantha Gades: https://unsplash.com/photos/EzDd5mfoqdg
+- `destination-love-hero.webp` — Osarugue Igbinoba: https://unsplash.com/photos/pcBQagGQySM
+- `destination-love-detail.webp` — Mary Anne Kimani: https://unsplash.com/photos/nmLUMFjMvFA
+- `eternal-romance-hero.webp` — Nathan Dumlao: https://unsplash.com/photos/7baHM9rEYUw
+- `eternal-romance-detail.webp` — Jakob Owens: https://unsplash.com/photos/mLIurLmSRAY
+- `royal-gold-hero.webp` — Patrick Amofah: https://unsplash.com/photos/eEEuQBWsj8k
+- `royal-gold-detail.webp` — Emmanuel Yeboah Okine: https://unsplash.com/photos/RCAUud6Wcmo
+- `minimalist-hero.webp` — Leo Manjarrez: https://unsplash.com/photos/-vygi0Cvz_c
+- `minimalist-detail.webp` — Annie Spratt: https://unsplash.com/photos/c-Ot-d_-NSk
+
 ## Public-domain artwork
 
 The following archival works were resized and converted to WebP for use in invitation previews. The local files are faithful reproductions with no substantive artistic changes.
@@ -52,6 +71,14 @@ The following interaction sounds were trimmed, filtered, level-adjusted, and con
 
 ## Project-supplied media
 
-The scroll-film videos, poster/cover frames, rose cutouts, RSVP animation, and soundtrack excerpts used by the `Soft Launch: Forever`, `Love Bomb`, `Love, in Transit`, `Scarlet Hour`, `Velvet Signal`, `Heart Parade`, and `Up, Up & Always` templates are optimized derivatives of media supplied by the project owner. Rights and provenance for those supplied originals remain the project owner’s responsibility.
+The scroll-film videos, poster/cover frames, rose cutouts, RSVP animation, and soundtrack excerpts used by the `Soft Launch: Forever`, `Love Bomb`, `Love, in Transit`, `Scarlet Hour`, `Velvet Signal`, `Heart Parade`, `Up, Up & Always`, and imported Webgency templates are optimized derivatives of media supplied by the project owner. Rights and provenance for those supplied originals remain the project owner’s responsibility.
 
-The K EVENTS interface and invitation compositions are original implementation work. Downloaded third-party websites in the local workspace were used only as visual references and are excluded from this repository.
+The K EVENTS interface and invitation compositions are original implementation work. Except for the specifically documented Sponsalia envelope media below, downloaded third-party websites in the local workspace were used only as visual references and are excluded from this repository.
+
+## Sponsalia envelope opener
+
+The shared invitation opener uses `public/media/busta-rossa-poster.jpg` from the project-supplied Sponsalia capture and its matching opening clip (`public/media/busta-rossa-envelope.mp4`). K EVENTS supplies the integration, personalized names, reduced-motion behavior, fallback transition, and faster playback timing. Rights and provenance for the supplied media remain the project owner's responsibility.
+
+## Imported Webgency templates
+
+The eight documents in `public/templates/webgency` are local mirrors of templates supplied for this project from Webgency Invitations and the linked Tilda pages. Their original source URLs are recorded in `public/templates/webgency/templates.json`. K EVENTS retains their core compositions and interactions while adapting the copy, typography, colour palettes, photography, music, local hosting, sandboxing, maps, and RSVP delivery. Rights and provenance for the underlying supplied layouts and remaining supplied media remain the project owner's responsibility.

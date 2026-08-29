@@ -59,6 +59,14 @@ const rawDesigns = [
   ['The Love Reel', 'Cinematic', 19500, 'Press play on forever.', 'reel', ['#b1664d', '#f4e6cd', '#9b2429', '#181716'], 'wedding-celebration.webp', 'Rhea', 'Kit', ['Bold', 'Cinematic', 'Photo-Led']],
   ['Garden in Motion', 'Cinematic', 17500, 'Watch your invitation bloom.', 'blooming', ['#8aa47a', '#f8eee4', '#d990a0', '#e6be63'], 'wedding-flowers.webp', 'Olive', 'Jasper', ['Romantic', 'Cinematic', 'Story Scroll']],
   ['Midnight in Nairobi', 'Cinematic', 20000, 'One city. One night. One forever.', 'nightcity', ['#101622', '#f3d08c', '#276cc5', '#d5c0a4'], 'city-night.webp', 'Njeri', 'Malik', ['Dark', 'Cinematic', 'Photo-Led']],
+  ['The Sacred Garden', 'Floral', 16500, 'A lush, sacred setting for your forever.', 'webgency-sacred-garden', ['#48624a', '#fbf6e9', '#bf9963', '#d7b8aa'], 'webgency/sacred-garden.webp', 'Olivia', 'Louis', ['Botanical', 'Interactive', 'RSVP-Ready'], 'Wedding', '/templates/webgency/sacred-garden/index.html'],
+  ['Blossom & Oud', 'Cultural', 18000, 'Soft blossom meets the warmth of oud.', 'webgency-blossom-oud', ['#642f38', '#f4eadc', '#bc8b55', '#d5a2a7'], 'webgency/blossom-oud.webp', 'Noor', 'Zayn', ['Romantic', 'Interactive', 'Music'], 'Wedding', '/templates/webgency/blossom-oud/index.html'],
+  ['Dolce Vita', 'Editorial', 17500, 'A sunlit celebration of the sweet life.', 'webgency-dolce-vita', ['#e5d0ab', '#4b3827', '#b04b3f', '#77805d'], 'webgency/dolce-vita.webp', 'Sofia', 'Matteo', ['Editorial', 'Interactive', 'Photo-Led'], 'Wedding', '/templates/webgency/dolce-vita/index.html'],
+  ['Vibrant Vows', 'Modern', 16000, 'Colour-forward, joyful, and made to move.', 'webgency-vibrant-vows', ['#f05972', '#fff6dc', '#275ac7', '#f5bd34'], 'webgency/vibrant-vows.webp', 'Maya', 'Jay', ['Bright', 'Interactive', 'RSVP-Ready'], 'Wedding', '/templates/webgency/vibrant-vows/index.html'],
+  ['Destination Love', 'Destination', 19000, 'Your celebration, wherever love takes you.', 'webgency-destination-love', ['#64aeba', '#fff8e8', '#d98267', '#244c55'], 'webgency/destination-love.webp', 'Amara', 'Leo', ['Destination', 'Interactive', 'Multi-Event Suite'], 'Wedding', '/templates/webgency/destination-love/index.html'],
+  ['Eternal Romance', 'Floral', 18500, 'A timeless love story, beautifully in bloom.', 'webgency-eternal-romance', ['#9b4b5a', '#faeee8', '#c99a72', '#667a5b'], 'webgency/eternal-romance.webp', 'Thanu', 'Jathu', ['Romantic', 'Interactive', 'RSVP-Ready'], 'Wedding', '/templates/webgency/eternal-romance/index.html'],
+  ['Royal Gold', 'Cultural', 19500, 'Regal detail for a truly golden celebration.', 'webgency-royal-gold', ['#9c6c25', '#fbf2dc', '#541f2d', '#263e36'], 'webgency/royal-gold.webp', 'Imani', 'Kofi', ['Formal', 'Metallic', 'Interactive'], 'Wedding', '/templates/webgency/royal-gold/index.html'],
+  ['Minimalist', 'Minimal', 14000, 'Quiet confidence, considered down to every detail.', 'webgency-minimalist', ['#eee9df', '#20201e', '#afa79b', '#faf9f5'], 'webgency/minimalist.webp', 'Ava', 'Noah', ['Neutral', 'Interactive', 'Single Page'], 'Wedding', '/templates/webgency/minimalist/index.html'],
 ]
 
 const slugify = (value) => value
@@ -69,7 +77,7 @@ const slugify = (value) => value
   .replace(/(^-|-$)/g, '')
 
 export const designs = rawDesigns.map((design, index) => {
-  const [name, category, price, tagline, variant, palette, image, personOne, personTwo, tags, eventType = 'Wedding'] = design
+  const [name, category, price, tagline, variant, palette, image, personOne, personTwo, tags, eventType = 'Wedding', templatePath = null] = design
   return {
     id: index + 1,
     slug: slugify(name),
@@ -83,6 +91,7 @@ export const designs = rawDesigns.map((design, index) => {
     couple: [personOne, personTwo],
     tags,
     eventType,
+    templatePath,
     featured: ['Soft Launch: Forever', 'Love Bomb', 'Love, in Transit', 'Scarlet Hour', 'Velvet Signal', 'Heart Parade', 'Up, Up & Always', 'Lamu Moon', 'Ivory Issue', 'Celestial Overture', 'Savannah Vows', 'Nairobi Noir'].includes(name),
   }
 })

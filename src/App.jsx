@@ -306,7 +306,9 @@ function CollectionPage() {
       if (sort === 'low') return a.price - b.price
       if (sort === 'high') return b.price - a.price
       if (sort === 'name') return a.name.localeCompare(b.name)
-      return Number(b.featured) - Number(a.featured) || a.id - b.id
+      return Number(Boolean(b.templatePath)) - Number(Boolean(a.templatePath))
+        || Number(b.featured) - Number(a.featured)
+        || a.id - b.id
     })
   }, [category, search, sort])
 
@@ -343,7 +345,7 @@ function CollectionPage() {
             <label className="sort-field">
               <span>Sort by</span>
               <select value={sort} onChange={(event) => setSort(event.target.value)}>
-                <option value="featured">Featured</option>
+                <option value="featured">Featured &amp; new</option>
                 <option value="low">Price: low to high</option>
                 <option value="high">Price: high to low</option>
                 <option value="name">Name: A to Z</option>
