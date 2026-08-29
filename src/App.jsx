@@ -15,7 +15,8 @@ import InvitationArtwork from './components/InvitationArtwork.jsx'
 import BrandLogo from './components/BrandLogo.jsx'
 import { categories, designs, formatPrice } from './data/designs.js'
 
-const featuredNames = ['Love, in Transit', 'Scarlet Hour', 'Soft Launch: Forever']
+const featuredNames = ['Velvet Signal', 'Heart Parade', 'Up, Up & Always', 'Love, in Transit', 'Scarlet Hour', 'Soft Launch: Forever', 'Love Bomb']
+const heroFeaturedNames = featuredNames.slice(0, 3)
 const loadTemplatePreview = () => import('./components/TemplatePreview.jsx')
 const TemplatePreview = lazy(loadTemplatePreview)
 
@@ -161,7 +162,7 @@ function Header({ view, navigate, onEnquire }) {
 
 function Hero({ navigate, onEnquire }) {
   const stageRef = useRef(null)
-  const featured = featuredNames.map((name) => designs.find((design) => design.name === name))
+  const featured = heroFeaturedNames.map((name) => designs.find((design) => design.name === name))
 
   const handlePointer = (event) => {
     if (!stageRef.current || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return

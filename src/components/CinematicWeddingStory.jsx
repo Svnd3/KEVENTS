@@ -126,7 +126,7 @@ function useScrollDirection(storyRef, videoRef, config, allowFilm) {
         lastChapter = activeChapter
       }
 
-      const usesScrollArc = config.theme === 'transit' || (config.theme === 'scarlet' && viewportWidth <= 680)
+      const usesScrollArc = config.planMotion === 'arc' && (config.theme !== 'scarlet' || viewportWidth <= 680)
       if (usesScrollArc) {
         const travel = planProgress * Math.max(0, planCards.length - 1)
         const isScarletMobile = config.theme === 'scarlet'
@@ -248,9 +248,12 @@ function StoryFilm({ config, videoRef, allowFilm }) {
         className="cw-film__video"
         muted
         playsInline
+        disablePictureInPicture
+        controlsList="nodownload noplaybackrate noremoteplayback"
         preload={allowFilm ? 'metadata' : 'none'}
         poster={config.poster}
         src={allowFilm ? config.video : undefined}
+        style={{ objectPosition: config.videoPosition || '50% 50%' }}
         tabIndex={-1}
       />
       <div className="cw-film__veil" />
@@ -435,7 +438,13 @@ function RSVP({ config }) {
             <span>{attendance === 'yes' ? config.rsvp.successEyebrow : config.rsvp.declineEyebrow}</span>
             <h3>{attendance === 'yes' ? config.rsvp.successHeading : config.rsvp.declineHeading}</h3>
             <p>{(attendance === 'yes' ? config.rsvp.successBody : config.rsvp.declineBody).replace('{name}', guestName)}</p>
-            {config.theme === 'transit' ? <ReplyLanded reducedMotion={reducedMotion} /> : <i className="cw-rsvp__seal" aria-hidden="true">Z<br />&amp;<br />J</i>}
+            {config.theme === 'transit' ? (
+              <ReplyLanded reducedMotion={reducedMotion} />
+            ) : (
+              <i className="cw-rsvp__seal" aria-hidden="true">
+                {config.couple[0][0]}<br />&amp;<br />{config.couple[1][0]}
+              </i>
+            )}
           </div>
         ) : (
           <form className="cw-rsvp__form" onSubmit={submit}>
@@ -563,7 +572,7 @@ export default function CinematicWeddingStory({ design }) {
   if (!config) return null
 
   return (
-    <div className={`cw-story cw-story--${config.theme}`} ref={storyRef}>
+    <div className={`cw-story cw-story--${config.theme}`} data-plan-motion={config.planMotion || 'arc'} ref={storyRef}>
       <StoryFilm config={config} videoRef={videoRef} allowFilm={allowFilm} />
       <div className="cw-story__content">
         <Hero config={config} />

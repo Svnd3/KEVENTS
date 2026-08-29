@@ -1,7 +1,7 @@
 const editorialVariants = new Set(['magazine', 'newspaper', 'editorial', 'couture', 'cover', 'society'])
 const minimalVariants = new Set(['line', 'bow', 'serif', 'monogram', 'clay', 'thread'])
 const floralVariants = new Set(['peony', 'pressed', 'orchid', 'bougainvillea', 'protea', 'rose', 'blooming'])
-const cinematicVariants = new Set(['dawn', 'noir', 'cosmos', 'reel', 'blooming', 'nightcity', 'city', 'stars', 'scroll-blue', 'scroll-candy', 'scroll-transit', 'scroll-scarlet'])
+const cinematicVariants = new Set(['dawn', 'noir', 'cosmos', 'reel', 'blooming', 'nightcity', 'city', 'stars', 'scroll-blue', 'scroll-candy', 'scroll-transit', 'scroll-scarlet', 'scroll-velvet', 'scroll-parade', 'scroll-airborne'])
 const archVariants = new Set(['arch', 'coastal', 'spice', 'cathedral'])
 const ringVariants = new Set(['beads', 'orbit', 'cosmos'])
 const geometryVariants = new Set(['print', 'blocks', 'electric', 'glass', 'clay'])

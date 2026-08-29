@@ -50,6 +50,9 @@ const rawDesigns = [
   ['Love Bomb', 'Cinematic', 26000, 'Big love. Main-character motion.', 'scroll-candy', ['#ec6ba9', '#171316', '#8ce9d4', '#ffcf3d'], 'love-bomb-cover.webp', 'Amara', 'Kai', ['Bold', 'Scroll Film', 'RSVP-Ready']],
   ['Love, in Transit', 'Cinematic', 28000, 'One ticket. Two hearts. A beautifully timed arrival.', 'scroll-transit', ['#f4b7c8', '#171316', '#7ec4d8', '#f7f0e5'], 'love-in-transit-cover.webp', 'Maya', 'Eli', ['Scroll Film', 'Music', 'RSVP-Ready']],
   ['Scarlet Hour', 'Cinematic', 29000, 'A red-letter night, written in motion.', 'scroll-scarlet', ['#bd1538', '#171012', '#f2a3ad', '#f8eadf'], 'scarlet-hour-cover.webp', 'Zara', 'Jude', ['Bold', 'Scroll Film', 'RSVP-Ready']],
+  ['Velvet Signal', 'Cinematic', 31000, 'Low light. High feeling. Your forever frequency.', 'scroll-velvet', ['#32172d', '#f7eadf', '#d74163', '#90b8b4'], 'velvet-signal-cover.webp', 'Amali', 'Ezra', ['Editorial', 'Scroll Film', 'Music']],
+  ['Heart Parade', 'Cinematic', 28500, 'Good news, loud colour, and love on the move.', 'scroll-parade', ['#ff6585', '#171316', '#ffd34f', '#75cfe4'], 'heart-parade-cover.webp', 'Safi', 'Noah', ['Playful', 'Scroll Film', 'RSVP-Ready']],
+  ['Up, Up & Always', 'Cinematic', 30000, 'An open-sky love story with a very soft landing.', 'scroll-airborne', ['#83c7df', '#17324a', '#f6a65a', '#fff2d8'], 'up-up-always-cover.webp', 'Imani', 'Theo', ['Destination', 'Scroll Film', 'Music']],
   ['First Light', 'Cinematic', 16000, 'The story begins at sunrise.', 'dawn', ['#eaa56a', '#fff4da', '#84add0', '#725848'], 'wedding-field.webp', 'Aria', 'Theo', ['Romantic', 'Cinematic', 'Photo-Led']],
   ['Film Noir Vows', 'Cinematic', 18000, 'A timeless love, dramatically told.', 'noir', ['#111111', '#f4f2ed', '#8b8b8b', '#d7d7d2'], 'wedding-dance.webp', 'Vivian', 'Cole', ['Dark', 'Cinematic', 'Photo-Led']],
   ['Celestial Overture', 'Cinematic', 22000, 'Written in the stars. Revealed in motion.', 'cosmos', ['#0f1024', '#f5e9c9', '#6a4fb7', '#c7b078'], null, 'Luna', 'Atlas', ['Jewel', 'Cinematic', 'Story Scroll']],
@@ -80,7 +83,7 @@ export const designs = rawDesigns.map((design, index) => {
     couple: [personOne, personTwo],
     tags,
     eventType,
-    featured: ['Soft Launch: Forever', 'Love Bomb', 'Love, in Transit', 'Scarlet Hour', 'Lamu Moon', 'Ivory Issue', 'Celestial Overture', 'Savannah Vows', 'Nairobi Noir'].includes(name),
+    featured: ['Soft Launch: Forever', 'Love Bomb', 'Love, in Transit', 'Scarlet Hour', 'Velvet Signal', 'Heart Parade', 'Up, Up & Always', 'Lamu Moon', 'Ivory Issue', 'Celestial Overture', 'Savannah Vows', 'Nairobi Noir'].includes(name),
   }
 })
 
