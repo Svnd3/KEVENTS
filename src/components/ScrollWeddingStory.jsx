@@ -1,5 +1,6 @@
 import { useEffect, useId, useRef, useState } from 'react'
 import { scrollWeddingTemplates } from '../data/scrollWeddingTemplates.js'
+import AutoplayMusicControl from './AutoplayMusicControl.jsx'
 import EventRevealMoment from './EventRevealMoment.jsx'
 import '../scroll-wedding-story.css'
 
@@ -994,6 +995,7 @@ export default function ScrollWeddingStory({ design }) {
         <p>Come for the vows.<br /><span>Stay for the lore.</span></p>
         <div><strong>{config.couple[0]} &amp; {config.couple[1]}</strong><span>{config.date} · {config.city}</span></div>
       </footer>
+      <AutoplayMusicControl music={config.music} className="sw-music" />
     </div>
   )
 }

@@ -1,5 +1,6 @@
-import { useCallback, useEffect, useId, useRef, useState } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
 import { cinematicWeddingTemplates } from '../data/cinematicWeddingTemplates.js'
+import AutoplayMusicControl from './AutoplayMusicControl.jsx'
 import EventRevealMoment from './EventRevealMoment.jsx'
 import '../cinematic-wedding-story.css'
 
@@ -213,17 +214,6 @@ function PinIcon() {
     <svg viewBox="0 0 24 24" aria-hidden="true">
       <path d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0Z" />
       <circle cx="12" cy="10" r="2.4" />
-    </svg>
-  )
-}
-
-function MusicIcon({ playing }) {
-  return (
-    <svg viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M9 18V6l9-2v11" />
-      <circle cx="6.5" cy="18" r="2.5" />
-      <circle cx="15.5" cy="15" r="2.5" />
-      {playing && <path className="cw-music__wave" d="M21 7c1.4 1.4 1.4 4.6 0 6" />}
     </svg>
   )
 }
@@ -474,84 +464,6 @@ function RSVP({ config }) {
   )
 }
 
-function MusicControl({ music }) {
-  const audioRef = useRef(null)
-  const fadeRef = useRef(0)
-  const [playing, setPlaying] = useState(false)
-
-  const stopFade = useCallback(() => {
-    window.cancelAnimationFrame(fadeRef.current)
-    fadeRef.current = 0
-  }, [])
-
-  const fadeTo = useCallback((target, duration, done) => {
-    const player = audioRef.current
-    if (!player) return
-    stopFade()
-    const start = player.volume
-    const startedAt = performance.now()
-    const tick = (now) => {
-      const progress = clamp((now - startedAt) / duration)
-      player.volume = start + (target - start) * (1 - (1 - progress) ** 3)
-      if (progress < 1) fadeRef.current = window.requestAnimationFrame(tick)
-      else done?.()
-    }
-    fadeRef.current = window.requestAnimationFrame(tick)
-  }, [stopFade])
-
-  const toggle = () => {
-    const player = audioRef.current
-    if (!player) return
-    if (player.paused) {
-      if (!player.getAttribute('src')) {
-        player.src = music.src
-        player.load()
-      }
-      player.volume = 0
-      player.play().then(() => fadeTo(music.volume, 560)).catch(() => setPlaying(false))
-    } else {
-      setPlaying(false)
-      fadeTo(0, 240, () => player.pause())
-    }
-  }
-
-  useEffect(() => {
-    const player = audioRef.current
-    const pauseWhenHidden = () => {
-      if (!document.hidden || !player || player.paused) return
-      stopFade()
-      player.pause()
-      setPlaying(false)
-    }
-    document.addEventListener('visibilitychange', pauseWhenHidden)
-    return () => {
-      document.removeEventListener('visibilitychange', pauseWhenHidden)
-      stopFade()
-      if (player) {
-        player.pause()
-        player.removeAttribute('src')
-        player.load()
-      }
-    }
-  }, [stopFade])
-
-  return (
-    <>
-      <button
-        className={`cw-music${playing ? ' is-playing' : ''}`}
-        type="button"
-        onClick={toggle}
-        aria-pressed={playing}
-        aria-label={`${playing ? 'Pause' : 'Play'} ${music.title} by ${music.artist}`}
-      >
-        <MusicIcon playing={playing} />
-        <span><b>{playing ? 'Playing' : music.buttonLabel}</b><small>{music.title}</small></span>
-      </button>
-      <audio ref={audioRef} preload="none" loop onPlay={() => setPlaying(true)} onPause={() => setPlaying(false)} />
-    </>
-  )
-}
-
 function Footer({ config }) {
   return (
     <footer className="cw-scene cw-footer" data-cw-scene data-scene="footer">
@@ -585,7 +497,7 @@ export default function CinematicWeddingStory({ design }) {
         <RSVP config={config} />
         <Footer config={config} />
       </div>
-      <MusicControl music={config.music} />
+      <AutoplayMusicControl music={config.music} />
     </div>
   )
 }
