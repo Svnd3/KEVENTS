@@ -44,6 +44,6 @@ The following archival works were resized and converted to WebP for use in invit
 
 ## Project-supplied media
 
-The scroll-film videos, poster/cover frames, and rose cutouts used by the `Soft Launch: Forever` and `Love Bomb` templates are optimized derivatives of media supplied by the project owner. Rights and provenance for those supplied originals remain the project owner’s responsibility.
+The scroll-film videos, poster/cover frames, rose cutouts, RSVP animation, and soundtrack excerpts used by the `Soft Launch: Forever`, `Love Bomb`, `Love, in Transit`, and `Scarlet Hour` templates are optimized derivatives of media supplied by the project owner. Rights and provenance for those supplied originals remain the project owner’s responsibility.
 
 The K EVENTS interface and invitation compositions are original implementation work. Downloaded third-party websites in the local workspace were used only as visual references and are excluded from this repository.

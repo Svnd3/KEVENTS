@@ -48,6 +48,8 @@ const rawDesigns = [
   ['Silver Thread', 'Minimal', 6000, 'Connected by the finest detail.', 'thread', ['#efefed', '#414a53', '#afb6bd', '#fafafa'], null, 'Elle', 'Remy', ['Neutral', 'Gentle Motion', 'Single Page']],
   ['Soft Launch: Forever', 'Cinematic', 24000, 'The soft launch is over. Forever starts here.', 'scroll-blue', ['#a9dbe7', '#171316', '#ae0f2f', '#f8f2e7'], 'soft-launch-cover.webp', 'Nia', 'Julian', ['Scroll Film', 'Interactive', 'RSVP-Ready']],
   ['Love Bomb', 'Cinematic', 26000, 'Big love. Main-character motion.', 'scroll-candy', ['#ec6ba9', '#171316', '#8ce9d4', '#ffcf3d'], 'love-bomb-cover.webp', 'Amara', 'Kai', ['Bold', 'Scroll Film', 'RSVP-Ready']],
+  ['Love, in Transit', 'Cinematic', 28000, 'One ticket. Two hearts. A beautifully timed arrival.', 'scroll-transit', ['#f4b7c8', '#171316', '#7ec4d8', '#f7f0e5'], 'love-in-transit-cover.webp', 'Maya', 'Eli', ['Scroll Film', 'Music', 'RSVP-Ready']],
+  ['Scarlet Hour', 'Cinematic', 29000, 'A red-letter night, written in motion.', 'scroll-scarlet', ['#bd1538', '#171012', '#f2a3ad', '#f8eadf'], 'scarlet-hour-cover.webp', 'Zara', 'Jude', ['Bold', 'Scroll Film', 'RSVP-Ready']],
   ['First Light', 'Cinematic', 16000, 'The story begins at sunrise.', 'dawn', ['#eaa56a', '#fff4da', '#84add0', '#725848'], 'wedding-field.webp', 'Aria', 'Theo', ['Romantic', 'Cinematic', 'Photo-Led']],
   ['Film Noir Vows', 'Cinematic', 18000, 'A timeless love, dramatically told.', 'noir', ['#111111', '#f4f2ed', '#8b8b8b', '#d7d7d2'], 'wedding-dance.webp', 'Vivian', 'Cole', ['Dark', 'Cinematic', 'Photo-Led']],
   ['Celestial Overture', 'Cinematic', 22000, 'Written in the stars. Revealed in motion.', 'cosmos', ['#0f1024', '#f5e9c9', '#6a4fb7', '#c7b078'], null, 'Luna', 'Atlas', ['Jewel', 'Cinematic', 'Story Scroll']],
@@ -78,7 +80,7 @@ export const designs = rawDesigns.map((design, index) => {
     couple: [personOne, personTwo],
     tags,
     eventType,
-    featured: ['Soft Launch: Forever', 'Love Bomb', 'Lamu Moon', 'Ivory Issue', 'Celestial Overture', 'Savannah Vows', 'Nairobi Noir'].includes(name),
+    featured: ['Soft Launch: Forever', 'Love Bomb', 'Love, in Transit', 'Scarlet Hour', 'Lamu Moon', 'Ivory Issue', 'Celestial Overture', 'Savannah Vows', 'Nairobi Noir'].includes(name),
   }
 })
 

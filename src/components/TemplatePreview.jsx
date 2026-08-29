@@ -1,12 +1,14 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { formatPrice } from '../data/designs.js'
 import { scrollWeddingVariants } from '../data/scrollWeddingTemplates.js'
+import { cinematicWeddingVariants } from '../data/cinematicWeddingTemplates.js'
 import { getSoundtrack } from '../data/soundtracks.js'
 import InvitationIntro from './InvitationIntro.jsx'
 import InvitationStory from './InvitationStory.jsx'
 import SandeEnvelopeIntro from './SandeEnvelopeIntro.jsx'
 import SandeSignatureStory from './SandeSignatureStory.jsx'
 import ScrollWeddingStory from './ScrollWeddingStory.jsx'
+import CinematicWeddingStory from './CinematicWeddingStory.jsx'
 import '../preview.css'
 
 function BackIcon() {
@@ -42,6 +44,7 @@ export default function TemplatePreview({ design, onBack, onEnquire }) {
   const audioRef = useRef(null)
   const isSandeSignature = design?.variant === 'sande'
   const isScrollWedding = scrollWeddingVariants.has(design?.variant)
+  const isCinematicWedding = cinematicWeddingVariants.has(design?.variant)
   const soundtrack = getSoundtrack(design)
 
   useEffect(() => {
@@ -112,6 +115,33 @@ export default function TemplatePreview({ design, onBack, onEnquire }) {
   }, [design?.slug, introComplete])
 
   if (!design) return null
+
+  if (isCinematicWedding) {
+    return (
+      <div className={`template-preview template-preview--cinematic-new template-preview--${design.variant}`}>
+        <nav className="tp-toolbar" aria-label="Invitation preview controls">
+          <button className="tp-toolbar__back" type="button" onClick={onBack} aria-label="Back to all designs">
+            <BackIcon />
+            <span>All designs</span>
+          </button>
+
+          <div className="tp-toolbar__title">
+            <strong>{design.name}</strong>
+            <span>{formatPrice(design.price)}</span>
+          </div>
+
+          <button className="tp-toolbar__use" type="button" onClick={() => onEnquire?.(design)} aria-label={`Use ${design.name} design`}>
+            <span>Use this design</span>
+            <ArrowIcon />
+          </button>
+        </nav>
+
+        <main id="main-content" tabIndex={-1}>
+          <CinematicWeddingStory design={design} />
+        </main>
+      </div>
+    )
+  }
 
   if (isScrollWedding) {
     return (
