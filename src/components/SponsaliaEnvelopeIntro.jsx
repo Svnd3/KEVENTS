@@ -9,10 +9,69 @@ const DISSOLVE_MS = 520
 const FALLBACK_OPEN_MS = 820
 const HARD_CLOSE_MS = 4400
 
-export default function SponsaliaEnvelopeIntro({ design, onComplete, onUserGesture }) {
+const FALLBACK_PALETTE = ['#e6d8c8', '#302923', '#8b2735', '#b9a48d']
+
+function parseHex(value) {
+  const match = /^#([\da-f]{2})([\da-f]{2})([\da-f]{2})$/i.exec(value || '')
+  return match ? match.slice(1).map((channel) => Number.parseInt(channel, 16)) : null
+}
+
+function toHex(channels) {
+  return `#${channels.map((channel) => Math.round(channel).toString(16).padStart(2, '0')).join('')}`
+}
+
+function mixHex(source, target, sourceWeight) {
+  const from = parseHex(source)
+  const to = parseHex(target)
+  if (!from || !to) return target
+  return toHex(from.map((channel, index) => (
+    channel * sourceWeight + to[index] * (1 - sourceWeight)
+  )))
+}
+
+function relativeLuminance(value) {
+  const channels = parseHex(value)
+  if (!channels) return 0
+  return channels
+    .map((channel) => channel / 255)
+    .map((channel) => (channel <= 0.04045
+      ? channel / 12.92
+      : ((channel + 0.055) / 1.055) ** 2.4))
+    .reduce((sum, channel, index) => sum + channel * [0.2126, 0.7152, 0.0722][index], 0)
+}
+
+function contrastRatio(first, second) {
+  const light = Math.max(relativeLuminance(first), relativeLuminance(second))
+  const dark = Math.min(relativeLuminance(first), relativeLuminance(second))
+  return (light + 0.05) / (dark + 0.05)
+}
+
+function envelopeTheme(design) {
+  const palette = design?.palette?.length >= 3 ? design.palette : FALLBACK_PALETTE
+  const [primary, secondary, accent, detail = secondary] = palette
+  const paper = mixHex(primary, '#f6eee4', design?.category === 'Minimal' ? 0.16 : 0.3)
+  const backdrop = mixHex(primary, '#2f2825', 0.48)
+  const ink = [secondary, detail, primary, '#241d1a', '#fffaf3']
+    .find((candidate) => contrastRatio(candidate, paper) >= 4.5) || '#241d1a'
+  const focus = [accent, secondary, primary, '#7d2735']
+    .find((candidate) => contrastRatio(candidate, paper) >= 3) || ink
+
+  return {
+    '--spei-poster': `url("${ENVELOPE_POSTER}")`,
+    '--spei-paper': paper,
+    '--spei-backdrop': backdrop,
+    '--spei-ink': ink,
+    '--spei-accent': accent,
+    '--spei-focus': focus,
+    '--spei-tone-strength': design?.category === 'Minimal' ? 0.22 : 0.46,
+  }
+}
+
+export default function SponsaliaEnvelopeIntro({ design, onBack, onComplete, onUserGesture }) {
   const [phase, setPhase] = useState('sealed')
   const [videoPlaying, setVideoPlaying] = useState(false)
   const [videoFailed, setVideoFailed] = useState(false)
+  const dialogRef = useRef(null)
   const buttonRef = useRef(null)
   const videoRef = useRef(null)
   const timersRef = useRef([])
@@ -132,6 +191,16 @@ export default function SponsaliaEnvelopeIntro({ design, onComplete, onUserGestu
     playRequest?.catch(runFallback)
   }, [beginClosing, design, finish, onUserGesture, runFallback, schedule])
 
+  const skipInvitation = useCallback(() => {
+    if (finishedRef.current || closingRef.current) return
+    if (!startedRef.current) {
+      startedRef.current = true
+      onUserGesture?.(design)
+    }
+    videoRef.current?.pause()
+    beginClosing(180)
+  }, [beginClosing, design, onUserGesture])
+
   const trackProgress = useCallback((event) => {
     const video = event.currentTarget
     if (!Number.isFinite(video.duration) || video.duration <= 0) return
@@ -161,24 +230,53 @@ export default function SponsaliaEnvelopeIntro({ design, onComplete, onUserGestu
       role="dialog"
       aria-modal="true"
       aria-label={`${names || 'Wedding'} invitation`}
-      style={{ '--spei-poster': `url("${ENVELOPE_POSTER}")` }}
+      style={envelopeTheme(design)}
+      ref={dialogRef}
+      onKeyDown={(event) => {
+        if (event.key === 'Escape' && onBack) {
+          event.preventDefault()
+          onBack()
+          return
+        }
+        if (event.key !== 'Tab') return
+        const controls = [...(dialogRef.current?.querySelectorAll('button:not(:disabled)') || [])]
+        if (!controls.length) return
+        const first = controls[0]
+        const last = controls.at(-1)
+        if (event.shiftKey && document.activeElement === first) {
+          event.preventDefault()
+          last.focus()
+        } else if (!event.shiftKey && document.activeElement === last) {
+          event.preventDefault()
+          first.focus()
+        }
+      }}
     >
       <span className="spei__ambient" aria-hidden="true" />
       <span className="spei__veil" aria-hidden="true" />
+
+      <div className="spei__controls">
+        <button className="spei__control spei__control--back" type="button" onClick={onBack}>
+          <svg viewBox="0 0 20 20" aria-hidden="true"><path d="m11.8 4.5-5.4 5.5 5.4 5.5M6.7 10h7" /></svg>
+          <span>All designs</span>
+        </button>
+        <button
+          className="spei__control spei__control--skip"
+          type="button"
+          onClick={skipInvitation}
+          disabled={phase === 'closing' || phase === 'complete'}
+        >
+          Skip intro
+        </button>
+      </div>
 
       <button
         ref={buttonRef}
         className="spei__opener"
         type="button"
         onClick={openInvitation}
-        onKeyDown={(event) => {
-          if (event.key === 'Tab') {
-            event.preventDefault()
-            buttonRef.current?.focus({ preventScroll: true })
-          }
-        }}
         aria-label={`Open ${names || 'the wedding'} invitation`}
-        aria-disabled={phase !== 'sealed'}
+        disabled={phase !== 'sealed'}
       >
         <span className="spei__frame">
           <video
@@ -196,6 +294,8 @@ export default function SponsaliaEnvelopeIntro({ design, onComplete, onUserGestu
             onEnded={() => beginClosing()}
             onError={handleVideoError}
           />
+
+          <span className="spei__tone" aria-hidden="true" />
 
           <span className="spei__caption" aria-hidden="true">
             {names && <span className="spei__names">{names}</span>}

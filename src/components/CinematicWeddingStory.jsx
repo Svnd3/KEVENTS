@@ -1,5 +1,6 @@
 import { useEffect, useId, useRef, useState } from 'react'
 import { cinematicWeddingTemplates } from '../data/cinematicWeddingTemplates.js'
+import { submitRsvp } from '../utils/submitRsvp.js'
 import AutoplayMusicControl from './AutoplayMusicControl.jsx'
 import EventRevealMoment from './EventRevealMoment.jsx'
 import '../cinematic-wedding-story.css'
@@ -8,6 +9,29 @@ const clamp = (value, min = 0, max = 1) => Math.min(max, Math.max(min, value))
 const smoothStep = (value) => {
   const amount = clamp(value)
   return amount * amount * (3 - 2 * amount)
+}
+
+const cinematicRosePaths = {
+  sweep: [
+    { x: -34, y: 16, turn: -14, scale: .76, mobile: { x: -27, y: 17, turn: -14, scale: .72 } },
+    { x: 30, y: 8, turn: 32, scale: .68, mobile: { x: 24, y: 9, turn: 32, scale: .65 } },
+    { x: -27, y: -12, turn: -18, scale: .7, mobile: { x: -22, y: -10, turn: -18, scale: .66 } },
+    { x: 25, y: -5, turn: 54, scale: .66, mobile: { x: 21, y: -4, turn: 54, scale: .62 } },
+    { x: -30, y: 12, turn: 6, scale: .68, mobile: { x: -24, y: 11, turn: 6, scale: .64 } },
+    { x: 29, y: -11, turn: 72, scale: .64, mobile: { x: 23, y: -9, turn: 72, scale: .6 } },
+    { x: -25, y: 5, turn: 26, scale: .6, mobile: { x: -20, y: 6, turn: 26, scale: .57 } },
+    { x: 26, y: -4, turn: 92, scale: .55, mobile: { x: 21, y: -3, turn: 92, scale: .52 } },
+  ],
+  drift: [
+    { x: 30, y: -12, turn: 12, scale: .72, mobile: { x: 25, y: -10, turn: 12, scale: .68 } },
+    { x: -25, y: 9, turn: 72, scale: .65, mobile: { x: -21, y: 9, turn: 72, scale: .61 } },
+    { x: 24, y: 14, turn: 135, scale: .62, mobile: { x: 20, y: 12, turn: 135, scale: .59 } },
+    { x: -28, y: -8, turn: 198, scale: .68, mobile: { x: -23, y: -7, turn: 198, scale: .64 } },
+    { x: 27, y: -10, turn: 255, scale: .64, mobile: { x: 22, y: -8, turn: 255, scale: .6 } },
+    { x: -23, y: 13, turn: 318, scale: .62, mobile: { x: -20, y: 11, turn: 318, scale: .58 } },
+    { x: 24, y: 4, turn: 382, scale: .58, mobile: { x: 20, y: 4, turn: 382, scale: .55 } },
+    { x: -20, y: -5, turn: 438, scale: .52, mobile: { x: -17, y: -4, turn: 438, scale: .49 } },
+  ],
 }
 
 function useReducedMotion() {
@@ -55,14 +79,17 @@ function useDeferredFilm(reducedMotion) {
   return ready && !isConstrained
 }
 
-function useScrollDirection(storyRef, videoRef, config, allowFilm) {
-  const reducedMotion = useReducedMotion()
-
+function useScrollDirection(storyRef, videoRef, roseRef, config, allowFilm, reducedMotion) {
   useEffect(() => {
     const story = storyRef.current
     const video = videoRef.current
     if (!story || !video || !config) return undefined
 
+    const rose = roseRef.current
+    const roseJourney = config.roseJourney
+    const rosePath = roseJourney
+      ? cinematicRosePaths[roseJourney.path] || cinematicRosePaths.sweep
+      : null
     const scenes = [...story.querySelectorAll('[data-cw-scene]')]
     const sceneLines = scenes.map((scene) => [...scene.querySelectorAll('[data-cw-line]')])
     const planCards = [...story.querySelectorAll('[data-cw-plan-card]')]
@@ -72,8 +99,10 @@ function useScrollDirection(storyRef, videoRef, config, allowFilm) {
     let viewportHeight = window.innerHeight
     let viewportWidth = window.innerWidth
     let frame = 0
+    let roseIdleTimer = 0
     let lastSeek = 0
     let lastChapter = -1
+    let lastRoseTransform = ''
 
     const documentTop = (element) => element.getBoundingClientRect().top + window.scrollY
 
@@ -95,6 +124,38 @@ function useScrollDirection(storyRef, videoRef, config, allowFilm) {
       const viewportCenter = scrollY + viewportHeight * 0.5
       const progress = clamp((scrollY - storyTop) / storyDistance)
       story.style.setProperty('--cw-story-progress', progress.toFixed(4))
+
+      if (rose && rosePath) {
+        if (reducedMotion) {
+          rose.classList.remove('is-rose-moving')
+          rose.style.removeProperty('transform')
+          lastRoseTransform = ''
+        } else {
+          const pathPosition = progress * (rosePath.length - 1)
+          const fromIndex = Math.floor(pathPosition)
+          const toIndex = Math.min(rosePath.length - 1, fromIndex + 1)
+          const segmentProgress = pathPosition - fromIndex
+          const easedProgress = smoothStep(segmentProgress)
+          const from = viewportWidth <= 680
+            ? rosePath[fromIndex].mobile || rosePath[fromIndex]
+            : rosePath[fromIndex]
+          const to = viewportWidth <= 680
+            ? rosePath[toIndex].mobile || rosePath[toIndex]
+            : rosePath[toIndex]
+          const direction = roseJourney.mirror ? -1 : 1
+          const curve = Math.sin(segmentProgress * Math.PI)
+          const x = (from.x + (to.x - from.x) * easedProgress) * direction
+          const y = from.y + (to.y - from.y) * easedProgress - curve * 2.4
+          const turn = (from.turn + (to.turn - from.turn) * easedProgress) * direction
+          const scale = from.scale + (to.scale - from.scale) * easedProgress
+          const transform = `translate(-50%, -50%) translate3d(${x.toFixed(2)}vw, ${y.toFixed(2)}vh, 0) rotate(${turn.toFixed(2)}deg) scale(${scale.toFixed(3)})`
+
+          if (transform !== lastRoseTransform) {
+            rose.style.transform = transform
+            lastRoseTransform = transform
+          }
+        }
+      }
 
       let activeChapter = 0
       let strongestPresence = -1
@@ -171,6 +232,13 @@ function useScrollDirection(storyRef, videoRef, config, allowFilm) {
     }
 
     function queueRender() {
+      if (rose && !reducedMotion) {
+        rose.classList.add('is-rose-moving')
+        window.clearTimeout(roseIdleTimer)
+        roseIdleTimer = window.setTimeout(() => {
+          rose.classList.remove('is-rose-moving')
+        }, 180)
+      }
       if (!frame) frame = window.requestAnimationFrame(render)
     }
 
@@ -193,12 +261,14 @@ function useScrollDirection(storyRef, videoRef, config, allowFilm) {
 
     return () => {
       window.cancelAnimationFrame(frame)
+      window.clearTimeout(roseIdleTimer)
+      rose?.classList.remove('is-rose-moving')
       resizeObserver?.disconnect()
       video.removeEventListener('loadedmetadata', queueRender)
       window.removeEventListener('scroll', queueRender)
       window.removeEventListener('resize', measure)
     }
-  }, [allowFilm, config, reducedMotion, storyRef, videoRef])
+  }, [allowFilm, config, reducedMotion, roseRef, storyRef, videoRef])
 }
 
 function ArrowIcon() {
@@ -230,7 +300,7 @@ function RevealLines({ as: Tag = 'h2', id, lines, className = '' }) {
   )
 }
 
-function StoryFilm({ config, videoRef, allowFilm }) {
+function StoryFilm({ config, videoRef, roseRef, allowFilm }) {
   return (
     <div className="cw-film" aria-hidden="true">
       <div className="cw-film__wash" />
@@ -249,6 +319,18 @@ function StoryFilm({ config, videoRef, allowFilm }) {
       />
       <div className="cw-film__veil" />
       <div className="cw-film__texture" />
+      {config.roseJourney && (
+        <img
+          ref={roseRef}
+          className={`cw-film__rose cw-film__rose--${config.roseJourney.kind}`}
+          src={config.roseJourney.asset}
+          alt=""
+          aria-hidden="true"
+          draggable="false"
+          decoding="async"
+          style={{ '--cw-rose-opacity': config.roseJourney.opacity }}
+        />
+      )}
       <span className="cw-film__folio" data-cw-folio>SCENE</span>
     </div>
   )
@@ -405,14 +487,28 @@ function ReplyLanded({ reducedMotion }) {
 function RSVP({ config }) {
   const fieldId = useId()
   const reducedMotion = useReducedMotion()
+  const successRef = useRef(null)
   const [attendance, setAttendance] = useState('yes')
   const [guestName, setGuestName] = useState('')
-  const [submitted, setSubmitted] = useState(false)
+  const [status, setStatus] = useState('idle')
+  const [demo, setDemo] = useState(false)
 
-  const submit = (event) => {
+  useEffect(() => {
+    if (status === 'success') successRef.current?.focus()
+  }, [status])
+
+  const submit = async (event) => {
     event.preventDefault()
-    setGuestName(new FormData(event.currentTarget).get('name')?.trim() || 'You')
-    setSubmitted(true)
+    const form = event.currentTarget
+    setGuestName(new FormData(form).get('name')?.trim() || 'You')
+    setStatus('sending')
+    try {
+      const result = await submitRsvp(form, config.label, { templateId: config.id })
+      setDemo(result.demo)
+      setStatus('success')
+    } catch {
+      setStatus('error')
+    }
   }
 
   return (
@@ -424,11 +520,13 @@ function RSVP({ config }) {
           <p>{config.rsvp.body}</p>
         </header>
 
-        {submitted ? (
-          <div className="cw-rsvp__success" role="status">
-            <span>{attendance === 'yes' ? config.rsvp.successEyebrow : config.rsvp.declineEyebrow}</span>
+        {status === 'success' ? (
+          <div className="cw-rsvp__success" role="status" aria-live="polite" ref={successRef} tabIndex={-1}>
+            <span>{demo ? 'Preview response' : attendance === 'yes' ? config.rsvp.successEyebrow : config.rsvp.declineEyebrow}</span>
             <h3>{attendance === 'yes' ? config.rsvp.successHeading : config.rsvp.declineHeading}</h3>
-            <p>{(attendance === 'yes' ? config.rsvp.successBody : config.rsvp.declineBody).replace('{name}', guestName)}</p>
+            <p>{demo
+              ? `${guestName}, this is a demo only—your reply was not sent.`
+              : (attendance === 'yes' ? config.rsvp.successBody : config.rsvp.declineBody).replace('{name}', guestName)}</p>
             {config.theme === 'transit' ? (
               <ReplyLanded reducedMotion={reducedMotion} />
             ) : (
@@ -438,7 +536,7 @@ function RSVP({ config }) {
             )}
           </div>
         ) : (
-          <form className="cw-rsvp__form" onSubmit={submit}>
+          <form className="cw-rsvp__form" onSubmit={submit} aria-busy={status === 'sending'}>
             <fieldset>
               <legend>Can you make it?</legend>
               <label className={attendance === 'yes' ? 'is-selected' : ''}>
@@ -456,7 +554,8 @@ function RSVP({ config }) {
             <input id={`${fieldId}-contact`} name="contact" type="email" inputMode="email" autoComplete="email" required />
             <label htmlFor={`${fieldId}-note`}>Leave us a note <span>(optional)</span></label>
             <textarea id={`${fieldId}-note`} name="note" rows="2" />
-            <button type="submit"><span>{attendance === 'yes' ? config.rsvp.cta : config.rsvp.declineCta}</span><ArrowIcon /></button>
+            {status === 'error' && <p className="cw-rsvp__error" role="alert">That reply did not send. Please try again.</p>}
+            <button type="submit" disabled={status === 'sending'}><span>{status === 'sending' ? 'Sending…' : attendance === 'yes' ? config.rsvp.cta : config.rsvp.declineCta}</span><ArrowIcon /></button>
           </form>
         )}
       </div>
@@ -474,19 +573,20 @@ function Footer({ config }) {
   )
 }
 
-export default function CinematicWeddingStory({ design }) {
+export default function CinematicWeddingStory({ design, showMusicControl = true }) {
   const config = cinematicWeddingTemplates[design.variant]
   const storyRef = useRef(null)
   const videoRef = useRef(null)
+  const roseRef = useRef(null)
   const reducedMotion = useReducedMotion()
   const allowFilm = useDeferredFilm(reducedMotion)
-  useScrollDirection(storyRef, videoRef, config, allowFilm)
+  useScrollDirection(storyRef, videoRef, roseRef, config, allowFilm, reducedMotion)
 
   if (!config) return null
 
   return (
-    <div className={`cw-story cw-story--${config.theme}`} data-plan-motion={config.planMotion || 'arc'} ref={storyRef}>
-      <StoryFilm config={config} videoRef={videoRef} allowFilm={allowFilm} />
+    <div className={`cw-story cw-story--${config.theme}`} data-plan-motion={config.planMotion || 'arc'} data-rose-journey={config.roseJourney?.kind} ref={storyRef}>
+      <StoryFilm config={config} videoRef={videoRef} roseRef={roseRef} allowFilm={allowFilm} />
       <div className="cw-story__content">
         <Hero config={config} />
         <InvitationNote config={config} />
@@ -497,7 +597,7 @@ export default function CinematicWeddingStory({ design }) {
         <RSVP config={config} />
         <Footer config={config} />
       </div>
-      <AutoplayMusicControl music={config.music} />
+      {showMusicControl && <AutoplayMusicControl music={config.music} />}
     </div>
   )
 }

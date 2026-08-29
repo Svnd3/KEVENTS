@@ -18,6 +18,7 @@ const editorialRoot = path.join(templateRoot, 'editorial')
 const coverRoot = path.join(projectRoot, 'public', 'images', 'webgency')
 const recoveredRoot = path.join(projectRoot, 'webgencyinvitations.com')
 const reuseAssets = process.argv.includes('--reuse-assets')
+const refreshGenerated = process.argv.includes('--refresh-generated')
 const execFileAsync = promisify(execFile)
 
 const templates = [
@@ -269,6 +270,7 @@ function customizationMarkup(page) {
     slug: page.slug,
     venue: customization.venue,
     directionsUrl: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(customization.venue)}`,
+    hiddenVideoRecord: customization.heroRecord || null,
     photos: photos.map(({ filename, alt }) => ({ filename, alt })),
   }).replaceAll('<', '\\u003c')
 
@@ -276,8 +278,10 @@ function customizationMarkup(page) {
     ? `#rec${customization.heroRecord} .t396__carrier{background-image:linear-gradient(180deg,rgba(22,16,19,.12),rgba(22,16,19,.42)),url("../editorial/${hero.filename}")!important;background-position:center!important;background-size:cover!important}#rec${customization.heroRecord} video,#rec${customization.heroRecord} canvas{opacity:0!important;pointer-events:none!important}#rec${customization.heroRecord} img[src*="Gemini"],#rec${customization.heroRecord} img[data-original*="Gemini"]{opacity:0!important}`
     : ''
   const openerCss = page.slug === 'sacred-garden'
-    ? '#weiImg{width:100%!important;height:100%!important;max-width:none!important;object-fit:cover!important}'
-    : ''
+    ? '#weiOverlay,#weiVideoWrap{display:none!important}'
+    : page.slug === 'blossom-oud' && customization.heroRecord
+      ? `#rec${customization.heroRecord}{display:none!important}`
+      : ''
 
   return `<script id="kevents-customization-data">window.__KEVENTS_TEMPLATE=${data};</script>
 <style id="kevents-customization-style">
@@ -287,9 +291,7 @@ function customizationMarkup(page) {
   .kevents-display{font-family:var(--kevents-display)!important;font-kerning:normal!important;letter-spacing:-.018em}
   input,select,textarea,.t-submit,button{font-family:var(--kevents-sans)!important}
   img[src*="../editorial/"],img[data-original*="../editorial/"]{object-fit:cover}
-  ${heroRecordCss}
-  ${openerCss}
-</style>`
+${heroRecordCss ? `  ${heroRecordCss}\n` : ''}${openerCss ? `  ${openerCss}\n` : ''}</style>`
 }
 
 const localRuntime = `<meta name="referrer" content="no-referrer">
@@ -302,6 +304,9 @@ const localRuntime = `<meta name="referrer" content="no-referrer">
   .kevents-venue-card__eyebrow{margin:0 0 8px;font-size:11px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--kevents-accent,#665a50)}
   .kevents-venue-card__title{margin:0 0 18px;font:500 clamp(25px,5vw,42px)/1.05 var(--kevents-display,Georgia,serif)}
   .kevents-venue-card__link{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 18px;border:1px solid currentColor;border-radius:999px;color:inherit;text-decoration:none;font-size:13px;font-weight:700}
+  .kevents-traveling-rose{position:fixed;left:clamp(12px,4vw,36px);bottom:clamp(14px,5vh,46px);z-index:40;width:clamp(44px,7vw,70px);pointer-events:none;opacity:.38;transform:rotate(-12deg);filter:drop-shadow(0 5px 9px #2a14162b)}
+  .kevents-traveling-rose img{display:block;width:100%;height:auto}
+  @media (prefers-reduced-motion:reduce){.kevents-traveling-rose{left:auto!important;right:14px!important;top:auto!important;bottom:14px!important;transform:none!important;transition:none!important}}
 </style>
 <script id="kevents-local-runtime">
 (function () {
@@ -323,6 +328,66 @@ const localRuntime = `<meta name="referrer" content="no-referrer">
       audio.removeAttribute('autoplay');
       audio.setAttribute('preload', 'none');
     });
+  }
+
+  function isHiddenCustomizationVideo(video) {
+    if (!video || !video.closest) return false;
+    if (templateConfig.slug === 'sacred-garden' && video.closest('#weiVideoWrap')) return true;
+    return Boolean(templateConfig.hiddenVideoRecord && video.closest('#rec' + templateConfig.hiddenVideoRecord));
+  }
+
+  function disableHiddenVideo(video) {
+    if (!isHiddenCustomizationVideo(video)) return;
+    video.pause();
+    video.muted = true;
+    video.removeAttribute('autoplay');
+    video.removeAttribute('src');
+    video.removeAttribute('poster');
+    video.removeAttribute('data-original');
+    video.setAttribute('preload', 'none');
+    Array.prototype.forEach.call(video.querySelectorAll('source'), function (source) {
+      source.removeAttribute('src');
+      source.removeAttribute('srcset');
+      source.removeAttribute('data-original');
+    });
+    video.load();
+  }
+
+  function removeHiddenVideoSources(root) {
+    if (!root || !root.querySelectorAll) return;
+    if (root.matches && root.matches('video,source')) disableHiddenVideo(root.closest('video'));
+    Array.prototype.forEach.call(root.querySelectorAll('video'), disableHiddenVideo);
+  }
+
+  function setupTravelingRose() {
+    var rose = document.getElementById('kevents-traveling-rose');
+    if (!rose || rose.dataset.keventsReady === 'true') return;
+    rose.dataset.keventsReady = 'true';
+    var reducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reducedMotion) return;
+    rose.style.left = '0';
+    rose.style.top = '0';
+    rose.style.right = 'auto';
+    rose.style.bottom = 'auto';
+    rose.style.willChange = 'transform';
+    var queued = false;
+    function positionRose() {
+      queued = false;
+      var maxScroll = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+      var progress = Math.max(0, Math.min(1, window.scrollY / maxScroll));
+      var size = rose.getBoundingClientRect().width || 56;
+      var x = 12 + progress * Math.max(0, window.innerWidth - size - 24);
+      var y = window.innerHeight - size - 20 - progress * Math.max(0, window.innerHeight * .48);
+      rose.style.transform = 'translate3d(' + Math.round(x) + 'px,' + Math.round(y) + 'px,0) rotate(' + Math.round(-12 + progress * 24) + 'deg)';
+    }
+    function queuePosition() {
+      if (queued) return;
+      queued = true;
+      window.requestAnimationFrame(positionRose);
+    }
+    positionRose();
+    window.addEventListener('scroll', queuePosition, { passive: true });
+    window.addEventListener('resize', queuePosition, { passive: true });
   }
 
   function makeVenueCard(frame) {
@@ -361,7 +426,7 @@ const localRuntime = `<meta name="referrer" content="no-referrer">
     if (templateConfig.slug) document.body.dataset.keventsTemplate = templateConfig.slug;
     Array.prototype.forEach.call(document.querySelectorAll('[data-elem-type="text"]'), function (element) {
       var declaredSize = parseFloat(element.getAttribute('data-field-fontsize-value') || '0');
-      var text = element.textContent.replace(/\s+/g, ' ').trim();
+      var text = element.textContent.replace(/\\s+/g, ' ').trim();
       if (declaredSize >= 30 || (declaredSize >= 24 && text.length <= 40)) {
         var atom = element.querySelector('.tn-atom');
         if (atom) atom.classList.add('kevents-display');
@@ -372,8 +437,10 @@ const localRuntime = `<meta name="referrer" content="no-referrer">
         image.alt = photo.alt;
       });
     });
+    removeHiddenVideoSources(document);
     silenceSourceAudio(document);
     replaceMapFrames(document);
+    setupTravelingRose();
   }
 
   document.addEventListener('play', function (event) {
@@ -387,14 +454,24 @@ const localRuntime = `<meta name="referrer" content="no-referrer">
 
   new MutationObserver(function (mutations) {
     mutations.forEach(function (mutation) {
+      if (mutation.type === 'attributes') {
+        removeHiddenVideoSources(mutation.target);
+        return;
+      }
       Array.prototype.forEach.call(mutation.addedNodes || [], function (node) {
         if (node.nodeType !== 1) return;
+        removeHiddenVideoSources(node);
         silenceSourceAudio(node);
         replaceMapFrames(node);
         if (node.matches && node.matches('iframe[src*="google.com/maps"],iframe[src*="maps.google"]')) makeVenueCard(node);
       });
     });
-  }).observe(document.documentElement, { childList: true, subtree: true });
+  }).observe(document.documentElement, {
+    childList: true,
+    subtree: true,
+    attributes: true,
+    attributeFilter: ['src', 'srcset', 'poster', 'data-original', 'autoplay']
+  });
 
   function firstInvalidField(form) {
     var fields = form.querySelectorAll('input,select,textarea');
@@ -550,6 +627,126 @@ const localRuntime = `<meta name="referrer" content="no-referrer">
   });
 }());
 </script>`
+
+const generatedStartMarker = '<!-- kevents-generated:start -->'
+const generatedEndMarker = '<!-- kevents-generated:end -->'
+const travelingRoseMarkup = '<div id="kevents-traveling-rose" class="kevents-traveling-rose" aria-hidden="true"><img src="/images/rose-bloom-cutout.webp" alt="" width="766" height="664" loading="lazy" decoding="async" draggable="false"></div>'
+
+function setTagAttribute(tag, name, value) {
+  const attributePattern = new RegExp(`(\\s${escapeRegExp(name)}\\s*=\\s*)(?:"[^"]*"|'[^']*'|[^\\s>]+)`, 'i')
+  if (attributePattern.test(tag)) {
+    return tag.replace(attributePattern, `$1"${value}"`)
+  }
+  return tag.replace(/\/?>(?=\s*$)/, (ending) => ` ${name}="${value}"${ending}`)
+}
+
+function removeTagAttribute(tag, name) {
+  const attributePattern = new RegExp(`\\s${escapeRegExp(name)}(?:\\s*=\\s*(?:"[^"]*"|'[^']*'|[^\\s>]+))?`, 'gi')
+  return tag.replace(attributePattern, '')
+}
+
+function stripVideoNetworkSources(markup) {
+  return markup.replace(/<video\b[^>]*>[\s\S]*?<\/video>/gi, (videoMarkup) => {
+    let stripped = videoMarkup.replace(/^<video\b[^>]*>/i, (videoTag) => {
+      let updatedTag = videoTag
+      for (const attribute of ['autoplay', 'data-original', 'poster', 'src']) {
+        updatedTag = removeTagAttribute(updatedTag, attribute)
+      }
+      return setTagAttribute(updatedTag, 'preload', 'none')
+    })
+    stripped = stripped.replace(/<source\b[^>]*>/gi, (sourceTag) => {
+      let updatedTag = sourceTag
+      for (const attribute of ['data-original', 'src', 'srcset']) {
+        updatedTag = removeTagAttribute(updatedTag, attribute)
+      }
+      return updatedTag
+    })
+    return stripped.replace(/[ \t]+(?=\r?\n)/g, '')
+  })
+}
+
+function transformRecordHtml(html, recordId, transform) {
+  const recordPattern = new RegExp(`<div\\b[^>]*\\bid=(['"])rec${escapeRegExp(String(recordId))}\\1[^>]*>`, 'i')
+  const recordMatch = recordPattern.exec(html)
+  if (!recordMatch) return html
+
+  const nextRecordPattern = /<div\b[^>]*\bid=(['"])rec\d+\1[^>]*>/gi
+  nextRecordPattern.lastIndex = recordMatch.index + recordMatch[0].length
+  const nextRecord = nextRecordPattern.exec(html)
+  const recordEnd = nextRecord ? nextRecord.index : html.length
+  return `${html.slice(0, recordMatch.index)}${transform(html.slice(recordMatch.index, recordEnd))}${html.slice(recordEnd)}`
+}
+
+function stripHiddenVideoSources(page, html) {
+  const customization = templateCustomizations[page.slug]
+  let updatedHtml = html
+  if (customization?.heroRecord) {
+    updatedHtml = transformRecordHtml(updatedHtml, customization.heroRecord, stripVideoNetworkSources)
+  }
+  if (page.slug === 'sacred-garden') {
+    updatedHtml = updatedHtml.replace(
+      /<video\b(?=[^>]*\bid=['"]weiVideo['"])[^>]*>[\s\S]*?<\/video>/gi,
+      stripVideoNetworkSources,
+    )
+  }
+  return updatedHtml
+}
+
+function enhanceTemplateImages(page, html) {
+  const heroFilename = `${page.slug}-hero.webp`
+  let imageIndex = 0
+  return html.replace(/<(script|style)\b[\s\S]*?<\/\1>|<img\b[^>]*>/gi, (fragment, inertElement) => {
+    if (inertElement) return fragment
+    const currentIndex = imageIndex
+    imageIndex += 1
+    let imageTag = setTagAttribute(fragment, 'decoding', 'async')
+    const isEditorialHero = fragment.includes(`../editorial/${heroFilename}`)
+    if (currentIndex >= 6 && !isEditorialHero) imageTag = setTagAttribute(imageTag, 'loading', 'lazy')
+    return imageTag
+  })
+}
+
+function addMainLandmark(html) {
+  return html.replace(
+    /<div\b(?=[^>]*\bid=['"]allrecords['"])[^>]*>/i,
+    (tag) => setTagAttribute(tag, 'role', 'main'),
+  )
+}
+
+function addTravelingRose(html) {
+  const withoutExistingRose = html.replace(
+    /<div\b(?=[^>]*\bid=['"]kevents-traveling-rose['"])[^>]*>[\s\S]*?<\/div>\s*/gi,
+    '',
+  )
+  const bodyEnd = withoutExistingRose.toLowerCase().lastIndexOf('</body>')
+  if (bodyEnd === -1) throw new Error('Template page is missing a closing body tag')
+  return `${withoutExistingRose.slice(0, bodyEnd)}${travelingRoseMarkup}${withoutExistingRose.slice(bodyEnd)}`
+}
+
+function finalizeTemplateHtml(page, html) {
+  let updatedHtml = stripHiddenVideoSources(page, html)
+  updatedHtml = enhanceTemplateImages(page, updatedHtml)
+  updatedHtml = addMainLandmark(updatedHtml)
+  return addTravelingRose(updatedHtml)
+}
+
+function generatedMarkup(page) {
+  return `${generatedStartMarker}${customizationMarkup(page)}${localRuntime}${generatedEndMarker}`
+}
+
+function replaceGeneratedMarkup(page, html) {
+  const markedPattern = /<!-- kevents-generated:start -->[\s\S]*?<!-- kevents-generated:end -->/
+  if (markedPattern.test(html)) return html.replace(markedPattern, generatedMarkup(page))
+
+  const customizationStart = html.indexOf('<script id="kevents-customization-data">')
+  const runtimeStart = html.indexOf('<script id="kevents-local-runtime">')
+  if (customizationStart === -1 || runtimeStart === -1) {
+    throw new Error(`${page.slug}: generated customization/runtime block is missing`)
+  }
+  const runtimeEnd = html.indexOf('</script>', runtimeStart)
+  if (runtimeEnd === -1) throw new Error(`${page.slug}: generated runtime block is incomplete`)
+  return `${html.slice(0, customizationStart)}${generatedMarkup(page)}${html.slice(runtimeEnd + '</script>'.length)}`
+}
 
 async function fetchBuffer(url) {
   let lastError
@@ -713,10 +910,11 @@ function localizePage(page) {
     html = customizePageHtml(page, html)
   }
 
-  return html.replace(
+  const localizedHtml = html.replace(
     /<head>/i,
-    `<head><!-- Local mirror generated from ${page.source}. See templates.json for source metadata. -->${customizationMarkup(page)}${localRuntime}`,
+    `<head><!-- Local mirror generated from ${page.source}. See templates.json for source metadata. -->${generatedMarkup(page)}`,
   )
+  return page.slug === catalog.slug ? localizedHtml : finalizeTemplateHtml(page, localizedHtml)
 }
 
 async function writeAsset(asset) {
@@ -777,6 +975,17 @@ async function mapWithConcurrency(items, limit, task) {
 
   await Promise.all(Array.from({ length: Math.min(limit, items.length) }, worker))
   return results
+}
+
+async function refreshGeneratedPages() {
+  await loadEditorialFonts()
+  for (const page of templates) {
+    const pagePath = path.join(templateRoot, page.slug, 'index.html')
+    const currentHtml = await readFile(pagePath, 'utf8')
+    const refreshedHtml = finalizeTemplateHtml(page, replaceGeneratedMarkup(page, currentHtml))
+    await writeFile(pagePath, refreshedHtml)
+  }
+  console.log(`Refreshed generated markup for ${templates.length} templates without network access.`)
 }
 
 async function main() {
@@ -921,4 +1130,5 @@ async function main() {
   }
 }
 
-await main()
+if (refreshGenerated) await refreshGeneratedPages()
+else await main()

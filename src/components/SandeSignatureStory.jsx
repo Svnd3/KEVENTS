@@ -1,4 +1,5 @@
 import { useEffect, useId, useMemo, useRef, useState } from 'react'
+import { submitRsvp } from '../utils/submitRsvp.js'
 import '../sande-signature-story.css'
 
 const FALLBACK_DATE = '2027-10-16T15:00:00+03:00'
@@ -131,38 +132,66 @@ function Countdown({ date }) {
   )
 }
 
-function RsvpForm({ first, second }) {
+function RsvpForm({ design, first, second }) {
   const formId = useId()
   const [attending, setAttending] = useState('yes')
+  const [status, setStatus] = useState('idle')
   const [response, setResponse] = useState(null)
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault()
-    const data = new FormData(event.currentTarget)
-    const fullName = String(data.get('fullName') || '').trim()
+    if (status === 'sending') return
+
+    const form = event.currentTarget
+    const data = new FormData(form)
+    const fullName = String(data.get('name') || '').trim()
     if (!fullName) return
-    setResponse({
-      firstName: fullName.split(/\s+/)[0],
-      attending: data.get('attendance') === 'yes',
-    })
+
+    setStatus('sending')
+    try {
+      const result = await submitRsvp(form, design?.name, {
+        name: fullName,
+        eventType: design?.eventType || 'Wedding',
+      })
+      setResponse({
+        firstName: fullName.split(/\s+/)[0],
+        attending: data.get('attendance') === 'yes',
+        demo: result.demo,
+      })
+      setStatus('success')
+    } catch {
+      setStatus('error')
+    }
   }
 
-  if (response) {
+  if (status === 'success' && response) {
     return (
       <div className="ss-rsvp-success" role="status" aria-live="polite">
         <span aria-hidden="true">✓</span>
-        <h3>{response.attending ? `You’re on the list, ${response.firstName}.` : `We’ll miss you, ${response.firstName}.`}</h3>
-        <p>{response.attending ? 'Bring your best shoes. We have plans for the dance floor.' : `${first} and ${second} will save you a slice in spirit.`}</p>
-        <button type="button" onClick={() => setResponse(null)}>Change response</button>
+        <h3>
+          {response.demo
+            ? `Preview complete, ${response.firstName}.`
+            : response.attending
+              ? `You’re on the list, ${response.firstName}.`
+              : `We’ll miss you, ${response.firstName}.`}
+        </h3>
+        <p>
+          {response.demo
+            ? 'This was a demo response and was not sent.'
+            : response.attending
+              ? 'Your RSVP was sent. Bring your best shoes — we have plans for the dance floor.'
+              : `Your reply was sent. ${first} and ${second} will save you a slice in spirit.`}
+        </p>
+        <button type="button" onClick={() => { setResponse(null); setStatus('idle') }}>Change response</button>
       </div>
     )
   }
 
   return (
-    <form className="ss-rsvp-form" onSubmit={handleSubmit}>
+    <form className="ss-rsvp-form" onSubmit={handleSubmit} aria-busy={status === 'sending'}>
       <label className="ss-rsvp-field" htmlFor={`${formId}-name`}>
         <span>Your name</span>
-        <input id={`${formId}-name`} name="fullName" type="text" autoComplete="name" placeholder="First and last name" required />
+        <input id={`${formId}-name`} name="name" type="text" autoComplete="name" placeholder="First and last name" required />
       </label>
 
       <fieldset className="ss-rsvp-attendance">
@@ -194,8 +223,11 @@ function RsvpForm({ first, second }) {
         <textarea id={`${formId}-note`} name="note" rows="3" placeholder="A message, a song request, or both" />
       </label>
 
-      <button className="ss-rsvp-submit" type="submit">
-        <span>Send RSVP</span>
+      {status === 'error' && (
+        <p className="ss-rsvp-error" role="alert">Your RSVP could not be sent. Check your connection and try again.</p>
+      )}
+      <button className="ss-rsvp-submit" type="submit" disabled={status === 'sending'}>
+        <span>{status === 'sending' ? 'Sending RSVP…' : 'Send RSVP'}</span>
         <ArrowIcon />
       </button>
     </form>
@@ -446,7 +478,7 @@ export default function SandeSignatureStory({
           <p>Tell us by 20 September. We promise not to guess the catering numbers.</p>
         </div>
         <div className="ss-rsvp__card" data-ss-reveal>
-          <RsvpForm first={first} second={second} />
+          <RsvpForm design={design} first={first} second={second} />
         </div>
       </section>
 

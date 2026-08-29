@@ -10,6 +10,12 @@ export const cinematicWeddingTemplates = {
     city: 'Nairobi, Kenya',
     video: '/media/love-in-transit-reel.mp4',
     poster: '/images/love-in-transit-poster.webp',
+    roseJourney: {
+      asset: '/images/rose-stem-cutout.webp',
+      kind: 'stem',
+      path: 'sweep',
+      opacity: 0.58,
+    },
     videoCues: [0.033602, 0.134409, 0.235215, 0.336021, 0.436828, 0.537634, 0.638441, 0.739247, 0.840054, 0.907258, 0.974462],
     planMotion: 'arc',
     music: {
@@ -117,6 +123,13 @@ export const cinematicWeddingTemplates = {
     city: 'Nairobi, Kenya',
     video: '/media/scarlet-hour-reel.mp4',
     poster: '/images/scarlet-hour-poster.webp',
+    roseJourney: {
+      asset: '/images/rose-bloom-cutout.webp',
+      kind: 'bloom',
+      path: 'drift',
+      mirror: true,
+      opacity: 0.54,
+    },
     videoCues: [0.013935, 0.069677, 0.139353, 0.222965, 0.292642, 0.39019, 0.515608, 0.641026, 0.738573, 0.877926, 0.989409],
     planMotion: 'arc',
     music: {
@@ -224,6 +237,13 @@ export const cinematicWeddingTemplates = {
     city: 'Nairobi, Kenya',
     video: '/media/velvet-signal-reel.mp4',
     poster: '/images/velvet-signal-poster.webp',
+    roseJourney: {
+      asset: '/images/rose-stem-cutout.webp',
+      kind: 'stem',
+      path: 'drift',
+      mirror: true,
+      opacity: 0.52,
+    },
     videoCues: [0.02, 0.116, 0.212, 0.308, 0.404, 0.5, 0.596, 0.692, 0.788, 0.884, 0.98],
     planMotion: 'arc',
     music: {
@@ -331,6 +351,12 @@ export const cinematicWeddingTemplates = {
     city: 'Nairobi, Kenya',
     video: '/media/heart-parade-reel.mp4',
     poster: '/images/heart-parade-poster.webp',
+    roseJourney: {
+      asset: '/images/rose-bloom-cutout.webp',
+      kind: 'bloom',
+      path: 'sweep',
+      opacity: 0.6,
+    },
     videoCues: [0.02, 0.116, 0.212, 0.308, 0.404, 0.5, 0.596, 0.692, 0.788, 0.884, 0.98],
     planMotion: 'arc',
     music: {
@@ -438,6 +464,13 @@ export const cinematicWeddingTemplates = {
     city: 'Naivasha, Kenya',
     video: '/media/up-up-always-reel.mp4',
     poster: '/images/up-up-always-poster.webp',
+    roseJourney: {
+      asset: '/images/rose-stem-cutout.webp',
+      kind: 'stem',
+      path: 'sweep',
+      mirror: true,
+      opacity: 0.48,
+    },
     videoCues: [0.02, 0.116, 0.212, 0.308, 0.404, 0.5, 0.596, 0.692, 0.788, 0.884, 0.98],
     planMotion: 'arc',
     music: {

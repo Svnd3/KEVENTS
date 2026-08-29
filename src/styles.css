@@ -1595,6 +1595,7 @@ img {
 .category-list button,
 .filter-toggle {
   flex: 0 0 auto;
+  min-height: 42px;
   padding: 10px 14px;
   border-radius: 999px;
   background: transparent;
@@ -1624,6 +1625,29 @@ img {
   align-items: center;
   gap: 16px;
   padding: 14px 0;
+}
+
+.catalog-results {
+  display: flex;
+  min-height: 42px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 12px;
+  color: #6f706b;
+  font-size: 11px;
+  font-weight: 650;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.catalog-results button {
+  padding: 8px 0;
+  border-bottom: 1px solid currentColor;
+  color: var(--ink);
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
 }
 
 .search-field {

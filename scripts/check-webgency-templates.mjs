@@ -8,6 +8,7 @@ const mirrorRoot = path.join(projectRoot, 'public', 'templates', 'webgency')
 const assetRoot = path.join(mirrorRoot, 'assets')
 const editorialRoot = path.join(mirrorRoot, 'editorial')
 const coverRoot = path.join(projectRoot, 'public', 'images', 'webgency')
+const travelingRosePath = path.join(projectRoot, 'public', 'images', 'rose-bloom-cutout.webp')
 const expectedSlugs = [
   'sacred-garden',
   'blossom-oud',
@@ -26,6 +27,12 @@ const expectedPhotoRoles = ['hero', 'detail']
 const expectedEditorialFilenames = expectedSlugs.flatMap((slug) => (
   expectedPhotoRoles.map((role) => `${slug}-${role}.webp`)
 ))
+const hiddenVideoRecords = new Map([
+  ['blossom-oud', '2443433693'],
+  ['dolce-vita', '2442650993'],
+  ['vibrant-vows', '2049114373'],
+  ['royal-gold', '2225136913'],
+])
 const failures = []
 let checkedReferences = 0
 
@@ -96,7 +103,33 @@ function readWebpDimensions(filePath) {
   return null
 }
 
+function markupWithoutInertContent(html) {
+  return html
+    .replace(/<!--[\s\S]*?-->/g, '')
+    .replace(/<(script|style)\b[\s\S]*?<\/\1>/gi, '')
+}
+
+function findRecordHtml(html, recordId) {
+  const recordPattern = new RegExp(`<div\\b[^>]*\\bid=(['"])rec${recordId}\\1[^>]*>`, 'i')
+  const recordMatch = recordPattern.exec(html)
+  if (!recordMatch) return null
+  const nextRecordPattern = /<div\b[^>]*\bid=(['"])rec\d+\1[^>]*>/gi
+  nextRecordPattern.lastIndex = recordMatch.index + recordMatch[0].length
+  const nextRecord = nextRecordPattern.exec(html)
+  return html.slice(recordMatch.index, nextRecord ? nextRecord.index : html.length)
+}
+
+function videoHasNetworkSource(videoMarkup) {
+  const videoTag = videoMarkup.match(/^<video\b[^>]*>/i)?.[0] || ''
+  if (/\s(?:src|poster|data-original)\s*=/i.test(videoTag)) return true
+  return [...videoMarkup.matchAll(/<source\b[^>]*>/gi)].some((match) => (
+    /\s(?:src|srcset|data-original)\s*=/i.test(match[0])
+  ))
+}
+
 const templateHtml = new Map()
+
+if (!isNonemptyFile(travelingRosePath)) fail(`Missing traveling rose asset: ${travelingRosePath}`)
 
 for (const slug of ['catalog', ...expectedSlugs]) {
   const pagePath = path.join(mirrorRoot, slug, 'index.html')
@@ -118,6 +151,61 @@ for (const slug of ['catalog', ...expectedSlugs]) {
   if (slug !== 'catalog') {
     if (!/<html\b[^>]*\blang=["']en["']/i.test(html)) fail(`${slug}: html language is not English`)
     if (!html.includes('id="kevents-customization-data"')) fail(`${slug}: customization marker is missing`)
+    if (!html.includes('<!-- kevents-generated:start -->') || !html.includes('<!-- kevents-generated:end -->')) {
+      fail(`${slug}: generated block markers are missing`)
+    }
+    if (!html.includes('"hiddenVideoRecord":')) fail(`${slug}: hidden-video configuration is missing`)
+    if (!html.includes('function removeHiddenVideoSources(root)')) fail(`${slug}: hidden-video runtime cleanup is missing`)
+    if (!html.includes('attributes: true') || !html.includes("attributeFilter: ['src', 'srcset', 'poster', 'data-original', 'autoplay']")) {
+      fail(`${slug}: hidden-video source mutation guard is missing`)
+    }
+    if (!html.includes("textContent.replace(/\\s+/g, ' ')")) fail(`${slug}: whitespace normalization regex is malformed`)
+    if (html.includes("textContent.replace(/s+/g, ' ')")) fail(`${slug}: broken whitespace normalization regex remains`)
+    if (!html.includes('function setupTravelingRose()')) fail(`${slug}: traveling rose runtime is missing`)
+    if (!html.includes('@media (prefers-reduced-motion:reduce)')) fail(`${slug}: traveling rose does not respect reduced motion`)
+
+    const markupHtml = markupWithoutInertContent(html)
+    const mainTag = markupHtml.match(/<div\b(?=[^>]*\bid=["']allrecords["'])[^>]*>/i)?.[0]
+    if (!mainTag || !/\srole=["']main["']/i.test(mainTag)) fail(`${slug}: #allrecords is not a main landmark`)
+
+    const roseCount = [...markupHtml.matchAll(/\bid=["']kevents-traveling-rose["']/gi)].length
+    if (roseCount !== 1) fail(`${slug}: expected one traveling rose, found ${roseCount}`)
+    if (!/<div\b(?=[^>]*\bid=["']kevents-traveling-rose["'])(?=[^>]*\baria-hidden=["']true["'])[^>]*>/i.test(markupHtml)) {
+      fail(`${slug}: traveling rose is not decorative for assistive technology`)
+    }
+    if (!/<img\b(?=[^>]*\bsrc=["']\/images\/rose-bloom-cutout\.webp["'])(?=[^>]*\bloading=["']lazy["'])(?=[^>]*\bdecoding=["']async["'])[^>]*>/i.test(markupHtml)) {
+      fail(`${slug}: traveling rose image markup is incomplete`)
+    }
+
+    const imageTags = [...markupHtml.matchAll(/<img\b[^>]*>/gi)].map((match) => match[0])
+    imageTags.forEach((imageTag, index) => {
+      if (!/\sdecoding=["']async["']/i.test(imageTag)) fail(`${slug}: image ${index + 1} does not decode asynchronously`)
+      const isEditorialHero = imageTag.includes(`../editorial/${slug}-hero.webp`)
+      if (index >= 6 && !isEditorialHero && !/\sloading=["']lazy["']/i.test(imageTag)) {
+        fail(`${slug}: below-fold image ${index + 1} is not lazy-loaded`)
+      }
+    })
+
+    if (slug === 'sacred-garden') {
+      if (!html.includes('#weiOverlay,#weiVideoWrap{display:none!important}')) fail(`${slug}: native opener is not disabled`)
+      const openerVideo = html.match(/<video\b(?=[^>]*\bid=["']weiVideo["'])[^>]*>[\s\S]*?<\/video>/i)?.[0]
+      if (!openerVideo) fail(`${slug}: native opener video marker is missing`)
+      else if (videoHasNetworkSource(openerVideo)) fail(`${slug}: native opener video still has a network source`)
+    }
+    if (slug === 'blossom-oud' && !html.includes('#rec2443433693{display:none!important}')) {
+      fail(`${slug}: native opener is not disabled`)
+    }
+
+    const hiddenVideoRecord = hiddenVideoRecords.get(slug)
+    if (hiddenVideoRecord) {
+      const recordHtml = findRecordHtml(markupHtml, hiddenVideoRecord)
+      if (!recordHtml) fail(`${slug}: hidden video record ${hiddenVideoRecord} is missing`)
+      else {
+        for (const video of recordHtml.matchAll(/<video\b[^>]*>[\s\S]*?<\/video>/gi)) {
+          if (videoHasNetworkSource(video[0])) fail(`${slug}: hidden video record ${hiddenVideoRecord} still has a network source`)
+        }
+      }
+    }
     if (untranslatedCopyPattern.test(html)) fail(`${slug}: untranslated invitation copy remains`)
     if (unfinishedCopyPattern.test(html)) fail(`${slug}: unfinished invitation copy remains`)
   }

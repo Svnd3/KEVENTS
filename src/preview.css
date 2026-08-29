@@ -5,6 +5,45 @@
   font-family: "Inter Local", Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
+.tp-story-loading {
+  display: grid;
+  min-height: 100vh;
+  place-items: center;
+  padding: 32px;
+  color: #66665f;
+  background: #f7f6f1;
+  font: 600 13px/1.5 "Inter Local", Inter, ui-sans-serif, system-ui, sans-serif;
+}
+
+.tp-rose-journey {
+  position: fixed;
+  z-index: 45;
+  top: 50%;
+  left: 50%;
+  display: block;
+  width: min(32vw, 330px);
+  max-width: none;
+  opacity: .32;
+  pointer-events: none;
+  user-select: none;
+  transform: translate(-50%, -50%) translate3d(37vw, 21vh, 0) rotate(76deg) scale(.72);
+  transform-origin: 50% 50%;
+  filter: drop-shadow(0 14px 18px rgb(35 10 18 / 18%));
+}
+
+.tp-rose-journey--bloom {
+  width: min(15vw, 165px);
+  transform: translate(-50%, -50%) translate3d(39vw, 20vh, 0) rotate(-15deg) scale(.78);
+}
+
+.tp-rose-journey.is-moving {
+  will-change: transform;
+}
+
+.tp-rose-host {
+  position: relative;
+}
+
 .tp-soundtrack {
   position: fixed;
   z-index: 90;
@@ -55,6 +94,35 @@
 @keyframes tp-sound-wave {
   from { opacity: .25; }
   to { opacity: 1; }
+}
+
+@media (max-width: 680px) {
+  .tp-rose-journey {
+    width: min(48vw, 220px);
+    opacity: .28;
+    filter: none;
+  }
+
+  .tp-rose-journey--bloom {
+    width: min(25vw, 120px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tp-rose-journey {
+    top: auto;
+    right: -7vw;
+    bottom: 4vh;
+    left: auto;
+    opacity: .2;
+    transform: rotate(-18deg) scale(.72);
+    filter: none;
+  }
+
+  .tp-rose-journey--bloom {
+    right: -2vw;
+    transform: rotate(14deg) scale(.76);
+  }
 }
 
 .template-preview *,
@@ -187,10 +255,28 @@
   width: 100%;
   height: 100%;
   place-items: center;
+  align-content: center;
+  gap: 14px;
   padding: 32px;
   color: #66665f;
   font-size: 14px;
   text-align: center;
+}
+
+.tp-embedded__status button {
+  min-height: 42px;
+  padding: 0 18px;
+  border: 1px solid #d8d8d2;
+  border-radius: 999px;
+  color: #fff;
+  background: #111210;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.tp-embedded__status button:focus-visible {
+  outline: 2px solid #315bea;
+  outline-offset: 3px;
 }
 
 @media (max-width: 680px) {

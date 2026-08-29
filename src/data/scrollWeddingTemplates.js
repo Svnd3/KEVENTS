@@ -93,7 +93,7 @@ export const scrollWeddingTemplates = {
     },
     rose: '/images/rose-bloom-cutout.webp',
     roseKind: 'bloom',
-    persistentRose: false,
+    persistentRose: true,
     dayPlanMotion: 'stack',
     mapTone: 'night',
     mapEmbed: 'https://www.openstreetmap.org/export/embed.html?bbox=36.7700%2C-1.3150%2C36.8420%2C-1.2480&layer=mapnik&marker=-1.2833%2C36.8172',

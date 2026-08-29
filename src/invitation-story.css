@@ -572,6 +572,20 @@
   margin-top: 5px;
 }
 
+.is-rsvp__form > button:disabled {
+  cursor: wait;
+  opacity: .65;
+}
+
+.is-rsvp .is-rsvp__error {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 650;
+  letter-spacing: 0;
+  line-height: 1.5;
+  text-transform: none;
+}
+
 .is-rsvp__confirmation {
   display: grid;
   width: min(520px, 100%);

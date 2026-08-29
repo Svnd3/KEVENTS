@@ -142,10 +142,14 @@
   max-width: none;
   opacity: var(--rose-opacity, 1);
   pointer-events: none;
+  user-select: none;
   transform: translate(-50%, -50%) translate3d(var(--rose-x, -54vw), var(--rose-y, 34vh), 0) rotate(var(--rose-turn, -12deg)) scale(var(--rose-scale, 1));
   transform-origin: 50% 50%;
-  will-change: transform, opacity;
   filter: drop-shadow(0 22px 22px rgb(24 8 15 / 24%));
+}
+
+.sw-film__rose.is-rose-moving {
+  will-change: transform, opacity;
 }
 
 .sw-film__rose--bloom {
@@ -2390,17 +2394,24 @@
   }
 }
 
-/* Soft Launch travelling rose ----------------------------------------- */
+/* Travelling rose ------------------------------------------------------ */
 .sw-film-bg__video { z-index: 1; }
 .sw-film-bg__scrim { z-index: 3; }
 .sw-film-bg__grain { z-index: 4; }
 
-.sw-story--soft-launch {
+.sw-story[data-rose-journey] {
   --rose-x: 30vw;
   --rose-y: -1vh;
   --rose-turn: 90deg;
   --rose-scale: .85;
   --rose-opacity: 1;
+}
+
+.sw-story[data-rose-journey="bloom"] {
+  --rose-x: 31vw;
+  --rose-y: 2vh;
+  --rose-turn: -18deg;
+  --rose-scale: .82;
 }
 
 .sw-film-bg__rose.sw-film__rose {
@@ -2411,6 +2422,11 @@
   mix-blend-mode: normal;
 }
 
+.sw-film-bg__rose.sw-film__rose--bloom {
+  width: min(38vw, 510px, 58svh);
+}
+
+/* Soft Launch's clear-film treatment --------------------------------- */
 .sw-story--soft-launch .sw-film__stage::before,
 .sw-story--soft-launch .sw-note::before,
 .sw-story--soft-launch .sw-map::before,
@@ -2529,12 +2545,21 @@
     mix-blend-mode: normal;
   }
 
-  .sw-story--soft-launch {
+  .sw-story[data-rose-journey] {
     --rose-x: 26.4vw;
+  }
+
+  .sw-story[data-rose-journey="bloom"] {
+    --rose-x: 28vw;
+    --rose-y: 3vh;
   }
 
   .sw-film-bg__rose.sw-film__rose {
     width: 98vw;
+  }
+
+  .sw-film-bg__rose.sw-film__rose--bloom {
+    width: min(62vw, 480px);
   }
 
   .sw-plan__stack--orbit {
@@ -2574,13 +2599,14 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .sw-story--soft-launch.is-reduced-motion .sw-film-bg__rose.sw-film__rose {
+  .sw-story[data-rose-journey].is-reduced-motion .sw-film-bg__rose.sw-film__rose {
     top: 50%;
     right: auto;
     bottom: auto;
     left: 50%;
     opacity: 1;
     transform: translate(-50%, -50%) translate3d(var(--rose-x), var(--rose-y), 0) rotate(var(--rose-turn)) scale(var(--rose-scale));
+    will-change: auto;
     filter: none;
   }
 }

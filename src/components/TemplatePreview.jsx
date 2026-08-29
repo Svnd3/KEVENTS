@@ -1,14 +1,29 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react'
 import { formatPrice } from '../data/designs.js'
-import { scrollWeddingVariants } from '../data/scrollWeddingTemplates.js'
-import { cinematicWeddingVariants } from '../data/cinematicWeddingTemplates.js'
+import { scrollWeddingTemplates, scrollWeddingVariants } from '../data/scrollWeddingTemplates.js'
+import { cinematicWeddingTemplates, cinematicWeddingVariants } from '../data/cinematicWeddingTemplates.js'
 import { getSoundtrack } from '../data/soundtracks.js'
-import InvitationStory from './InvitationStory.jsx'
+import RoseJourney from './RoseJourney.jsx'
 import SponsaliaEnvelopeIntro from './SponsaliaEnvelopeIntro.jsx'
-import SandeSignatureStory from './SandeSignatureStory.jsx'
-import ScrollWeddingStory from './ScrollWeddingStory.jsx'
-import CinematicWeddingStory from './CinematicWeddingStory.jsx'
 import '../preview.css'
+
+const loadInvitationStory = () => import('./InvitationStory.jsx')
+const loadSandeSignatureStory = () => import('./SandeSignatureStory.jsx')
+const loadScrollWeddingStory = () => import('./ScrollWeddingStory.jsx')
+const loadCinematicWeddingStory = () => import('./CinematicWeddingStory.jsx')
+
+const InvitationStory = lazy(loadInvitationStory)
+const SandeSignatureStory = lazy(loadSandeSignatureStory)
+const ScrollWeddingStory = lazy(loadScrollWeddingStory)
+const CinematicWeddingStory = lazy(loadCinematicWeddingStory)
+
+function warmImages(sources) {
+  sources.filter(Boolean).forEach((src) => {
+    const image = new window.Image()
+    image.decoding = 'async'
+    image.src = src
+  })
+}
 
 function BackIcon() {
   return (
@@ -37,11 +52,49 @@ function SoundIcon({ playing }) {
   )
 }
 
+function PreviewToolbar({ design, onBack, onEnquire }) {
+  return (
+    <nav className="tp-toolbar" aria-label="Invitation preview controls">
+      <button className="tp-toolbar__back" type="button" onClick={onBack} aria-label="Back to all designs">
+        <BackIcon />
+        <span>All designs</span>
+      </button>
+
+      <div className="tp-toolbar__title">
+        <strong>{design.name}</strong>
+        <span>{formatPrice(design.price)}</span>
+      </div>
+
+      <button className="tp-toolbar__use" type="button" onClick={() => onEnquire?.(design)} aria-label={`Use ${design.name} design`}>
+        <span>Use this design</span>
+        <ArrowIcon />
+      </button>
+    </nav>
+  )
+}
+
+function SoundtrackButton({ isPlaying, onToggle, soundtrack }) {
+  return (
+    <button
+      className={`tp-soundtrack${isPlaying ? ' is-playing' : ''}`}
+      type="button"
+      onClick={onToggle}
+      aria-pressed={isPlaying}
+      aria-label={`${isPlaying ? 'Pause' : 'Play'} ${soundtrack.title}`}
+      title={soundtrack.title}
+    >
+      <SoundIcon playing={isPlaying} />
+      <span>{isPlaying ? 'Sound on' : 'Play song'}</span>
+    </button>
+  )
+}
+
 export default function TemplatePreview({ design, onBack, onEnquire }) {
   const [introComplete, setIntroComplete] = useState(false)
   const [isMusicPlaying, setIsMusicPlaying] = useState(false)
   const [embeddedHtml, setEmbeddedHtml] = useState('')
   const [embeddedError, setEmbeddedError] = useState('')
+  const [embeddedAttempt, setEmbeddedAttempt] = useState(0)
   const audioRef = useRef(null)
   const embeddedFrameRef = useRef(null)
   const bridgeTokenRef = useRef('')
@@ -53,16 +106,9 @@ export default function TemplatePreview({ design, onBack, onEnquire }) {
   useEffect(() => {
     setIntroComplete(false)
     setIsMusicPlaying(false)
+    setEmbeddedAttempt(0)
     window.scrollTo({ top: 0, behavior: 'auto' })
   }, [design?.slug])
-
-  useEffect(() => {
-    if (!isSandeSignature) return
-    ;['/images/wedding-couple.webp', '/images/wedding-celebration.webp'].forEach((src) => {
-      const image = new window.Image()
-      image.src = src
-    })
-  }, [isSandeSignature])
 
   useEffect(() => {
     const player = audioRef.current
@@ -91,6 +137,8 @@ export default function TemplatePreview({ design, onBack, onEnquire }) {
     setEmbeddedHtml('')
     setEmbeddedError('')
 
+    const requestTimeout = window.setTimeout(() => controller.abort('timeout'), 15000)
+
     fetch(templateUrl, { credentials: 'same-origin', signal: controller.signal })
       .then((response) => {
         if (!response.ok) throw new Error(`Template request failed (${response.status})`)
@@ -98,6 +146,7 @@ export default function TemplatePreview({ design, onBack, onEnquire }) {
       })
       .then((source) => {
         if (controller.signal.aborted) return
+        window.clearTimeout(requestTimeout)
         const escapedBase = templateBase.replaceAll('&', '&amp;').replaceAll('"', '&quot;')
         let html = source.replaceAll('__KEVENTS_BRIDGE_TOKEN__', token)
         html = html.replace(/<head\b[^>]*>/i, (head) => `${head}<base href="${escapedBase}">`)
@@ -108,16 +157,24 @@ export default function TemplatePreview({ design, onBack, onEnquire }) {
         setEmbeddedHtml(html)
       })
       .catch((error) => {
-        if (error.name !== 'AbortError') setEmbeddedError('This invitation preview could not be loaded.')
+        window.clearTimeout(requestTimeout)
+        if (controller.signal.reason === 'timeout') {
+          setEmbeddedError('This invitation preview took too long to load.')
+        } else if (error.name !== 'AbortError') {
+          setEmbeddedError('This invitation preview could not be loaded.')
+        }
       })
 
-    return () => controller.abort()
-  }, [design?.slug, design?.templatePath])
+    return () => {
+      window.clearTimeout(requestTimeout)
+      controller.abort()
+    }
+  }, [design?.slug, design?.templatePath, embeddedAttempt])
 
   useEffect(() => {
     if (!design?.templatePath) return undefined
 
-    const endpoint = import.meta.env.VITE_RSVP_ENDPOINT
+    const endpoint = import.meta.env.VITE_RSVP_ENDPOINT || import.meta.env.VITE_ENQUIRY_ENDPOINT
     const handleMessage = async (event) => {
       if (event.source !== embeddedFrameRef.current?.contentWindow) return
       if (event.origin !== 'null') return
@@ -182,9 +239,27 @@ export default function TemplatePreview({ design, onBack, onEnquire }) {
   const startMusic = useCallback(() => {
     const player = audioRef.current
     if (!player) return
-    player.volume = 0.28
+    player.volume = soundtrack.volume ?? 0.28
     player.play().catch(() => setIsMusicPlaying(false))
-  }, [])
+  }, [soundtrack.volume])
+
+  const preparePreview = useCallback(() => {
+    startMusic()
+    if (design?.templatePath) return
+    if (isCinematicWedding) {
+      const config = cinematicWeddingTemplates[design.variant]
+      warmImages([config?.poster, config?.roseJourney?.asset])
+      loadCinematicWeddingStory()
+    } else if (isScrollWedding) {
+      const config = scrollWeddingTemplates[design.variant]
+      warmImages([config?.poster, config?.rose])
+      loadScrollWeddingStory()
+    } else if (isSandeSignature) {
+      warmImages(['/images/wedding-couple.webp', '/images/wedding-celebration.webp'])
+      loadSandeSignatureStory()
+    }
+    else loadInvitationStory()
+  }, [design?.templatePath, design?.variant, isCinematicWedding, isSandeSignature, isScrollWedding, startMusic])
 
   const toggleMusic = useCallback(() => {
     const player = audioRef.current
@@ -223,148 +298,82 @@ export default function TemplatePreview({ design, onBack, onEnquire }) {
     return () => observer.disconnect()
   }, [design?.slug, introComplete])
 
+  useEffect(() => {
+    if (!introComplete) return undefined
+    window.scrollTo({ top: 0, behavior: 'auto' })
+    const frame = window.requestAnimationFrame(() => {
+      document.getElementById('main-content')?.focus({ preventScroll: true })
+    })
+    return () => window.cancelAnimationFrame(frame)
+  }, [design?.slug, introComplete])
+
   if (!design) return null
 
   const envelopeIntro = !introComplete ? (
     <SponsaliaEnvelopeIntro
       design={design}
+      onBack={onBack}
       onComplete={() => setIntroComplete(true)}
-      onUserGesture={startMusic}
+      onUserGesture={preparePreview}
     />
   ) : null
 
+  let previewContent = null
+
   if (design.templatePath) {
-    return (
-      <>
-        {envelopeIntro}
-        <div className="template-preview template-preview--embedded">
-          <nav className="tp-toolbar" aria-label="Invitation preview controls">
-            <button className="tp-toolbar__back" type="button" onClick={onBack} aria-label="Back to all designs">
-              <BackIcon />
-              <span>All designs</span>
-            </button>
+    previewContent = introComplete ? (
+      <div className="template-preview template-preview--embedded">
+        <PreviewToolbar design={design} onBack={onBack} onEnquire={onEnquire} />
 
-            <div className="tp-toolbar__title">
-              <strong>{design.name}</strong>
-              <span>{formatPrice(design.price)}</span>
+        <main id="main-content" className="tp-embedded" tabIndex={-1}>
+          {embeddedHtml ? (
+            <iframe
+              key={design.slug}
+              ref={embeddedFrameRef}
+              className="tp-embedded__frame"
+              srcDoc={embeddedHtml}
+              title={`${design.name} invitation preview`}
+              allow="autoplay; fullscreen"
+              sandbox="allow-scripts allow-modals allow-presentation"
+            />
+          ) : (
+            <div className="tp-embedded__status" role={embeddedError ? 'alert' : 'status'}>
+              <span>{embeddedError || 'Loading invitation preview…'}</span>
+              {embeddedError && (
+                <button type="button" onClick={() => setEmbeddedAttempt((attempt) => attempt + 1)}>
+                  Retry preview
+                </button>
+              )}
             </div>
+          )}
+        </main>
 
-            <button className="tp-toolbar__use" type="button" onClick={() => onEnquire?.(design)} aria-label={`Use ${design.name} design`}>
-              <span>Use this design</span>
-              <ArrowIcon />
-            </button>
-          </nav>
-
-          <main id="main-content" className="tp-embedded" tabIndex={-1}>
-            {embeddedHtml ? (
-              <iframe
-                key={design.slug}
-                ref={embeddedFrameRef}
-                className="tp-embedded__frame"
-                srcDoc={embeddedHtml}
-                title={`${design.name} invitation preview`}
-                allow="autoplay; fullscreen"
-                sandbox="allow-scripts allow-modals allow-presentation"
-              />
-            ) : (
-              <div className="tp-embedded__status" role={embeddedError ? 'alert' : 'status'}>
-                {embeddedError || 'Loading invitation preview…'}
-              </div>
-            )}
-          </main>
-
-          <button
-            className={`tp-soundtrack${isMusicPlaying ? ' is-playing' : ''}`}
-            type="button"
-            onClick={toggleMusic}
-            aria-pressed={isMusicPlaying}
-            aria-label={`${isMusicPlaying ? 'Pause' : 'Play'} ${soundtrack.title}`}
-            title={soundtrack.title}
-          >
-            <SoundIcon playing={isMusicPlaying} />
-            <span>{isMusicPlaying ? 'Sound on' : 'Play song'}</span>
-          </button>
-
-          <audio
-            ref={audioRef}
-            src={soundtrack.src}
-            preload="none"
-            loop
-            onPlay={(event) => {
-              event.currentTarget.volume = soundtrack.volume ?? 0.28
-              setIsMusicPlaying(true)
-            }}
-            onPause={() => setIsMusicPlaying(false)}
-          />
-        </div>
-      </>
-    )
-  }
-
-  if (isCinematicWedding) {
-    return (
-      <>
-        {envelopeIntro}
-        <div className={`template-preview template-preview--cinematic-new template-preview--${design.variant}`}>
-          <nav className="tp-toolbar" aria-label="Invitation preview controls">
-            <button className="tp-toolbar__back" type="button" onClick={onBack} aria-label="Back to all designs">
-              <BackIcon />
-              <span>All designs</span>
-            </button>
-
-            <div className="tp-toolbar__title">
-              <strong>{design.name}</strong>
-              <span>{formatPrice(design.price)}</span>
-            </div>
-
-            <button className="tp-toolbar__use" type="button" onClick={() => onEnquire?.(design)} aria-label={`Use ${design.name} design`}>
-              <span>Use this design</span>
-              <ArrowIcon />
-            </button>
-          </nav>
-
-          <main id="main-content" tabIndex={-1}>
-            <CinematicWeddingStory design={design} />
-          </main>
-        </div>
-      </>
-    )
-  }
-
-  if (isScrollWedding) {
-    return (
-      <>
-        {envelopeIntro}
-        <div className="template-preview template-preview--scroll">
-          <nav className="tp-toolbar" aria-label="Invitation preview controls">
-            <button className="tp-toolbar__back" type="button" onClick={onBack} aria-label="Back to all designs">
-              <BackIcon />
-              <span>All designs</span>
-            </button>
-
-            <div className="tp-toolbar__title">
-              <strong>{design.name}</strong>
-              <span>{formatPrice(design.price)}</span>
-            </div>
-
-            <button className="tp-toolbar__use" type="button" onClick={() => onEnquire?.(design)} aria-label={`Use ${design.name} design`}>
-              <span>Use this design</span>
-              <ArrowIcon />
-            </button>
-          </nav>
-
-          <main id="main-content" tabIndex={-1}>
-            <ScrollWeddingStory design={design} />
-          </main>
-        </div>
-      </>
-    )
-  }
-
-  if (isSandeSignature) {
-    return (
-      <>
-        {envelopeIntro}
+        <SoundtrackButton isPlaying={isMusicPlaying} onToggle={toggleMusic} soundtrack={soundtrack} />
+      </div>
+    ) : null
+  } else if (isCinematicWedding) {
+    previewContent = introComplete ? (
+      <div className={`template-preview template-preview--cinematic-new template-preview--${design.variant}`}>
+        <PreviewToolbar design={design} onBack={onBack} onEnquire={onEnquire} />
+        <main id="main-content" tabIndex={-1}>
+          <CinematicWeddingStory design={design} showMusicControl={false} />
+        </main>
+        <SoundtrackButton isPlaying={isMusicPlaying} onToggle={toggleMusic} soundtrack={soundtrack} />
+      </div>
+    ) : null
+  } else if (isScrollWedding) {
+    previewContent = introComplete ? (
+      <div className="template-preview template-preview--scroll">
+        <PreviewToolbar design={design} onBack={onBack} onEnquire={onEnquire} />
+        <main id="main-content" tabIndex={-1}>
+          <ScrollWeddingStory design={design} showMusicControl={false} />
+        </main>
+        <SoundtrackButton isPlaying={isMusicPlaying} onToggle={toggleMusic} soundtrack={soundtrack} />
+      </div>
+    ) : null
+  } else if (isSandeSignature) {
+    previewContent = introComplete ? (
+      <div className="tp-rose-host">
         <SandeSignatureStory
           design={design}
           onBack={onBack}
@@ -372,62 +381,45 @@ export default function TemplatePreview({ design, onBack, onEnquire }) {
           isMusicPlaying={isMusicPlaying}
           onToggleMusic={toggleMusic}
         />
-        <audio
-          ref={audioRef}
-          src={soundtrack.src}
-          preload="none"
-          loop
-          onPlay={() => setIsMusicPlaying(true)}
-          onPause={() => setIsMusicPlaying(false)}
-        />
-      </>
-    )
-  }
-
-  return (
-    <>
-      {envelopeIntro}
+        <RoseJourney design={design} />
+      </div>
+    ) : null
+  } else {
+    previewContent = introComplete ? (
       <div className="template-preview">
-        <nav className="tp-toolbar" aria-label="Invitation preview controls">
-          <button className="tp-toolbar__back" type="button" onClick={onBack} aria-label="Back to all designs">
-            <BackIcon />
-            <span>All designs</span>
-          </button>
-
-          <div className="tp-toolbar__title">
-            <strong>{design.name}</strong>
-            <span>{formatPrice(design.price)}</span>
-          </div>
-
-          <button className="tp-toolbar__use" type="button" onClick={() => onEnquire?.(design)} aria-label={`Use ${design.name} design`}>
-            <span>Use this design</span>
-            <ArrowIcon />
-          </button>
-        </nav>
+        <PreviewToolbar design={design} onBack={onBack} onEnquire={onEnquire} />
 
         <main id="main-content" tabIndex={-1}>
           <InvitationStory design={design} onEnquire={onEnquire} />
         </main>
 
-        <button
-          className={`tp-soundtrack${isMusicPlaying ? ' is-playing' : ''}`}
-          type="button"
-          onClick={toggleMusic}
-          aria-pressed={isMusicPlaying}
-          aria-label={`${isMusicPlaying ? 'Pause' : 'Play'} ${soundtrack.title}`}
-          title={soundtrack.title}
-        >
-          <SoundIcon playing={isMusicPlaying} />
-          <span>{isMusicPlaying ? 'Sound on' : 'Play song'}</span>
-        </button>
+        <RoseJourney design={design} />
+        <SoundtrackButton isPlaying={isMusicPlaying} onToggle={toggleMusic} soundtrack={soundtrack} />
       </div>
+    ) : null
+  }
 
+  return (
+    <>
+      {envelopeIntro}
+      <Suspense
+        fallback={(
+          <main id="main-content" className="tp-story-loading" tabIndex={-1} role="status">
+            Loading invitation…
+          </main>
+        )}
+      >
+        {previewContent}
+      </Suspense>
       <audio
         ref={audioRef}
         src={soundtrack.src}
         preload="none"
         loop
-        onPlay={() => setIsMusicPlaying(true)}
+        onPlay={(event) => {
+          event.currentTarget.volume = soundtrack.volume ?? 0.28
+          setIsMusicPlaying(true)
+        }}
         onPause={() => setIsMusicPlaying(false)}
       />
     </>

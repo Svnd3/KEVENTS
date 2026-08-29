@@ -1,5 +1,6 @@
 import { useEffect, useId, useRef, useState } from 'react'
 import { getExperienceRecipe } from '../data/experienceRecipes.js'
+import { submitRsvp } from '../utils/submitRsvp.js'
 import '../invitation-story.css'
 
 const venueByCategory = {
@@ -336,24 +337,39 @@ function StoryMedia({ design, mode, priority = false, caption }) {
   )
 }
 
-function RSVP({ design: _design, mode, prompt = 'Can you make it?' }) {
+function RSVP({ design, mode, prompt = 'Can you make it?' }) {
   const fieldId = useId()
   const [attendance, setAttendance] = useState('yes')
   const [guestName, setGuestName] = useState('')
   const [note, setNote] = useState('')
-  const [submitted, setSubmitted] = useState(false)
+  const [status, setStatus] = useState('idle')
+  const [submission, setSubmission] = useState(null)
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault()
+    if (status === 'sending') return
+
+    const form = event.currentTarget
     const cleanName = guestName.trim()
     if (!cleanName) {
-      const nameInput = event.currentTarget.elements.namedItem('guestName')
+      const nameInput = form.elements.namedItem('name')
       nameInput.setCustomValidity('Please enter your name.')
       nameInput.reportValidity()
       return
     }
-    setGuestName(cleanName)
-    setSubmitted(true)
+
+    setStatus('sending')
+    try {
+      const result = await submitRsvp(form, design?.name, {
+        name: cleanName,
+        eventType: design?.eventType || 'Wedding',
+      })
+      setGuestName(cleanName)
+      setSubmission({ attendance, demo: result.demo, noteIncluded: Boolean(note.trim()) })
+      setStatus('success')
+    } catch {
+      setStatus('error')
+    }
   }
 
   return (
@@ -361,26 +377,30 @@ function RSVP({ design: _design, mode, prompt = 'Can you make it?' }) {
       <div className="is-rsvp__inner">
         <p>RSVP by 20 September 2027</p>
         <h2>{prompt}</h2>
-        {submitted ? (
+        {status === 'success' ? (
           <div className="is-rsvp__confirmation" role="status" aria-live="polite">
-            <strong>Thank you, {guestName}.</strong>
+            <strong>{submission.demo ? `Preview complete, ${guestName}.` : `Thank you, ${guestName}.`}</strong>
             <span>
-              {attendance === 'yes'
-                ? 'We have saved you a place. We cannot wait to celebrate with you.'
-                : 'Your reply is saved. We will miss you on the day.'}
+              {submission.demo
+                ? 'This was a demo response and was not sent.'
+                : submission.attendance === 'yes'
+                  ? 'Your RSVP was sent. We cannot wait to celebrate with you.'
+                  : 'Your reply was sent. We will miss you on the day.'}
             </span>
-            {note && <small>Your note was included.</small>}
-            <button type="button" onClick={() => setSubmitted(false)}>Edit response</button>
+            {submission.noteIncluded && (
+              <small>{submission.demo ? 'Your note was included in the preview.' : 'Your note was sent too.'}</small>
+            )}
+            <button type="button" onClick={() => { setSubmission(null); setStatus('idle') }}>Edit response</button>
           </div>
         ) : (
-          <form className="is-rsvp__form" onSubmit={handleSubmit}>
+          <form className="is-rsvp__form" onSubmit={handleSubmit} aria-busy={status === 'sending'}>
             <fieldset>
               <legend>Will you attend?</legend>
               <div className="is-rsvp__choice">
                 <label>
                   <input
                     type="radio"
-                    name={`${fieldId}-attendance`}
+                    name="attendance"
                     value="yes"
                     checked={attendance === 'yes'}
                     onChange={(event) => setAttendance(event.target.value)}
@@ -390,7 +410,7 @@ function RSVP({ design: _design, mode, prompt = 'Can you make it?' }) {
                 <label>
                   <input
                     type="radio"
-                    name={`${fieldId}-attendance`}
+                    name="attendance"
                     value="no"
                     checked={attendance === 'no'}
                     onChange={(event) => setAttendance(event.target.value)}
@@ -403,7 +423,7 @@ function RSVP({ design: _design, mode, prompt = 'Can you make it?' }) {
               <span>Your name</span>
               <input
                 id={`${fieldId}-name`}
-                name="guestName"
+                name="name"
                 type="text"
                 autoComplete="name"
                 value={guestName}
@@ -424,8 +444,11 @@ function RSVP({ design: _design, mode, prompt = 'Can you make it?' }) {
                 onChange={(event) => setNote(event.target.value)}
               />
             </label>
-            <button type="submit">
-              Send reply
+            {status === 'error' && (
+              <p className="is-rsvp__error" role="alert">Your reply could not be sent. Check your connection and try again.</p>
+            )}
+            <button type="submit" disabled={status === 'sending'}>
+              {status === 'sending' ? 'Sending reply…' : 'Send reply'}
               <ArrowIcon />
             </button>
           </form>

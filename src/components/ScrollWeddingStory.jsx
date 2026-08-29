@@ -1,21 +1,34 @@
 import { useEffect, useId, useRef, useState } from 'react'
 import { scrollWeddingTemplates } from '../data/scrollWeddingTemplates.js'
+import { submitRsvp } from '../utils/submitRsvp.js'
 import AutoplayMusicControl from './AutoplayMusicControl.jsx'
 import EventRevealMoment from './EventRevealMoment.jsx'
 import '../scroll-wedding-story.css'
 
 const clamp = (value, min = 0, max = 1) => Math.min(max, Math.max(min, value))
 
-const persistentRosePath = [
-  { x: 30, y: -1, turn: 90, scale: .85, mobile: { x: 26.4, y: -1, turn: 90, scale: .82 } },
-  { x: -27, y: 8, turn: -4, scale: .7, mobile: { x: -16, y: 8, turn: -4, scale: .67 } },
-  { x: -10, y: -5, turn: 45, scale: .66, mobile: { x: -8, y: -5, turn: 45, scale: .63 } },
-  { x: 30, y: -6, turn: 90, scale: .72, mobile: { x: 31.5, y: -6, turn: 90, scale: .68 } },
-  { x: -28, y: -10, turn: -12, scale: .68, mobile: { x: -16.5, y: -10, turn: -12, scale: .64 } },
-  { x: 28, y: -9, turn: 10, scale: .67, mobile: { x: 18, y: -9, turn: 10, scale: .64 } },
-  { x: -27, y: 15, turn: 72, scale: .66, mobile: { x: 27, y: -12, turn: 72, scale: .62 } },
-  { x: 24, y: -4, turn: 15, scale: .52, mobile: { x: 16, y: -4, turn: 15, scale: .48 } },
-]
+const persistentRosePaths = {
+  stem: [
+    { x: 30, y: -1, turn: 90, scale: .85, mobile: { x: 26.4, y: -1, turn: 90, scale: .82 } },
+    { x: -27, y: 8, turn: -4, scale: .7, mobile: { x: -16, y: 8, turn: -4, scale: .67 } },
+    { x: -10, y: -5, turn: 45, scale: .66, mobile: { x: -8, y: -5, turn: 45, scale: .63 } },
+    { x: 30, y: -6, turn: 90, scale: .72, mobile: { x: 31.5, y: -6, turn: 90, scale: .68 } },
+    { x: -28, y: -10, turn: -12, scale: .68, mobile: { x: -16.5, y: -10, turn: -12, scale: .64 } },
+    { x: 28, y: -9, turn: 10, scale: .67, mobile: { x: 18, y: -9, turn: 10, scale: .64 } },
+    { x: -27, y: 15, turn: 72, scale: .66, mobile: { x: 27, y: -12, turn: 72, scale: .62 } },
+    { x: 24, y: -4, turn: 15, scale: .52, mobile: { x: 16, y: -4, turn: 15, scale: .48 } },
+  ],
+  bloom: [
+    { x: 31, y: 2, turn: -18, scale: .82, mobile: { x: 28, y: 3, turn: -18, scale: .78 } },
+    { x: -31, y: 9, turn: 48, scale: .72, mobile: { x: -24, y: 8, turn: 48, scale: .68 } },
+    { x: -8, y: -8, turn: 112, scale: .66, mobile: { x: -7, y: -8, turn: 112, scale: .62 } },
+    { x: 32, y: -4, turn: 174, scale: .72, mobile: { x: 27, y: -5, turn: 174, scale: .67 } },
+    { x: -29, y: -11, turn: 230, scale: .68, mobile: { x: -23, y: -10, turn: 230, scale: .64 } },
+    { x: 27, y: -8, turn: 292, scale: .66, mobile: { x: 22, y: -8, turn: 292, scale: .62 } },
+    { x: -28, y: 13, turn: 348, scale: .64, mobile: { x: -22, y: 10, turn: 348, scale: .6 } },
+    { x: 23, y: -3, turn: 405, scale: .52, mobile: { x: 18, y: -3, turn: 405, scale: .48 } },
+  ],
+}
 
 const smoothStep = (value) => value * value * (3 - 2 * value)
 
@@ -87,15 +100,7 @@ function useScrollFilm(storyRef, filmRef, worldRef, videoRef, config) {
     const words = [...film.querySelectorAll('[data-scroll-word]')]
     const wordValues = words.map(() => '')
     const sceneCounter = film.querySelector('[data-scene-counter]')
-    const roseAnchors = config.persistentRose
-      ? [
-          '.sw-note__copy h2',
-          '.sw-map .sw-section-heading h2',
-          '.sw-plan .sw-section-heading h2',
-          '.sw-vibes > header h2',
-          '.sw-rsvp__intro h2',
-        ].map((selector) => world.querySelector(selector)).filter(Boolean)
-      : []
+    const rosePath = persistentRosePaths[config.roseKind] || persistentRosePaths.stem
     const rose = config.persistentRose
       ? story.querySelector('.sw-film-bg__rose')
       : film.querySelector('.sw-film__rose')
@@ -108,7 +113,7 @@ function useScrollFilm(storyRef, filmRef, worldRef, videoRef, config) {
     let worldIsNear = true
     let previousTick = performance.now()
     let lastSeek = 0
-    let roseStops = persistentRosePath.map((_, index) => index / (persistentRosePath.length - 1))
+    let roseStops = rosePath.map((_, index) => index / (rosePath.length - 1))
     let filmTop = 0
     let filmHeight = 1
     let worldTop = 0
@@ -170,13 +175,13 @@ function useScrollFilm(storyRef, filmRef, worldRef, videoRef, config) {
       if (config.persistentRose) {
         const matchingStop = roseStops.findIndex((stop) => worldProgress <= stop)
         const toIndex = matchingStop === -1 ? roseStops.length - 1 : Math.max(1, matchingStop)
-        const fromIndex = Math.min(toIndex - 1, persistentRosePath.length - 2)
+        const fromIndex = Math.min(toIndex - 1, rosePath.length - 2)
         const segmentStart = roseStops[fromIndex]
         const segmentEnd = roseStops[toIndex] ?? 1
         const segmentProgress = clamp((worldProgress - segmentStart) / Math.max(.0001, segmentEnd - segmentStart))
         const easedProgress = smoothStep(segmentProgress)
-        const from = persistentRosePath[fromIndex]
-        const to = persistentRosePath[toIndex] ?? persistentRosePath.at(-1)
+        const from = rosePath[fromIndex]
+        const to = rosePath[toIndex] ?? rosePath.at(-1)
         const fromPose = mobileLayout ? from.mobile : from
         const toPose = mobileLayout ? to.mobile : to
         const curve = Math.sin(segmentProgress * Math.PI)
@@ -236,7 +241,14 @@ function useScrollFilm(storyRef, filmRef, worldRef, videoRef, config) {
         frame = window.requestAnimationFrame(tick)
       } else {
         frame = 0
+        rose?.classList.remove('is-rose-moving')
       }
+    }
+
+    const queueTick = () => {
+      if (frame) return
+      rose?.classList.add('is-rose-moving')
+      frame = window.requestAnimationFrame(tick)
     }
 
     const updateLayout = () => {
@@ -245,7 +257,10 @@ function useScrollFilm(storyRef, filmRef, worldRef, videoRef, config) {
       worldTop = getDocumentTop(world)
       worldHeight = world.offsetHeight
       mobileLayout = window.innerWidth <= 680
-      if (config.persistentRose && roseAnchors.length === persistentRosePath.length - 3) {
+      const roseAnchors = config.persistentRose
+        ? [...world.querySelectorAll('[data-rose-stop]')]
+        : []
+      if (config.persistentRose && roseAnchors.length === rosePath.length - 3) {
         const worldDistance = Math.max(1, worldHeight - window.innerHeight)
         const dateStop = clamp((filmTop - worldTop + Math.max(0, filmHeight - window.innerHeight) * .83) / worldDistance)
         const anchorStops = roseAnchors.map((anchor) => (
@@ -260,7 +275,7 @@ function useScrollFilm(storyRef, filmRef, worldRef, videoRef, config) {
       const worldDistance = Math.max(1, worldHeight - window.innerHeight)
       heroTarget = clamp((window.scrollY - filmTop) / heroDistance)
       worldTarget = clamp((window.scrollY - worldTop) / worldDistance)
-      if (!frame) frame = window.requestAnimationFrame(tick)
+      queueTick()
     }
 
     const handleLayoutChange = () => {
@@ -269,7 +284,7 @@ function useScrollFilm(storyRef, filmRef, worldRef, videoRef, config) {
     }
 
     const resumeAfterSeek = () => {
-      if (!frame) frame = window.requestAnimationFrame(tick)
+      queueTick()
     }
 
     const handleScroll = () => {
@@ -286,6 +301,7 @@ function useScrollFilm(storyRef, filmRef, worldRef, videoRef, config) {
     const showReducedState = () => {
       story.classList.add('is-reduced-motion')
       film.dataset.scene = '0'
+      rose?.classList.remove('is-rose-moving')
       rose?.style.removeProperty('transform')
       rose?.style.removeProperty('opacity')
       words.forEach((word) => word.style.setProperty('--word-reveal', '1'))
@@ -330,6 +346,7 @@ function useScrollFilm(storyRef, filmRef, worldRef, videoRef, config) {
       worldObserver?.disconnect()
       resizeObserver?.disconnect()
       window.cancelAnimationFrame(frame)
+      rose?.classList.remove('is-rose-moving')
     }
   }, [config, filmRef, reducedMotion, storyRef, videoRef, worldRef])
 }
@@ -617,7 +634,7 @@ function PersistentFilm({ config, videoRef }) {
         <source src={config.video} type="video/mp4" />
       </video>
       {config.persistentRose && (
-        <img className={`sw-film-bg__rose sw-film__rose sw-film__rose--${config.roseKind}`} src={config.rose} alt="" />
+        <img className={`sw-film-bg__rose sw-film__rose sw-film__rose--${config.roseKind}`} src={config.rose} alt="" aria-hidden="true" draggable="false" decoding="async" />
       )}
       <div className="sw-film-bg__scrim" />
       <div className="sw-film-bg__grain" />
@@ -698,7 +715,7 @@ function FilmHero({ config, storyRef, worldRef, videoRef }) {
 
 function InvitationNote({ config }) {
   return (
-    <section className="sw-note" id={`${config.id}-invitation`}>
+    <section className="sw-note" id={`${config.id}-invitation`} data-rose-stop>
       <div className="sw-note__label"><span>A note from us</span><i /></div>
       <div className="sw-note__copy">
         <h2>
@@ -718,7 +735,7 @@ function WeddingMap({ config }) {
   const [mapReady, setMapReady] = useState(false)
 
   return (
-    <section className={`sw-map sw-map--${config.mapTone}`}>
+    <section className={`sw-map sw-map--${config.mapTone}`} data-rose-stop>
       <header className="sw-section-heading">
         <span>Three stops · one very good day</span>
         <h2>
@@ -786,7 +803,7 @@ function DayPlan({ config }) {
   ))
 
   return (
-    <section className="sw-plan">
+    <section className="sw-plan" data-rose-stop>
       <header className="sw-section-heading sw-section-heading--plan">
         <span>{config.date}</span>
         <h2>
@@ -816,7 +833,7 @@ function VibeCheck({ config }) {
     : [['01', 'Soft tears', 'Waterproof mascara.'], ['02', 'Sharp fits', 'Bring the look.'], ['03', 'Late cake', 'Save some room.']]
 
   return (
-    <section className="sw-vibes">
+    <section className="sw-vibes" data-rose-stop>
       <header>
         <span>What’s going down</span>
         <h2>
@@ -849,7 +866,7 @@ function RSVP({ config }) {
   const successRef = useRef(null)
   const [attendance, setAttendance] = useState('yes')
   const [status, setStatus] = useState('idle')
-  const endpoint = import.meta.env.VITE_RSVP_ENDPOINT || import.meta.env.VITE_ENQUIRY_ENDPOINT
+  const [demo, setDemo] = useState(false)
 
   useEffect(() => {
     if (status === 'success') successRef.current?.focus()
@@ -859,20 +876,10 @@ function RSVP({ config }) {
     event.preventDefault()
     setStatus('sending')
     const form = event.currentTarget
-    const payload = new FormData(form)
-    payload.set('template', config.label)
 
     try {
-      if (endpoint) {
-        const response = await fetch(endpoint, {
-          method: 'POST',
-          body: payload,
-          headers: { Accept: 'application/json' },
-        })
-        if (!response.ok) throw new Error('RSVP could not be sent')
-      } else {
-        await new Promise((resolve) => window.setTimeout(resolve, 450))
-      }
+      const result = await submitRsvp(form, config.label, { templateId: config.id })
+      setDemo(result.demo)
       setStatus('success')
     } catch {
       setStatus('error')
@@ -881,20 +888,22 @@ function RSVP({ config }) {
 
   if (status === 'success') {
     return (
-      <section className="sw-rsvp sw-rsvp--success" aria-live="polite" aria-labelledby={headingId} role="status" ref={successRef} tabIndex={-1}>
+      <section className="sw-rsvp sw-rsvp--success" data-rose-stop aria-live="polite" aria-labelledby={headingId} role="status" ref={successRef} tabIndex={-1}>
         <div className="sw-rsvp__success-card">
-          <span className="sw-rsvp__folio">RSVP / RECEIVED</span>
+          <span className="sw-rsvp__folio">RSVP / {demo ? 'PREVIEW' : 'RECEIVED'}</span>
           <HeartIcon />
-          <p>You’re on the list</p>
+          <p>{demo ? 'Demo response' : 'You’re on the list'}</p>
           <h2 id={headingId}>You’re officially part of the plot.</h2>
-          <span>Thank you — {config.couple[0]} &amp; {config.couple[1]} can’t wait to celebrate with you.</span>
+          <span>{demo
+            ? 'This preview is not connected, so your reply was not sent.'
+            : `Thank you — ${config.couple[0]} & ${config.couple[1]} can’t wait to celebrate with you.`}</span>
         </div>
       </section>
     )
   }
 
   return (
-    <section className="sw-rsvp" aria-labelledby={headingId}>
+    <section className="sw-rsvp" data-rose-stop aria-labelledby={headingId}>
       <div className="sw-rsvp__intro">
         <div className="sw-rsvp__folio"><span>RSVP</span><i aria-hidden="true">01 / 01</i></div>
         <span className="sw-rsvp__deadline">Reply by {config.replyBy}</span>
@@ -968,7 +977,7 @@ function RSVP({ config }) {
   )
 }
 
-export default function ScrollWeddingStory({ design }) {
+export default function ScrollWeddingStory({ design, showMusicControl = true }) {
   const config = scrollWeddingTemplates[design.variant]
   const storyRef = useRef(null)
   const worldRef = useRef(null)
@@ -977,7 +986,7 @@ export default function ScrollWeddingStory({ design }) {
   if (!config) return null
 
   return (
-    <div className={`sw-story sw-story--${config.id}`} ref={storyRef}>
+    <div className={`sw-story sw-story--${config.id}`} data-rose-journey={config.persistentRose ? config.roseKind : undefined} ref={storyRef}>
       <div className="sw-film-world" ref={worldRef}>
         <PersistentFilm config={config} videoRef={videoRef} />
         <div className="sw-film-world__content">
@@ -995,7 +1004,7 @@ export default function ScrollWeddingStory({ design }) {
         <p>Come for the vows.<br /><span>Stay for the lore.</span></p>
         <div><strong>{config.couple[0]} &amp; {config.couple[1]}</strong><span>{config.date} · {config.city}</span></div>
       </footer>
-      <AutoplayMusicControl music={config.music} className="sw-music" />
+      {showMusicControl && <AutoplayMusicControl music={config.music} className="sw-music" />}
     </div>
   )
 }

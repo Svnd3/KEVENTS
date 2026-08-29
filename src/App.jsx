@@ -19,6 +19,21 @@ const featuredNames = ['Velvet Signal', 'Heart Parade', 'Up, Up & Always', 'Love
 const heroFeaturedNames = featuredNames.slice(0, 3)
 const loadTemplatePreview = () => import('./components/TemplatePreview.jsx')
 const TemplatePreview = lazy(loadTemplatePreview)
+const COLLECTION_PREFERENCES_KEY = 'kevents-collection-preferences'
+
+function readCollectionPreferences() {
+  try {
+    const saved = JSON.parse(window.sessionStorage.getItem(COLLECTION_PREFERENCES_KEY) || '{}')
+    return {
+      category: categories.includes(saved.category) ? saved.category : 'All',
+      search: typeof saved.search === 'string' ? saved.search : '',
+      sort: ['featured', 'low', 'high', 'name'].includes(saved.sort) ? saved.sort : 'featured',
+      showFilters: typeof saved.showFilters === 'boolean' ? saved.showFilters : true,
+    }
+  } catch {
+    return { category: 'All', search: '', sort: 'featured', showFilters: true }
+  }
+}
 
 function getView() {
   const hash = window.location.hash
@@ -125,14 +140,24 @@ function SkipLink() {
 
 function Header({ view, navigate, onEnquire }) {
   const [open, setOpen] = useState(false)
+  const navigationRef = useRef(null)
+  const menuToggleRef = useRef(null)
 
   useEffect(() => {
     if (!open) return undefined
+    const focusFrame = window.requestAnimationFrame(() => {
+      navigationRef.current?.querySelector('button')?.focus({ preventScroll: true })
+    })
     const closeOnEscape = (event) => {
-      if (event.key === 'Escape') setOpen(false)
+      if (event.key !== 'Escape') return
+      setOpen(false)
+      menuToggleRef.current?.focus({ preventScroll: true })
     }
     window.addEventListener('keydown', closeOnEscape)
-    return () => window.removeEventListener('keydown', closeOnEscape)
+    return () => {
+      window.cancelAnimationFrame(focusFrame)
+      window.removeEventListener('keydown', closeOnEscape)
+    }
   }, [open])
 
   const move = (destination) => {
@@ -145,15 +170,15 @@ function Header({ view, navigate, onEnquire }) {
       <button className="brand" type="button" onClick={() => move('home')} aria-label="K EVENTS home">
         <BrandLogo />
       </button>
-      <nav id="main-navigation" className={`main-nav ${open ? 'is-open' : ''}`} aria-label="Main navigation">
-        <button className={view === 'home' ? 'is-active' : ''} type="button" onClick={() => move('home')}>Home</button>
-        <button className={view === 'collection' ? 'is-active' : ''} type="button" onClick={() => move('collection')}>Designs</button>
+      <nav ref={navigationRef} id="main-navigation" className={`main-nav ${open ? 'is-open' : ''}`} aria-label="Main navigation">
+        <button className={view === 'home' ? 'is-active' : ''} type="button" onClick={() => move('home')} aria-current={view === 'home' ? 'page' : undefined}>Home</button>
+        <button className={view === 'collection' ? 'is-active' : ''} type="button" onClick={() => move('collection')} aria-current={view === 'collection' ? 'page' : undefined}>Designs</button>
         <button type="button" onClick={() => { setOpen(false); onEnquire(null) }}>Custom design</button>
       </nav>
       <button className="header-cta" type="button" onClick={() => onEnquire(null)}>
         <span>Get started</span><ArrowRight size={15} strokeWidth={1.8} />
       </button>
-      <button className="menu-toggle" type="button" onClick={() => setOpen((value) => !value)} aria-label="Toggle menu" aria-controls="main-navigation" aria-expanded={open}>
+      <button ref={menuToggleRef} className="menu-toggle" type="button" onClick={() => setOpen((value) => !value)} aria-label="Toggle menu" aria-controls="main-navigation" aria-expanded={open}>
         {open ? <X size={20} /> : <Menu size={20} />}
       </button>
     </header>
@@ -291,10 +316,25 @@ function HomePage({ navigate, onEnquire }) {
 }
 
 function CollectionPage() {
-  const [category, setCategory] = useState('All')
-  const [search, setSearch] = useState('')
-  const [sort, setSort] = useState('featured')
-  const [showFilters, setShowFilters] = useState(false)
+  const initialPreferences = useRef(null)
+  if (!initialPreferences.current) initialPreferences.current = readCollectionPreferences()
+  const [category, setCategory] = useState(initialPreferences.current.category)
+  const [search, setSearch] = useState(initialPreferences.current.search)
+  const [sort, setSort] = useState(initialPreferences.current.sort)
+  const [showFilters, setShowFilters] = useState(initialPreferences.current.showFilters)
+
+  useEffect(() => {
+    try {
+      window.sessionStorage.setItem(COLLECTION_PREFERENCES_KEY, JSON.stringify({
+        category,
+        search,
+        sort,
+        showFilters,
+      }))
+    } catch {
+      // Browsing still works when storage is unavailable.
+    }
+  }, [category, search, showFilters, sort])
 
   const filtered = useMemo(() => {
     const query = search.trim().toLowerCase()
@@ -311,6 +351,14 @@ function CollectionPage() {
         || a.id - b.id
     })
   }, [category, search, sort])
+
+  const clearFilters = () => {
+    setSearch('')
+    setCategory('All')
+    setSort('featured')
+  }
+
+  const hasActiveFilters = category !== 'All' || Boolean(search.trim()) || sort !== 'featured'
 
   return (
     <main className="collection-page">
@@ -329,13 +377,13 @@ function CollectionPage() {
               </button>
             ))}
           </div>
-          <button className="filter-toggle" type="button" onClick={() => setShowFilters((value) => !value)} aria-expanded={showFilters}>
-            <SlidersHorizontal size={16} /> Filters
+          <button className="filter-toggle" type="button" onClick={() => setShowFilters((value) => !value)} aria-expanded={showFilters} aria-controls="catalog-filter-panel">
+            <SlidersHorizontal size={16} /> <span>Filters</span>
           </button>
         </div>
 
         {showFilters && (
-          <div className="catalog-filters">
+          <div className="catalog-filters" id="catalog-filter-panel">
             <div className="search-field">
               <Search size={17} />
               <label className="sr-only" htmlFor="design-search">Search designs</label>
@@ -354,6 +402,11 @@ function CollectionPage() {
           </div>
         )}
 
+        <div className="catalog-results" role="status" aria-live="polite" aria-atomic="true">
+          <span>{filtered.length} {filtered.length === 1 ? 'design' : 'designs'}</span>
+          {hasActiveFilters && <button type="button" onClick={clearFilters}>Clear filters</button>}
+        </div>
+
         {filtered.length ? (
           <div className="catalog-grid">
             {filtered.map((design) => <DesignCard key={design.id} design={design} />)}
@@ -363,7 +416,7 @@ function CollectionPage() {
             <span>No results</span>
             <h2>No designs match your search.</h2>
             <p>Try another search or clear the filters.</p>
-            <button type="button" className="button button--dark" onClick={() => { setSearch(''); setCategory('All') }}>Clear filters</button>
+            <button type="button" className="button button--dark" onClick={clearFilters}>Clear filters</button>
           </div>
         )}
       </section>
@@ -456,15 +509,25 @@ export default function App() {
   const [view, setView] = useState(getView)
   const [enquiry, setEnquiry] = useState({ open: false, design: null })
   const progressRef = useRef(null)
+  const viewRef = useRef(view)
+  const collectionScrollRef = useRef(0)
   const closeEnquiry = useCallback(() => setEnquiry({ open: false, design: null }), [])
   const previewDesign = view === 'preview' ? getPreviewDesign() : null
 
   useEffect(() => {
     const changeView = () => {
-      setView(getView())
+      const nextView = getView()
+      if (viewRef.current === 'collection') collectionScrollRef.current = window.scrollY
+      viewRef.current = nextView
+      setView(nextView)
       setEnquiry({ open: false, design: null })
-      window.scrollTo({ top: 0, behavior: 'instant' })
-      window.requestAnimationFrame(() => document.getElementById('main-content')?.focus({ preventScroll: true }))
+      window.requestAnimationFrame(() => {
+        window.scrollTo({
+          top: nextView === 'collection' ? collectionScrollRef.current : 0,
+          behavior: 'auto',
+        })
+        document.getElementById('main-content')?.focus({ preventScroll: true })
+      })
     }
     let frame = 0
     const updateProgress = () => {
@@ -473,6 +536,7 @@ export default function App() {
         const max = document.documentElement.scrollHeight - window.innerHeight
         const progress = max > 0 ? window.scrollY / max : 0
         if (progressRef.current) progressRef.current.style.transform = `scaleX(${progress})`
+        if (viewRef.current === 'collection') collectionScrollRef.current = window.scrollY
         frame = 0
       })
     }
