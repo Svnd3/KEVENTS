@@ -3,6 +3,13 @@ import chaiUrl from '../../songs/CHAI YA SAA KUMI (LYRIC VIDEO) - YWAYA TAJIRI [
 const bundledTrack = { title: 'Chai Ya Saa Kumi', src: chaiUrl }
 
 const importedTracks = {
+  'a-letter-from-the-tide': {
+    title: 'Coming Home',
+    artist: 'Sauti Sol',
+    src: '/audio/up-up-always-coming-home.mp3',
+    buttonLabel: 'Play our song',
+    volume: 0.19,
+  },
   'the-sacred-garden': {
     title: 'Mazuri Mabaya',
     artist: 'Ywaya Tajiri',

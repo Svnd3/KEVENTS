@@ -1,9 +1,10 @@
 import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react'
-import { formatPrice } from '../data/designs.js'
+import { useCurrency } from './CurrencyControl.jsx'
 import { scrollWeddingTemplates, scrollWeddingVariants } from '../data/scrollWeddingTemplates.js'
 import { cinematicWeddingTemplates, cinematicWeddingVariants } from '../data/cinematicWeddingTemplates.js'
 import { getSoundtrack } from '../data/soundtracks.js'
 import RoseJourney from './RoseJourney.jsx'
+import KeepsakeEnvelopeIntro from './KeepsakeEnvelopeIntro.jsx'
 import SponsaliaEnvelopeIntro from './SponsaliaEnvelopeIntro.jsx'
 import SaveDesignButton from './SaveDesignButton.jsx'
 import '../preview.css'
@@ -12,11 +13,13 @@ const loadInvitationStory = () => import('./InvitationStory.jsx')
 const loadSandeSignatureStory = () => import('./SandeSignatureStory.jsx')
 const loadScrollWeddingStory = () => import('./ScrollWeddingStory.jsx')
 const loadCinematicWeddingStory = () => import('./CinematicWeddingStory.jsx')
+const loadKeepsakeWeddingStory = () => import('./KeepsakeWeddingStory.jsx')
 
 const InvitationStory = lazy(loadInvitationStory)
 const SandeSignatureStory = lazy(loadSandeSignatureStory)
 const ScrollWeddingStory = lazy(loadScrollWeddingStory)
 const CinematicWeddingStory = lazy(loadCinematicWeddingStory)
+const KeepsakeWeddingStory = lazy(loadKeepsakeWeddingStory)
 
 function warmImages(sources) {
   sources.filter(Boolean).forEach((src) => {
@@ -54,6 +57,8 @@ function SoundIcon({ playing }) {
 }
 
 function PreviewToolbar({ design, onBack, onEnquire, saved, onToggleSaved }) {
+  const { formatPrice, currencyCode } = useCurrency()
+
   return (
     <nav className="tp-toolbar" aria-label="Invitation preview controls">
       <button className="tp-toolbar__back" type="button" onClick={onBack} aria-label="Back to all designs">
@@ -63,7 +68,7 @@ function PreviewToolbar({ design, onBack, onEnquire, saved, onToggleSaved }) {
 
       <div className="tp-toolbar__title">
         <strong>{design.name}</strong>
-        <span>{formatPrice(design.price)} · one-time</span>
+        <span>{formatPrice(design.price)}{currencyCode !== 'KES' ? ' approx.' : ''} · one-time</span>
       </div>
 
       <div className="tp-toolbar__actions">
@@ -100,6 +105,7 @@ function SoundtrackButton({ isPlaying, onToggle, soundtrack }) {
 }
 
 export default function TemplatePreview({ design, onBack, onEnquire, saved = false, onToggleSaved }) {
+  const { formatPrice } = useCurrency()
   const [introComplete, setIntroComplete] = useState(false)
   const [isMusicPlaying, setIsMusicPlaying] = useState(false)
   const [embeddedHtml, setEmbeddedHtml] = useState('')
@@ -109,6 +115,7 @@ export default function TemplatePreview({ design, onBack, onEnquire, saved = fal
   const embeddedFrameRef = useRef(null)
   const bridgeTokenRef = useRef('')
   const isSandeSignature = design?.variant === 'sande'
+  const isKeepsakeWedding = design?.variant === 'keepsake-tide'
   const isScrollWedding = scrollWeddingVariants.has(design?.variant)
   const isCinematicWedding = cinematicWeddingVariants.has(design?.variant)
   const cinematicMusic = isCinematicWedding ? cinematicWeddingTemplates[design?.variant]?.music : null
@@ -251,7 +258,7 @@ export default function TemplatePreview({ design, onBack, onEnquire, saved = fal
 
     window.addEventListener('message', handleMessage)
     return () => window.removeEventListener('message', handleMessage)
-  }, [design, onEnquire])
+  }, [design, formatPrice, onEnquire])
 
   const startMusic = useCallback(() => {
     const player = audioRef.current
@@ -277,6 +284,16 @@ export default function TemplatePreview({ design, onBack, onEnquire, saved = fal
     }
     else loadInvitationStory()
   }, [design?.templatePath, design?.variant, isCinematicWedding, isSandeSignature, isScrollWedding, startMusic])
+
+  const prepareKeepsakePreview = useCallback(() => {
+    warmImages([
+      '/images/wedding-couple.webp',
+      '/images/wedding-dance.webp',
+      '/images/wedding-celebration.webp',
+      '/images/venue-hotel-pool.webp',
+    ])
+    loadKeepsakeWeddingStory()
+  }, [])
 
   const toggleMusic = useCallback(() => {
     const player = audioRef.current
@@ -327,14 +344,23 @@ export default function TemplatePreview({ design, onBack, onEnquire, saved = fal
   if (!design) return null
 
   const envelopeIntro = !introComplete ? (
-    <SponsaliaEnvelopeIntro
-      design={design}
-      onBack={onBack}
-      onComplete={() => setIntroComplete(true)}
-      onUserGesture={preparePreview}
-      saved={saved}
-      onToggleSaved={onToggleSaved}
-    />
+    isKeepsakeWedding ? (
+      <KeepsakeEnvelopeIntro
+        design={design}
+        onBack={onBack}
+        onComplete={() => setIntroComplete(true)}
+        onUserGesture={prepareKeepsakePreview}
+      />
+    ) : (
+      <SponsaliaEnvelopeIntro
+        design={design}
+        onBack={onBack}
+        onComplete={() => setIntroComplete(true)}
+        onUserGesture={preparePreview}
+        saved={saved}
+        onToggleSaved={onToggleSaved}
+      />
+    )
   ) : null
 
   let previewContent = null
@@ -368,6 +394,15 @@ export default function TemplatePreview({ design, onBack, onEnquire, saved = fal
         </main>
 
         <SoundtrackButton isPlaying={isMusicPlaying} onToggle={toggleMusic} soundtrack={soundtrack} />
+      </div>
+    ) : null
+  } else if (isKeepsakeWedding) {
+    previewContent = introComplete ? (
+      <div className="template-preview template-preview--keepsake">
+        <PreviewToolbar design={design} onBack={onBack} onEnquire={onEnquire} saved={saved} onToggleSaved={onToggleSaved} />
+        <main id="main-content" tabIndex={-1}>
+          <KeepsakeWeddingStory design={design} isMusicPlaying={isMusicPlaying} onToggleMusic={toggleMusic} />
+        </main>
       </div>
     ) : null
   } else if (isCinematicWedding) {

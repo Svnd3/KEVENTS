@@ -1,6 +1,6 @@
 import { useEffect, useId, useMemo, useRef, useState } from 'react'
-import { formatPrice } from '../data/designs.js'
 import { submitRsvp } from '../utils/submitRsvp.js'
+import { useCurrency } from './CurrencyControl.jsx'
 import SaveDesignButton from './SaveDesignButton.jsx'
 import '../sande-signature-story.css'
 
@@ -270,6 +270,7 @@ export default function SandeSignatureStory({
   saved = false,
   onToggleSaved,
 }) {
+  const { formatPrice } = useCurrency()
   const rootRef = useRef(null)
   const [first = 'Zuri', second = 'Kito'] = design?.couple || []
   const eventDate = useMemo(() => {

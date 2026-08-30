@@ -580,6 +580,382 @@
   }
 }
 
+/* Keepsake Tide: a composed memory box of photographs and formal stationery. */
+.artwork--keepsake-tide {
+  container-type: inline-size;
+  background: color-mix(in srgb, var(--art-bg) 72%, #c5d9d4 28%);
+}
+
+.artwork--keepsake-tide::before {
+  z-index: 0;
+  background:
+    linear-gradient(104deg, rgba(255, 255, 255, .28), transparent 38%),
+    repeating-linear-gradient(0deg, rgba(37, 63, 57, .025) 0 1px, transparent 1px 5px),
+    color-mix(in srgb, var(--art-bg) 74%, #b9d5d1 26%);
+  opacity: 1;
+}
+
+.artwork--keepsake-tide::after {
+  position: absolute;
+  z-index: 1;
+  right: -34%;
+  bottom: -3%;
+  width: 112%;
+  height: 36%;
+  border: 1px solid color-mix(in srgb, var(--art-ink) 17%, transparent);
+  border-radius: 50%;
+  box-shadow:
+    0 -4cqw 0 -1px color-mix(in srgb, var(--art-ink) 10%, transparent),
+    0 -8cqw 0 -1px color-mix(in srgb, var(--art-ink) 7%, transparent);
+  content: '';
+  pointer-events: none;
+  transform: rotate(-7deg);
+}
+
+.artwork--keepsake-tide .keepsake-tide {
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  color: var(--art-ink);
+}
+
+.artwork--keepsake-tide .keepsake-tide__photo-print {
+  position: absolute;
+  z-index: 2;
+  top: 6.5%;
+  left: 5.5%;
+  width: 43%;
+  height: 37%;
+  margin: 0;
+  padding: 2.4% 2.4% 7.5%;
+  transform: rotate(-4deg);
+  background: #f7f1e5;
+  box-shadow: 0 2.4cqw 5cqw rgba(26, 33, 30, .2);
+  transition: transform .55s cubic-bezier(.2, .75, .2, 1);
+}
+
+.artwork--keepsake-tide .keepsake-tide__photo-print::after {
+  position: absolute;
+  inset: 5% 5% 19%;
+  border: 1px solid rgba(255, 255, 255, .34);
+  content: '';
+  pointer-events: none;
+}
+
+.artwork--keepsake-tide .keepsake-tide__photo-print img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: saturate(.72) contrast(.96) sepia(.08);
+}
+
+.artwork--keepsake-tide .keepsake-tide__photo-print figcaption {
+  position: absolute;
+  right: 6%;
+  bottom: 5.5%;
+  left: 6%;
+  overflow: hidden;
+  font-family: var(--sans);
+  font-size: clamp(5px, 1.75cqw, 10px);
+  font-weight: 650;
+  letter-spacing: .12em;
+  line-height: 1;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.artwork--keepsake-tide .keepsake-tide__title-card {
+  position: absolute;
+  z-index: 1;
+  top: 5%;
+  right: 5.5%;
+  display: flex;
+  width: 48%;
+  height: 34%;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 6% 5%;
+  transform: rotate(2.2deg);
+  color: color-mix(in srgb, var(--art-bg) 28%, #fff 72%);
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, .08), transparent 52%),
+    color-mix(in srgb, var(--art-ink) 82%, #315e58 18%);
+  box-shadow: 0 2cqw 4.6cqw rgba(27, 35, 31, .17);
+}
+
+.artwork--keepsake-tide .keepsake-tide__title-card::before {
+  position: absolute;
+  inset: 5%;
+  border: 1px solid rgba(250, 244, 230, .34);
+  content: '';
+}
+
+.artwork--keepsake-tide .keepsake-tide__title-card span,
+.artwork--keepsake-tide .keepsake-tide__title-card small {
+  position: relative;
+  z-index: 1;
+  font-family: var(--sans);
+  font-size: clamp(4px, 1.45cqw, 8px);
+  font-weight: 650;
+  letter-spacing: .15em;
+  line-height: 1.25;
+  text-transform: uppercase;
+}
+
+.artwork--keepsake-tide .keepsake-tide__title-card strong {
+  position: relative;
+  z-index: 1;
+  display: -webkit-box;
+  overflow: hidden;
+  margin: 5% 0 3%;
+  font-family: var(--serif);
+  font-size: clamp(13px, 5.6cqw, 32px);
+  font-weight: 400;
+  letter-spacing: -.045em;
+  line-height: .88;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.artwork--keepsake-tide .keepsake-tide__title-card small {
+  display: -webkit-box;
+  overflow: hidden;
+  opacity: .72;
+  letter-spacing: .04em;
+  text-transform: none;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.artwork--keepsake-tide .keepsake-tide__record {
+  position: absolute;
+  z-index: 3;
+  top: 33%;
+  left: 7%;
+  display: grid;
+  width: 43%;
+  aspect-ratio: 1;
+  place-items: center;
+  transform: rotate(-8deg);
+  border: 1px solid rgba(255, 255, 255, .14);
+  border-radius: 50%;
+  background:
+    repeating-radial-gradient(circle, transparent 0 1.7%, rgba(255, 255, 255, .09) 1.9% 2.2%),
+    radial-gradient(circle at 35% 28%, #4b4a47 0, #171816 29%, #080908 72%);
+  box-shadow: 0 3cqw 6cqw rgba(20, 24, 22, .28);
+  transition: transform .7s cubic-bezier(.2, .75, .2, 1);
+}
+
+.artwork--keepsake-tide .keepsake-tide__record::before {
+  position: absolute;
+  inset: 7%;
+  border-radius: inherit;
+  background: conic-gradient(from 210deg, transparent 0 23%, rgba(255, 255, 255, .08) 24% 31%, transparent 32% 100%);
+  content: '';
+}
+
+.artwork--keepsake-tide .keepsake-tide__record-label {
+  position: relative;
+  display: grid;
+  width: 38%;
+  aspect-ratio: 1;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, .36);
+  border-radius: 50%;
+  background: var(--art-accent);
+  color: color-mix(in srgb, var(--art-ink) 88%, #111 12%);
+  line-height: 1;
+}
+
+.artwork--keepsake-tide .keepsake-tide__record-label::after {
+  position: absolute;
+  width: 8%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: #111;
+  content: '';
+}
+
+.artwork--keepsake-tide .keepsake-tide__record-label small,
+.artwork--keepsake-tide .keepsake-tide__record-label i {
+  position: absolute;
+  font-family: var(--sans);
+  font-size: clamp(3px, 1.1cqw, 6px);
+  font-style: normal;
+  font-weight: 750;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+.artwork--keepsake-tide .keepsake-tide__record-label small { top: 20%; }
+.artwork--keepsake-tide .keepsake-tide__record-label i { bottom: 20%; }
+
+.artwork--keepsake-tide .keepsake-tide__record-label b {
+  font-family: var(--serif);
+  font-size: clamp(8px, 3cqw, 17px);
+  font-weight: 400;
+  letter-spacing: -.08em;
+}
+
+.artwork--keepsake-tide .keepsake-tide__formal-card {
+  position: absolute;
+  z-index: 4;
+  right: 6%;
+  bottom: 10%;
+  display: flex;
+  width: 55%;
+  height: 51%;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 9% 8%;
+  transform: rotate(1.4deg);
+  border: 1px solid color-mix(in srgb, var(--art-ink) 18%, transparent);
+  clip-path: polygon(3% 0, 97% 0, 100% 3%, 100% 97%, 97% 100%, 3% 100%, 0 97%, 0 3%);
+  background: color-mix(in srgb, var(--art-bg) 90%, #fff 10%);
+  box-shadow: 0 3cqw 6cqw rgba(31, 39, 34, .2);
+  text-align: center;
+  transition: transform .55s cubic-bezier(.2, .75, .2, 1);
+}
+
+.artwork--keepsake-tide .keepsake-tide__formal-card::before,
+.artwork--keepsake-tide .keepsake-tide__formal-card::after {
+  position: absolute;
+  inset: 4%;
+  border: 1px solid color-mix(in srgb, var(--art-accent) 66%, transparent);
+  content: '';
+  pointer-events: none;
+}
+
+.artwork--keepsake-tide .keepsake-tide__formal-card::after {
+  inset: 6%;
+  border-color: color-mix(in srgb, var(--art-ink) 10%, transparent);
+}
+
+.artwork--keepsake-tide .keepsake-tide__formal-card > * {
+  position: relative;
+  z-index: 1;
+}
+
+.artwork--keepsake-tide .keepsake-tide__formal-card > span,
+.artwork--keepsake-tide .keepsake-tide__formal-card > small {
+  font-family: var(--sans);
+  font-size: clamp(4px, 1.4cqw, 8px);
+  font-weight: 680;
+  letter-spacing: .14em;
+  line-height: 1.25;
+  text-transform: uppercase;
+}
+
+.artwork--keepsake-tide .keepsake-tide__formal-card h3 {
+  display: flex;
+  max-width: 100%;
+  flex-direction: column;
+  margin: 9% 0 6%;
+  font-family: var(--serif);
+  font-size: clamp(15px, 6cqw, 34px);
+  font-weight: 400;
+  letter-spacing: -.05em;
+  line-height: .72;
+}
+
+.artwork--keepsake-tide .keepsake-tide__formal-card h3 b {
+  overflow: hidden;
+  font: inherit;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.artwork--keepsake-tide .keepsake-tide__formal-card h3 i {
+  margin: .28em 0 .2em;
+  color: var(--art-accent-2);
+  font-size: .48em;
+  font-style: italic;
+  font-weight: 400;
+}
+
+.artwork--keepsake-tide .keepsake-tide__formal-card p {
+  max-width: 84%;
+  margin: 0 0 7%;
+  font-family: var(--serif);
+  font-size: clamp(5px, 2cqw, 11px);
+  font-style: italic;
+  line-height: 1.15;
+}
+
+.artwork--keepsake-tide .keepsake-tide__date-slip {
+  position: absolute;
+  z-index: 5;
+  right: 4%;
+  bottom: 4.5%;
+  display: flex;
+  width: 48%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4%;
+  padding: 3% 4%;
+  transform: rotate(-2.4deg);
+  border: 1px solid color-mix(in srgb, var(--art-ink) 18%, transparent);
+  background: color-mix(in srgb, var(--art-accent) 64%, #f3e4af 36%);
+  box-shadow: 0 1.5cqw 3cqw rgba(31, 39, 34, .16);
+  color: color-mix(in srgb, var(--art-ink) 88%, #111 12%);
+}
+
+.artwork--keepsake-tide .keepsake-tide__date-slip span {
+  font-family: var(--serif);
+  font-size: clamp(5px, 1.9cqw, 11px);
+  font-style: italic;
+  white-space: nowrap;
+}
+
+.artwork--keepsake-tide .keepsake-tide__date-slip strong {
+  font-family: var(--sans);
+  font-size: clamp(5px, 1.65cqw, 9px);
+  letter-spacing: .08em;
+  white-space: nowrap;
+}
+
+.artwork--keepsake-tide .keepsake-tide__wax {
+  position: absolute;
+  z-index: 6;
+  bottom: 8%;
+  left: 27%;
+  display: grid;
+  width: 16%;
+  aspect-ratio: 1;
+  place-items: center;
+  transform: rotate(-9deg);
+  border: .7cqw solid color-mix(in srgb, var(--art-accent-2) 84%, #6d443c 16%);
+  border-radius: 47% 53% 45% 55% / 52% 43% 57% 48%;
+  background:
+    radial-gradient(circle at 34% 27%, rgba(255, 255, 255, .28), transparent 24%),
+    var(--art-accent-2);
+  box-shadow:
+    inset 0 0 0 .5cqw color-mix(in srgb, var(--art-accent-2) 66%, #fff 34%),
+    0 1.8cqw 3.4cqw rgba(42, 34, 30, .28);
+  color: color-mix(in srgb, var(--art-bg) 68%, #fff 32%);
+}
+
+.artwork--keepsake-tide .keepsake-tide__wax span {
+  font-family: var(--serif);
+  font-size: clamp(8px, 3.5cqw, 19px);
+  letter-spacing: -.1em;
+}
+
+.artwork--keepsake-tide:hover .keepsake-tide__photo-print {
+  transform: rotate(-5deg) translate(-1%, -1.5%);
+}
+
+.artwork--keepsake-tide:hover .keepsake-tide__record {
+  transform: rotate(-2deg);
+}
+
+.artwork--keepsake-tide:hover .keepsake-tide__formal-card {
+  transform: rotate(.5deg) translateY(-1%);
+}
+
 /*
  * Distinct art direction for the remaining collection.
  * Keep the catalogue inexpensive to paint: every treatment below is static,

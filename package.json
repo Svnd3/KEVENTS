@@ -12,6 +12,7 @@
     "check:webgency": "node scripts/check-webgency-templates.mjs"
   },
   "dependencies": {
+    "lottie-web": "5.13.0",
     "lucide-react": "0.468.0",
     "react": "19.2.8",
     "react-dom": "19.2.8"

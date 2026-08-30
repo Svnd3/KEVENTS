@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { getCoupleNameReveal } from '../data/coupleNameReveals.js'
-import { formatPrice } from '../data/designs.js'
 import CoupleNameReveal from './CoupleNameReveal.jsx'
+import { useCurrency } from './CurrencyControl.jsx'
 import SaveDesignButton from './SaveDesignButton.jsx'
 import '../sponsalia-envelope-intro.css'
 
@@ -81,6 +81,7 @@ export default function SponsaliaEnvelopeIntro({
   saved = false,
   onToggleSaved,
 }) {
+  const { formatPrice } = useCurrency()
   const [phase, setPhase] = useState('sealed')
   const [videoPlaying, setVideoPlaying] = useState(false)
   const [videoFailed, setVideoFailed] = useState(false)

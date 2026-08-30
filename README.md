@@ -59,6 +59,16 @@ The scroll-film invitations and imported Webgency templates have guest RSVP form
 
 Every design submits the same compact `kevents-rsvp-v1` payload. `name` and `attendance` (`attending` or `declined`) are always required. Attendees also provide `partySize`; `requirements` combines guest names, children’s ages, dietary needs, and accessibility needs in one optional answer, while `song` is optional. Declining guests can leave an optional `message`. The payload also includes `template`, `templateId`, and `eventType` where available.
 
+## Accounts, reports, currency and legal setup
+
+The current sign-up, sign-in and account experience is a browser-only prototype. It stores a salted PBKDF2 password verifier and profile data on the current device, but it is not production authentication. Replace `src/account/authClient.js` with a server-side identity provider before accepting real customer accounts or sensitive information.
+
+Reports are delivered as JSON when `VITE_REPORT_ENDPOINT` is configured. Without it, the report dialog clearly creates an unsent demo receipt. Set `VITE_CONTACT_EMAIL` to the public support/legal inbox used by the Terms, Privacy Notice and Cookie Policy.
+
+Country and currency detection uses browser time zone and language without requesting precise location. Visitors can always override both. Foreign-currency values are indicative conversions from KES; rates and their displayed update date live in `src/utils/currency.js` and should be refreshed regularly. Promotional “Was” amounts are explicit `compareAtPrice` values in `src/data/designs.js`; verify that each is a genuine prior price before publishing.
+
+The included legal documents are a practical Kenya-oriented draft, not a substitute for advice from a qualified lawyer. Confirm the legal business identity, contact details, refund practice, payment flow and data processors before launch.
+
 ## Content
 
 - Invitation names, exact prices, pricing tiers, palettes and categories live in `src/data/designs.js`.

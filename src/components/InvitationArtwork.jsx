@@ -26,7 +26,9 @@ function BotanicalLines() {
 }
 
 export default function InvitationArtwork({ design, className = '', priority = false }) {
-  if (design.templatePath) {
+  const isKeepsakeTide = design.variant === 'keepsake-tide'
+
+  if (design.templatePath && !isKeepsakeTide) {
     return (
       <div
         className={`artwork artwork--imported ${className}`}
@@ -56,6 +58,67 @@ export default function InvitationArtwork({ design, className = '', priority = f
     '--art-ink': ink,
     '--art-accent': accent,
     '--art-accent-2': accentTwo,
+  }
+
+  if (isKeepsakeTide) {
+    const initials = `${first?.[0] || ''}${second?.[0] || ''}`
+
+    return (
+      <div
+        className={`artwork artwork--keepsake-tide ${className}`}
+        style={style}
+        role="img"
+        aria-label={`${design.name} invitation preview for ${first} and ${second}`}
+      >
+        <div className="keepsake-tide" aria-hidden="true">
+          <figure className="keepsake-tide__photo-print">
+            {design.image && (
+              <img
+                src={design.image}
+                alt=""
+                loading={priority ? 'eager' : 'lazy'}
+                decoding="async"
+                fetchPriority={priority ? 'high' : 'auto'}
+              />
+            )}
+            <figcaption>A love story · volume one</figcaption>
+          </figure>
+
+          <div className="keepsake-tide__title-card">
+            <span>{design.category} edition</span>
+            <strong>{design.name}</strong>
+            <small>{design.tagline}</small>
+          </div>
+
+          <div className="keepsake-tide__record">
+            <div className="keepsake-tide__record-label">
+              <small>our song</small>
+              <b>{initials}</b>
+              <i>play</i>
+            </div>
+          </div>
+
+          <div className="keepsake-tide__formal-card">
+            <span>Together with their families</span>
+            <h3>
+              <b>{first}</b>
+              <i>&amp;</i>
+              <b>{second}</b>
+            </h3>
+            <p>request the pleasure of your company</p>
+            <small>Diani · Kenya</small>
+          </div>
+
+          <div className="keepsake-tide__date-slip">
+            <span>Save the date</span>
+            <strong>18 · 09 · 27</strong>
+          </div>
+
+          <div className="keepsake-tide__wax"><span>{initials}</span></div>
+        </div>
+        <div className="artwork__grain" />
+      </div>
+    )
   }
 
   return (

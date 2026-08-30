@@ -62,6 +62,7 @@ const rawDesigns = [
   ['Maison Amour', 'Editorial', 22900, 'A study in modern romance.', 'couture', ['#f1efea', '#171717', '#781f2a', '#a59e94'], 'wedding-bouquet.webp', 'Céline', 'Marc', ['Formal', 'Cinematic', 'Photo-Led']],
   ['Cover Story', 'Editorial', 23900, 'The issue everyone has been waiting for.', 'cover', ['#f8f8f5', '#262626', '#cf343e', '#a8a8a3'], 'wedding-celebration.webp', 'Layla', 'Kai', ['Bold', 'Cinematic', 'Story Scroll']],
   ['Society Pages', 'Editorial', 14900, 'Consider this your formal announcement.', 'society', ['#e9dfca', '#182c48', '#315141', '#b5904d'], null, 'Rose', 'Arthur', ['Formal', 'Gentle Motion', 'Single Page']],
+  ['A Letter from the Tide', 'Destination', 27900, 'A coastal keepsake, made to be opened.', 'keepsake-tide', ['#f4efe4', '#263934', '#d1b65d', '#a96052'], 'wedding-couple.webp', 'Amara', 'Theo', ['Editorial', 'Interactive', 'Weekend RSVP']],
   ['Diani Tide', 'Destination', 13900, 'Meet us where the ocean turns turquoise.', 'ocean', ['#42a9b8', '#fffef8', '#efb38d', '#e6d6b7'], 'ocean.webp', 'Kendi', 'Alex', ['Bright', 'Gentle Motion', 'Story Scroll']],
   ['Santorini Blue', 'Destination', 15900, 'Aegean light. Endless love.', 'aegean', ['#1650a2', '#fffdf6', '#d62e83', '#9bd4e0'], 'ocean.webp', 'Elena', 'Niko', ['Bright', 'Interactive', 'Story Scroll']],
   ['Tuscan Hour', 'Destination', 16900, 'Golden hour was made for this.', 'vineyard', ['#d6b378', '#373b22', '#b45c3e', '#ede0bd'], 'wedding-table.webp', 'Lucia', 'Matteo', ['Earthy', 'Gentle Motion', 'Story Scroll']],
@@ -114,6 +115,17 @@ const slugify = (value) => value
   .replace(/[^a-z0-9]+/g, '-')
   .replace(/(^-|-$)/g, '')
 
+// Compare-at prices are deliberately explicit: only designs with a reviewed
+// promotional price should display a “Was” amount in the storefront.
+const compareAtPrices = Object.freeze({
+  'A Letter from the Tide': 32900,
+  'Soft Launch: Forever': 34900,
+  'Love Bomb': 36900,
+  'Savannah Vows': 17900,
+  'Lamu Moon': 21900,
+  'Ivory Issue': 20900,
+})
+
 export const designs = rawDesigns.map((design, index) => {
   const [name, category, price, tagline, variant, palette, image, personOne, personTwo, tags, eventType = 'Wedding', templatePath = null] = design
   return {
@@ -131,7 +143,8 @@ export const designs = rawDesigns.map((design, index) => {
     tags,
     eventType,
     templatePath,
-    featured: ['Soft Launch: Forever', 'Love Bomb', 'Love, in Transit', 'Scarlet Hour', 'Velvet Signal', 'Heart Parade', 'Up, Up & Always', 'Crimson Orbit', 'Heartburst: After Dark', 'Electric Vow', 'Blush Forecast', 'Lamu Moon', 'Ivory Issue', 'Celestial Overture', 'Savannah Vows', 'Nairobi Noir'].includes(name),
+    compareAtPrice: compareAtPrices[name] || null,
+    featured: ['A Letter from the Tide', 'Soft Launch: Forever', 'Love Bomb', 'Love, in Transit', 'Scarlet Hour', 'Velvet Signal', 'Heart Parade', 'Up, Up & Always', 'Crimson Orbit', 'Heartburst: After Dark', 'Electric Vow', 'Blush Forecast', 'Lamu Moon', 'Ivory Issue', 'Celestial Overture', 'Savannah Vows', 'Nairobi Noir'].includes(name),
   }
 })
 

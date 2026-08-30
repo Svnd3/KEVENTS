@@ -6,17 +6,30 @@ import {
   ChevronLeft,
   ChevronRight,
   CirclePlay,
+  CircleUserRound,
+  ExternalLink,
+  Instagram,
+  LifeBuoy,
+  LogIn,
+  LogOut,
   Menu,
+  Music2,
   Search,
   SlidersHorizontal,
   X,
 } from 'lucide-react'
 import InvitationArtwork from './components/InvitationArtwork.jsx'
 import BrandLogo from './components/BrandLogo.jsx'
+import CookieBanner from './components/CookieConsent.jsx'
+import LegalPage from './components/LegalPage.jsx'
 import SaveDesignButton from './components/SaveDesignButton.jsx'
-import { categories, designs, formatPrice, pricingTiers } from './data/designs.js'
+import { CurrencyControl, PriceDisplay, useCurrency } from './components/CurrencyControl.jsx'
+import { AccountPage, AuthDialog, ReportDialog, useAuthSession } from './account/index.js'
+import { categories, designs, pricingTiers } from './data/designs.js'
+import { openCookiePreferences } from './utils/cookieConsent.js'
 
 const featuredNames = [
+  'A Letter from the Tide',
   'Crimson Orbit',
   'Heartburst: After Dark',
   'Electric Vow',
@@ -67,6 +80,10 @@ function getView() {
   const hash = window.location.hash
   if (hash === '#collection') return 'collection'
   if (hash === '#saved') return 'saved'
+  if (hash === '#account') return 'account'
+  if (hash === '#terms' || hash.startsWith('#legal/terms') || hash.startsWith('#legal-terms-')) return 'terms'
+  if (hash === '#privacy' || hash.startsWith('#legal/privacy') || hash.startsWith('#legal-privacy-')) return 'privacy'
+  if (hash === '#cookies' || hash.startsWith('#legal/cookies') || hash.startsWith('#legal-cookies-')) return 'cookies'
   if (hash.startsWith('#preview/')) {
     try {
       const slug = decodeURIComponent(hash.slice('#preview/'.length))
@@ -167,7 +184,7 @@ function SkipLink() {
   return <a className="skip-link" href="#main-content" onClick={focusMain}>Skip to content</a>
 }
 
-function Header({ view, navigate, onEnquire, savedCount }) {
+function Header({ view, navigate, onEnquire, onOpenAuth, onReport, savedCount, user }) {
   const [open, setOpen] = useState(false)
   const navigationRef = useRef(null)
   const menuToggleRef = useRef(null)
@@ -194,6 +211,14 @@ function Header({ view, navigate, onEnquire, savedCount }) {
     navigate(destination)
   }
 
+  const openAccount = () => {
+    setOpen(false)
+    if (user) move('account')
+    else onOpenAuth('sign-in')
+  }
+
+  const accountName = user?.profile?.displayName?.split(/\s+/)[0] || 'Account'
+
   return (
     <header className="site-header">
       <button className="brand" type="button" onClick={() => move('home')} aria-label="Tell & Wed home">
@@ -206,10 +231,23 @@ function Header({ view, navigate, onEnquire, savedCount }) {
           Saved{savedCount ? ` (${savedCount})` : ''}
         </button>
         <button type="button" onClick={() => { setOpen(false); onEnquire(null) }}>Custom design</button>
+        <div className="main-nav__mobile-actions">
+          <button className={view === 'account' ? 'is-active' : ''} type="button" onClick={openAccount}>
+            {user ? `Account · ${accountName}` : 'Sign in or create account'}
+          </button>
+          <button type="button" onClick={() => { setOpen(false); onReport() }}>Report a problem</button>
+        </div>
       </nav>
-      <button className="header-cta" type="button" onClick={() => onEnquire(null)}>
-        <span>Get started</span><ArrowRight size={15} strokeWidth={1.8} />
-      </button>
+      <div className="header-tools">
+        <CurrencyControl compact />
+        <button className={`header-account ${view === 'account' ? 'is-active' : ''}`} type="button" onClick={openAccount} aria-label={user ? `Open ${accountName}'s account` : 'Sign in or create an account'}>
+          {user ? <CircleUserRound size={17} /> : <LogIn size={16} />}
+          <span>{user ? accountName : 'Sign in'}</span>
+        </button>
+        <button className="header-cta" type="button" onClick={() => onEnquire(null)}>
+          <span>Get started</span><ArrowRight size={15} strokeWidth={1.8} />
+        </button>
+      </div>
       <button ref={menuToggleRef} className="menu-toggle" type="button" onClick={() => setOpen((value) => !value)} aria-label="Toggle menu" aria-controls="main-navigation" aria-expanded={open}>
         {open ? <X size={20} /> : <Menu size={20} />}
       </button>
@@ -291,8 +329,7 @@ function DesignCard({ design, large = false, saved = false, onToggleSaved }) {
           <h3>{design.name}</h3>
         </div>
         <div className="design-card__price">
-          <strong>{formatPrice(design.price)}</strong>
-          <small>One-time</small>
+          <PriceDisplay price={design.price} compareAt={design.compareAtPrice} compact />
         </div>
       </div>
     </article>
@@ -337,6 +374,8 @@ function Featured({ navigate, savedSet, onToggleSaved }) {
 }
 
 function PricingGuide({ navigate }) {
+  const { formatRange, currencyCode } = useCurrency()
+
   return (
     <section className="pricing-guide section-pad" data-reveal aria-labelledby="pricing-guide-title">
       <div className="pricing-guide__intro">
@@ -350,10 +389,11 @@ function PricingGuide({ navigate }) {
         {pricingTiers.map((tier) => (
           <article key={tier.key}>
             <span>{tier.name}</span>
-            <strong>{formatPrice(tier.min)}–{tier.max.toLocaleString('en-KE')}</strong>
+            <strong>{formatRange(tier.min, tier.max)}</strong>
             <p>{tier.description}</p>
           </article>
         ))}
+        <p className="pricing-guide__currency-note">Prices shown in {currencyCode}. Non-KES amounts are indicative; your quote confirms the final KES total.</p>
       </div>
     </section>
   )
@@ -548,6 +588,7 @@ function EnquiryPanel({ design, onClose }) {
   const [error, setError] = useState('')
   const dialogRef = useRef(null)
   const endpoint = import.meta.env.VITE_ENQUIRY_ENDPOINT
+  const { formatPrice, currencyCode } = useCurrency()
   useDialogBehavior(true, dialogRef, onClose)
 
   const submit = async (event) => {
@@ -582,14 +623,20 @@ function EnquiryPanel({ design, onClose }) {
             <span className="eyebrow">Enquiry</span>
             <h2 id="enquiry-title">Tell us what<br /><span>you need.</span></h2>
             <p>Share your details and we will reply with availability and next steps.</p>
-            {design && <div className="enquiry-selection"><span>Selected design</span><strong>{design.name}</strong><small>{formatPrice(design.price)}</small></div>}
+            {design && <div className="enquiry-selection"><span>Selected design</span><strong>{design.name}</strong><small>{formatPrice(design.price)} {currencyCode !== 'KES' ? '(estimate)' : ''}</small></div>}
             <form onSubmit={submit}>
               {design && <input type="hidden" name="design" value={design.name} />}
               {design && <input type="hidden" name="price" value={formatPrice(design.price)} />}
+              {design && <input type="hidden" name="priceKes" value={design.price} />}
+              <input type="hidden" name="termsVersion" value="2026-08-30" />
               <label><span>Names</span><input name="name" autoComplete="name" required placeholder="Njeri and Malik" data-autofocus /></label>
               <label><span>Email address</span><input name="email" type="email" autoComplete="email" required placeholder="you@example.com" /></label>
               <label><span>Event date</span><input name="date" type="date" /></label>
               <label><span>Invitation details</span><textarea name="message" required rows="4" placeholder="Tell us about the events, wording and any ideas you already have." /></label>
+              <label className="enquiry-consent">
+                <input name="termsAccepted" type="checkbox" required />
+                <span>I agree to the <a href="#terms">Terms</a> and acknowledge the <a href="#privacy">Privacy notice</a>.</span>
+              </label>
               {error && <p className="form-error" role="alert">{error}</p>}
               <button className="button button--dark button--full" type="submit" disabled={submitting}>{submitting ? 'Sending…' : 'Send enquiry'} <ArrowRight size={17} /></button>
             </form>
@@ -607,19 +654,66 @@ function EnquiryPanel({ design, onClose }) {
   )
 }
 
-function Footer({ navigate, onEnquire, savedCount }) {
+function Footer({ navigate, onEnquire, onOpenAuth, onReport, onCookieSettings, onSignOut, savedCount, user }) {
   return (
     <footer className="site-footer section-pad">
-      <div className="footer-brand"><BrandLogo /></div>
-      <div className="footer-copy"><p>Digital invitations<br />designed in Nairobi.</p><span>Available worldwide</span></div>
-      <div className="footer-links">
-        <button type="button" onClick={() => navigate('collection')}>Designs</button>
-        <button type="button" onClick={() => navigate('saved')}>Saved designs{savedCount ? ` (${savedCount})` : ''}</button>
-        <button type="button" onClick={() => onEnquire(null)}>Custom design</button>
-        <button type="button" onClick={() => navigate('home')}>Home</button>
-        <button type="button" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>Back to top</button>
+      <div className="footer-cta">
+        <span className="eyebrow">Your story deserves a beautiful entrance</span>
+        <h2>Ready to tell them<br /><em>you’re getting married?</em></h2>
+        <div>
+          <button className="button button--light" type="button" onClick={() => navigate('collection')}>Browse invitations <ArrowRight size={17} /></button>
+          <button className="footer-text-link" type="button" onClick={() => onEnquire(null)}>Request something custom</button>
+        </div>
       </div>
-      <div className="footer-bottom"><span>© 2026 Tell &amp; Wed</span></div>
+
+      <div className="footer-main">
+        <div className="footer-intro">
+          <div className="footer-brand"><BrandLogo /></div>
+          <p>Thoughtful digital invitations, designed in Nairobi and shared everywhere.</p>
+          <div className="footer-socials" aria-label="Tell & Wed on social media">
+            <a href="https://www.instagram.com/tellandwed/" target="_blank" rel="noreferrer" aria-label="Instagram @tellandwed">
+              <Instagram size={16} /><span>@tellandwed</span><ExternalLink size={12} />
+            </a>
+            <a href="https://www.tiktok.com/@tell.wed.invitations" target="_blank" rel="noreferrer" aria-label="TikTok @tell.wed.invitations">
+              <Music2 size={16} /><span>@tell.wed.invitations</span><ExternalLink size={12} />
+            </a>
+          </div>
+        </div>
+
+        <nav className="footer-links" aria-label="Footer navigation">
+          <div>
+            <strong>Explore</strong>
+            <button type="button" onClick={() => navigate('collection')}>All designs</button>
+            <button type="button" onClick={() => navigate('saved')}>Saved designs{savedCount ? ` (${savedCount})` : ''}</button>
+            <button type="button" onClick={() => onEnquire(null)}>Custom design</button>
+          </div>
+          <div>
+            <strong>Account</strong>
+            <button type="button" onClick={() => user ? navigate('account') : onOpenAuth('sign-in')}>{user ? 'My account' : 'Sign in'}</button>
+            {!user && <button type="button" onClick={() => onOpenAuth('sign-up')}>Create account</button>}
+            {user && <button type="button" onClick={onSignOut}><LogOut size={13} /> Sign out</button>}
+          </div>
+          <div>
+            <strong>Help &amp; legal</strong>
+            <button type="button" onClick={onReport}><LifeBuoy size={13} /> Report a problem</button>
+            <button type="button" onClick={() => navigate('terms')}>Terms of service</button>
+            <button type="button" onClick={() => navigate('privacy')}>Privacy notice</button>
+            <button type="button" onClick={() => navigate('cookies')}>Cookie policy</button>
+            <button type="button" onClick={onCookieSettings}>Cookie settings</button>
+          </div>
+        </nav>
+      </div>
+
+      <div className="footer-utility">
+        <div><span>Country &amp; currency</span><CurrencyControl /></div>
+        <button type="button" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>Back to top <ArrowDown className="footer-back-arrow" size={14} /></button>
+      </div>
+
+      <div className="footer-bottom">
+        <span>© {new Date().getFullYear()} Tell &amp; Wed</span>
+        <span>Nairobi, Kenya · Available worldwide</span>
+        <span>Prices are one-time unless stated otherwise</span>
+      </div>
     </footer>
   )
 }
@@ -627,13 +721,19 @@ function Footer({ navigate, onEnquire, savedCount }) {
 export default function App() {
   const [view, setView] = useState(getView)
   const [enquiry, setEnquiry] = useState({ open: false, design: null })
+  const [authDialog, setAuthDialog] = useState({ open: false, mode: 'sign-in' })
+  const [reportOpen, setReportOpen] = useState(false)
   const [savedSlugs, setSavedSlugs] = useState(readSavedDesigns)
   const [saveAnnouncement, setSaveAnnouncement] = useState('')
+  const auth = useAuthSession()
+  const { country, currency } = useCurrency()
   const progressRef = useRef(null)
   const viewRef = useRef(view)
   const collectionScrollRef = useRef(0)
   const closeEnquiry = useCallback(() => setEnquiry({ open: false, design: null }), [])
+  const closeAuth = useCallback(() => setAuthDialog((current) => ({ ...current, open: false })), [])
   const previewDesign = view === 'preview' ? getPreviewDesign() : null
+  const isLegalView = ['terms', 'privacy', 'cookies'].includes(view)
   const savedSet = useMemo(() => new Set(savedSlugs), [savedSlugs])
   const savedDesigns = useMemo(
     () => savedSlugs.map((slug) => designs.find((design) => design.slug === slug)).filter(Boolean),
@@ -668,6 +768,8 @@ export default function App() {
       viewRef.current = nextView
       setView(nextView)
       setEnquiry({ open: false, design: null })
+      setAuthDialog((current) => ({ ...current, open: false }))
+      setReportOpen(false)
       window.requestAnimationFrame(() => {
         window.scrollTo({
           top: nextView === 'collection' ? collectionScrollRef.current : 0,
@@ -698,23 +800,34 @@ export default function App() {
   }, [])
 
   useEffect(() => {
+    const titles = {
+      account: 'Your account | Tell & Wed',
+      collection: 'Invitation designs | Tell & Wed',
+      cookies: 'Cookie policy | Tell & Wed',
+      privacy: 'Privacy notice | Tell & Wed',
+      saved: 'Saved designs | Tell & Wed',
+      terms: 'Terms of service | Tell & Wed',
+    }
     document.title = previewDesign
       ? `${previewDesign.name} | Tell & Wed`
-      : view === 'collection'
-        ? 'Invitation designs | Tell & Wed'
-        : view === 'saved'
-          ? 'Saved designs | Tell & Wed'
-        : 'Tell & Wed | Digital invitations'
+      : titles[view] || 'Tell & Wed | Digital invitations'
   }, [previewDesign, view])
 
   const navigate = (destination) => {
-    const nextHash = destination === 'collection'
-      ? '#collection'
-      : destination === 'saved'
-        ? '#saved'
-        : '#home'
+    const routes = {
+      account: '#account',
+      collection: '#collection',
+      cookies: '#cookies',
+      home: '#home',
+      privacy: '#privacy',
+      saved: '#saved',
+      terms: '#terms',
+    }
+    const nextView = routes[destination] ? destination : 'home'
+    const nextHash = routes[nextView]
     if (window.location.hash === nextHash) {
-      setView(destination)
+      viewRef.current = nextView
+      setView(nextView)
       window.scrollTo({ top: 0, behavior: 'auto' })
     } else {
       window.location.hash = nextHash
@@ -724,6 +837,16 @@ export default function App() {
   const openEnquiry = useCallback((design) => {
     setEnquiry({ open: true, design })
   }, [])
+
+  const openAuth = useCallback((mode = 'sign-in') => {
+    setAuthDialog({ open: true, mode: mode === 'sign-up' ? 'sign-up' : 'sign-in' })
+  }, [])
+
+  const signOutFromSite = () => {
+    auth.signOut()
+    setSaveAnnouncement('You have signed out of this device.')
+    navigate('home')
+  }
 
   const toggleSaved = useCallback((design) => {
     const willSave = !savedSlugs.includes(design.slug)
@@ -754,7 +877,37 @@ export default function App() {
         </Suspense>
         <p className="sr-only" role="status" aria-live="polite" aria-atomic="true">{saveAnnouncement}</p>
         {enquiry.open && <EnquiryPanel design={enquiry.design} onClose={closeEnquiry} />}
+        <CookieBanner onNavigatePolicy={() => navigate('cookies')} policyHref="#cookies" />
       </>
+    )
+  }
+
+  let page = <HomePage navigate={navigate} onEnquire={openEnquiry} savedSet={savedSet} onToggleSaved={toggleSaved} />
+  if (view === 'collection') {
+    page = <CollectionPage savedSet={savedSet} onToggleSaved={toggleSaved} />
+  } else if (view === 'saved') {
+    page = <SavedPage navigate={navigate} savedDesigns={savedDesigns} savedSet={savedSet} onToggleSaved={toggleSaved} />
+  } else if (view === 'account') {
+    page = (
+      <AccountPage
+        user={auth.user}
+        savedDesigns={savedDesigns}
+        onNavigate={navigate}
+        onSignOut={() => navigate('home')}
+        onOpenAuth={openAuth}
+        onReport={() => setReportOpen(true)}
+        currencySummary={{ label: `${currency.code} · ${currency.name}`, country: country.name }}
+        onUserChange={auth.refresh}
+      />
+    )
+  } else if (isLegalView) {
+    page = (
+      <LegalPage
+        document={view}
+        navigate={navigate}
+        contactEmail={import.meta.env.VITE_CONTACT_EMAIL || 'hello@tellandwed.com'}
+        onOpenCookiePreferences={openCookiePreferences}
+      />
     )
   }
 
@@ -762,17 +915,43 @@ export default function App() {
     <>
       <SkipLink />
       <div className="scroll-progress" ref={progressRef} />
-      <Header view={view} navigate={navigate} onEnquire={openEnquiry} savedCount={savedSlugs.length} />
+      {!isLegalView && (
+        <Header
+          view={view}
+          navigate={navigate}
+          onEnquire={openEnquiry}
+          onOpenAuth={openAuth}
+          onReport={() => setReportOpen(true)}
+          savedCount={savedSlugs.length}
+          user={auth.user}
+        />
+      )}
       <div id="main-content" tabIndex={-1}>
-        {view === 'home'
-          ? <HomePage navigate={navigate} onEnquire={openEnquiry} savedSet={savedSet} onToggleSaved={toggleSaved} />
-          : view === 'collection'
-            ? <CollectionPage savedSet={savedSet} onToggleSaved={toggleSaved} />
-            : <SavedPage navigate={navigate} savedDesigns={savedDesigns} savedSet={savedSet} onToggleSaved={toggleSaved} />}
+        {page}
       </div>
-      <Footer navigate={navigate} onEnquire={openEnquiry} savedCount={savedSlugs.length} />
+      <Footer
+        navigate={navigate}
+        onEnquire={openEnquiry}
+        onOpenAuth={openAuth}
+        onReport={() => setReportOpen(true)}
+        onCookieSettings={openCookiePreferences}
+        onSignOut={signOutFromSite}
+        savedCount={savedSlugs.length}
+        user={auth.user}
+      />
       <p className="sr-only" role="status" aria-live="polite" aria-atomic="true">{saveAnnouncement}</p>
       {enquiry.open && <EnquiryPanel design={enquiry.design} onClose={closeEnquiry} />}
+      <AuthDialog
+        open={authDialog.open}
+        mode={authDialog.mode}
+        onClose={closeAuth}
+        onAuthenticated={() => {
+          closeAuth()
+          navigate('account')
+        }}
+      />
+      <ReportDialog open={reportOpen} onClose={() => setReportOpen(false)} user={auth.user} />
+      <CookieBanner onNavigatePolicy={() => navigate('cookies')} policyHref="#cookies" />
     </>
   )
 }
