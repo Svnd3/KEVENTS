@@ -51,6 +51,8 @@ export default function CoupleNameReveal({ design, recipe, active }) {
     <section
       className={`couple-name-reveal cnr--${recipe.style}${active ? ' is-active' : ''}`}
       data-design={design?.slug}
+      data-backdrop={recipe.backdrop || undefined}
+      data-scene={recipe.scene || undefined}
       style={style}
       aria-hidden={!active}
     >
