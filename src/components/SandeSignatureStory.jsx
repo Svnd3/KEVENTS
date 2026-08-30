@@ -1,5 +1,7 @@
 import { useEffect, useId, useMemo, useRef, useState } from 'react'
+import { formatPrice } from '../data/designs.js'
 import { submitRsvp } from '../utils/submitRsvp.js'
+import SaveDesignButton from './SaveDesignButton.jsx'
 import '../sande-signature-story.css'
 
 const FALLBACK_DATE = '2027-10-16T15:00:00+03:00'
@@ -265,6 +267,8 @@ export default function SandeSignatureStory({
   onUseDesign,
   isMusicPlaying = false,
   onToggleMusic,
+  saved = false,
+  onToggleSaved,
 }) {
   const rootRef = useRef(null)
   const [first = 'Zuri', second = 'Kito'] = design?.couple || []
@@ -335,13 +339,17 @@ export default function SandeSignatureStory({
           <BackIcon />
           <span>Designs</span>
         </button>
-        <span className="ss-floating-nav__signature" aria-label={`${first} and ${second}`}>
-          {first.charAt(0)} + {second.charAt(0)}
+        <span className="ss-floating-nav__price">
+          <strong>{design.name}</strong>
+          <small>{formatPrice(design.price)} · one-time</small>
         </span>
-        <button className="ss-round-action ss-round-action--use" type="button" onClick={() => onUseDesign?.(design)}>
-          <span>Use this design</span>
-          <ArrowIcon />
-        </button>
+        <div className="ss-floating-nav__actions">
+          <SaveDesignButton design={design} saved={saved} onToggle={onToggleSaved} className="ss-round-action ss-round-action--save" />
+          <button className="ss-round-action ss-round-action--use" type="button" onClick={() => onUseDesign?.(design)}>
+            <span>Start</span>
+            <ArrowIcon />
+          </button>
+        </div>
       </nav>
 
       <button

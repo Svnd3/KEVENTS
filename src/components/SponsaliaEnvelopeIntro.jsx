@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { formatPrice } from '../data/designs.js'
+import SaveDesignButton from './SaveDesignButton.jsx'
 import '../sponsalia-envelope-intro.css'
 
 const ENVELOPE_POSTER = '/media/busta-rossa-poster.jpg'
@@ -68,7 +70,14 @@ function envelopeTheme(design) {
   }
 }
 
-export default function SponsaliaEnvelopeIntro({ design, onBack, onComplete, onUserGesture }) {
+export default function SponsaliaEnvelopeIntro({
+  design,
+  onBack,
+  onComplete,
+  onUserGesture,
+  saved = false,
+  onToggleSaved,
+}) {
   const [phase, setPhase] = useState('sealed')
   const [videoPlaying, setVideoPlaying] = useState(false)
   const [videoFailed, setVideoFailed] = useState(false)
@@ -261,14 +270,18 @@ export default function SponsaliaEnvelopeIntro({ design, onBack, onComplete, onU
           <svg viewBox="0 0 20 20" aria-hidden="true"><path d="m11.8 4.5-5.4 5.5 5.4 5.5M6.7 10h7" /></svg>
           <span>All designs</span>
         </button>
-        <button
-          className="spei__control spei__control--skip"
-          type="button"
-          onClick={skipInvitation}
-          disabled={phase === 'closing' || phase === 'complete'}
-        >
-          Skip intro
-        </button>
+        <span className="spei__price"><strong>{design.name}</strong>{formatPrice(design.price)} · one-time</span>
+        <div className="spei__control-group">
+          <SaveDesignButton design={design} saved={saved} onToggle={onToggleSaved} className="spei__save" />
+          <button
+            className="spei__control spei__control--skip"
+            type="button"
+            onClick={skipInvitation}
+            disabled={phase === 'closing' || phase === 'complete'}
+          >
+            Skip intro
+          </button>
+        </div>
       </div>
 
       <button

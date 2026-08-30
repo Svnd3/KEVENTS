@@ -1,6 +1,6 @@
 # Tell & Wed
 
-A fast, responsive storefront for bespoke digital wedding invitations. The site includes a catalog of 70 designs, dedicated interactive previews, category filters, pricing in Kenyan shillings, and an enquiry flow.
+A fast, responsive storefront for bespoke digital wedding invitations. The site includes a catalog of 70 designs, dedicated interactive previews, category filters, tiered one-time pricing in Kenyan shillings, a device-persistent saved-design shortlist, and an enquiry flow.
 
 ## Run locally
 
@@ -61,7 +61,7 @@ Every design submits the same compact `kevents-rsvp-v1` payload. `name` and `att
 
 ## Content
 
-- Invitation names, prices, palettes and categories live in `src/data/designs.js`.
+- Invitation names, exact prices, pricing tiers, palettes and categories live in `src/data/designs.js`.
 - Catalog artwork lives in `src/components/InvitationArtwork.jsx`.
 - Every design uses the shared lace-and-wax envelope opener in `src/components/SponsaliaEnvelopeIntro.jsx`.
 - Full invitation stories and the demo RSVP flow live in `src/components/InvitationStory.jsx`.

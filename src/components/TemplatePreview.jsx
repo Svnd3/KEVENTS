@@ -5,6 +5,7 @@ import { cinematicWeddingTemplates, cinematicWeddingVariants } from '../data/cin
 import { getSoundtrack } from '../data/soundtracks.js'
 import RoseJourney from './RoseJourney.jsx'
 import SponsaliaEnvelopeIntro from './SponsaliaEnvelopeIntro.jsx'
+import SaveDesignButton from './SaveDesignButton.jsx'
 import '../preview.css'
 
 const loadInvitationStory = () => import('./InvitationStory.jsx')
@@ -52,7 +53,7 @@ function SoundIcon({ playing }) {
   )
 }
 
-function PreviewToolbar({ design, onBack, onEnquire }) {
+function PreviewToolbar({ design, onBack, onEnquire, saved, onToggleSaved }) {
   return (
     <nav className="tp-toolbar" aria-label="Invitation preview controls">
       <button className="tp-toolbar__back" type="button" onClick={onBack} aria-label="Back to all designs">
@@ -62,13 +63,22 @@ function PreviewToolbar({ design, onBack, onEnquire }) {
 
       <div className="tp-toolbar__title">
         <strong>{design.name}</strong>
-        <span>{formatPrice(design.price)}</span>
+        <span>{formatPrice(design.price)} · one-time</span>
       </div>
 
-      <button className="tp-toolbar__use" type="button" onClick={() => onEnquire?.(design)} aria-label={`Use ${design.name} design`}>
-        <span>Use this design</span>
-        <ArrowIcon />
-      </button>
+      <div className="tp-toolbar__actions">
+        <SaveDesignButton
+          design={design}
+          saved={saved}
+          onToggle={onToggleSaved}
+          className="tp-toolbar__save"
+        />
+        <button className="tp-toolbar__use" type="button" onClick={() => onEnquire?.(design)} aria-label={`Start with ${design.name}`}>
+          <span className="tp-toolbar__use-label tp-toolbar__use-label--desktop">Start with this design</span>
+          <span className="tp-toolbar__use-label tp-toolbar__use-label--mobile">Start</span>
+          <ArrowIcon />
+        </button>
+      </div>
     </nav>
   )
 }
@@ -89,7 +99,7 @@ function SoundtrackButton({ isPlaying, onToggle, soundtrack }) {
   )
 }
 
-export default function TemplatePreview({ design, onBack, onEnquire }) {
+export default function TemplatePreview({ design, onBack, onEnquire, saved = false, onToggleSaved }) {
   const [introComplete, setIntroComplete] = useState(false)
   const [isMusicPlaying, setIsMusicPlaying] = useState(false)
   const [embeddedHtml, setEmbeddedHtml] = useState('')
@@ -322,6 +332,8 @@ export default function TemplatePreview({ design, onBack, onEnquire }) {
       onBack={onBack}
       onComplete={() => setIntroComplete(true)}
       onUserGesture={preparePreview}
+      saved={saved}
+      onToggleSaved={onToggleSaved}
     />
   ) : null
 
@@ -330,7 +342,7 @@ export default function TemplatePreview({ design, onBack, onEnquire }) {
   if (design.templatePath) {
     previewContent = introComplete ? (
       <div className="template-preview template-preview--embedded">
-        <PreviewToolbar design={design} onBack={onBack} onEnquire={onEnquire} />
+        <PreviewToolbar design={design} onBack={onBack} onEnquire={onEnquire} saved={saved} onToggleSaved={onToggleSaved} />
 
         <main id="main-content" className="tp-embedded" tabIndex={-1}>
           {embeddedHtml ? (
@@ -361,7 +373,7 @@ export default function TemplatePreview({ design, onBack, onEnquire }) {
   } else if (isCinematicWedding) {
     previewContent = introComplete ? (
       <div className={`template-preview template-preview--cinematic-new template-preview--${design.variant}`}>
-        <PreviewToolbar design={design} onBack={onBack} onEnquire={onEnquire} />
+        <PreviewToolbar design={design} onBack={onBack} onEnquire={onEnquire} saved={saved} onToggleSaved={onToggleSaved} />
         <main id="main-content" tabIndex={-1}>
           <CinematicWeddingStory design={design} showMusicControl={false} />
         </main>
@@ -371,7 +383,7 @@ export default function TemplatePreview({ design, onBack, onEnquire }) {
   } else if (isScrollWedding) {
     previewContent = introComplete ? (
       <div className="template-preview template-preview--scroll">
-        <PreviewToolbar design={design} onBack={onBack} onEnquire={onEnquire} />
+        <PreviewToolbar design={design} onBack={onBack} onEnquire={onEnquire} saved={saved} onToggleSaved={onToggleSaved} />
         <main id="main-content" tabIndex={-1}>
           <ScrollWeddingStory design={design} showMusicControl={false} />
         </main>
@@ -387,6 +399,8 @@ export default function TemplatePreview({ design, onBack, onEnquire }) {
           onUseDesign={(selectedDesign) => onEnquire?.(selectedDesign)}
           isMusicPlaying={isMusicPlaying}
           onToggleMusic={toggleMusic}
+          saved={saved}
+          onToggleSaved={onToggleSaved}
         />
         <RoseJourney design={design} />
       </div>
@@ -394,7 +408,7 @@ export default function TemplatePreview({ design, onBack, onEnquire }) {
   } else {
     previewContent = introComplete ? (
       <div className="template-preview">
-        <PreviewToolbar design={design} onBack={onBack} onEnquire={onEnquire} />
+        <PreviewToolbar design={design} onBack={onBack} onEnquire={onEnquire} saved={saved} onToggleSaved={onToggleSaved} />
 
         <main id="main-content" tabIndex={-1}>
           <InvitationStory design={design} onEnquire={onEnquire} />

@@ -13,7 +13,8 @@ import {
 } from 'lucide-react'
 import InvitationArtwork from './components/InvitationArtwork.jsx'
 import BrandLogo from './components/BrandLogo.jsx'
-import { categories, designs, formatPrice } from './data/designs.js'
+import SaveDesignButton from './components/SaveDesignButton.jsx'
+import { categories, designs, formatPrice, pricingTiers } from './data/designs.js'
 
 const featuredNames = [
   'Crimson Orbit',
@@ -32,6 +33,21 @@ const heroFeaturedNames = featuredNames.slice(0, 4)
 const loadTemplatePreview = () => import('./components/TemplatePreview.jsx')
 const TemplatePreview = lazy(loadTemplatePreview)
 const COLLECTION_PREFERENCES_KEY = 'kevents-collection-preferences'
+const SAVED_DESIGNS_KEY = 'tell-and-wed:saved-designs:v1'
+const validDesignSlugs = new Set(designs.map((design) => design.slug))
+
+function cleanSavedDesigns(value) {
+  if (!Array.isArray(value)) return []
+  return [...new Set(value.filter((slug) => typeof slug === 'string' && validDesignSlugs.has(slug)))]
+}
+
+function readSavedDesigns() {
+  try {
+    return cleanSavedDesigns(JSON.parse(window.localStorage.getItem(SAVED_DESIGNS_KEY) || '[]'))
+  } catch {
+    return []
+  }
+}
 
 function readCollectionPreferences() {
   try {
@@ -50,6 +66,7 @@ function readCollectionPreferences() {
 function getView() {
   const hash = window.location.hash
   if (hash === '#collection') return 'collection'
+  if (hash === '#saved') return 'saved'
   if (hash.startsWith('#preview/')) {
     try {
       const slug = decodeURIComponent(hash.slice('#preview/'.length))
@@ -150,7 +167,7 @@ function SkipLink() {
   return <a className="skip-link" href="#main-content" onClick={focusMain}>Skip to content</a>
 }
 
-function Header({ view, navigate, onEnquire }) {
+function Header({ view, navigate, onEnquire, savedCount }) {
   const [open, setOpen] = useState(false)
   const navigationRef = useRef(null)
   const menuToggleRef = useRef(null)
@@ -185,6 +202,9 @@ function Header({ view, navigate, onEnquire }) {
       <nav ref={navigationRef} id="main-navigation" className={`main-nav ${open ? 'is-open' : ''}`} aria-label="Main navigation">
         <button className={view === 'home' ? 'is-active' : ''} type="button" onClick={() => move('home')} aria-current={view === 'home' ? 'page' : undefined}>Home</button>
         <button className={view === 'collection' ? 'is-active' : ''} type="button" onClick={() => move('collection')} aria-current={view === 'collection' ? 'page' : undefined}>Designs</button>
+        <button className={view === 'saved' ? 'is-active' : ''} type="button" onClick={() => move('saved')} aria-current={view === 'saved' ? 'page' : undefined}>
+          Saved{savedCount ? ` (${savedCount})` : ''}
+        </button>
         <button type="button" onClick={() => { setOpen(false); onEnquire(null) }}>Custom design</button>
       </nav>
       <button className="header-cta" type="button" onClick={() => onEnquire(null)}>
@@ -245,7 +265,7 @@ function Hero({ navigate, onEnquire }) {
   )
 }
 
-function DesignCard({ design, large = false }) {
+function DesignCard({ design, large = false, saved = false, onToggleSaved }) {
   return (
     <article className={`design-card ${large ? 'design-card--large' : ''}`}>
       <a
@@ -259,18 +279,27 @@ function DesignCard({ design, large = false }) {
         <span className="design-card__view"><span>Preview</span><ArrowRight size={15} /></span>
         {design.category === 'Cinematic' && <span className="design-card__motion"><CirclePlay size={13} /> Animated</span>}
       </a>
+      <SaveDesignButton
+        design={design}
+        saved={saved}
+        onToggle={onToggleSaved}
+        className="design-card__save"
+      />
       <div className="design-card__meta">
         <div>
-          <span>{design.category}</span>
+          <span>{design.category} · {design.tier.name}</span>
           <h3>{design.name}</h3>
         </div>
-        <strong>{formatPrice(design.price)}</strong>
+        <div className="design-card__price">
+          <strong>{formatPrice(design.price)}</strong>
+          <small>One-time</small>
+        </div>
       </div>
     </article>
   )
 }
 
-function Featured({ navigate }) {
+function Featured({ navigate, savedSet, onToggleSaved }) {
   const scroller = useRef(null)
   const featured = featuredNames.map((name) => designs.find((design) => design.name === name))
   const scroll = (direction) => scroller.current?.scrollBy({ left: direction * scroller.current.clientWidth * 0.78, behavior: 'smooth' })
@@ -288,7 +317,15 @@ function Featured({ navigate }) {
         </div>
       </div>
       <div className="featured__track" ref={scroller}>
-        {featured.map((design) => <DesignCard key={design.id} design={design} large />)}
+        {featured.map((design) => (
+          <DesignCard
+            key={design.id}
+            design={design}
+            large
+            saved={savedSet.has(design.slug)}
+            onToggleSaved={onToggleSaved}
+          />
+        ))}
         <button className="collection-teaser" type="button" onClick={() => navigate('collection')} data-reveal>
           <span>All<br />designs</span>
           <p>Browse the full collection</p>
@@ -299,12 +336,36 @@ function Featured({ navigate }) {
   )
 }
 
-function HomePage({ navigate, onEnquire }) {
+function PricingGuide({ navigate }) {
+  return (
+    <section className="pricing-guide section-pad" data-reveal aria-labelledby="pricing-guide-title">
+      <div className="pricing-guide__intro">
+        <span className="eyebrow">Clear, one-time pricing</span>
+        <h2 id="pricing-guide-title">One invitation.<br /><span>Every guest.</span></h2>
+        <p>Pay for the creative work—not for the size of your guest list. Every listed price includes personalisation, a shareable link and two review rounds.</p>
+        <button className="text-link" type="button" onClick={() => navigate('collection')}>See exact design prices <ArrowRight size={15} /></button>
+        <p className="pricing-guide__note">Names, wording, colours and event details are customised. No per-guest charge.</p>
+      </div>
+      <div className="pricing-guide__tiers">
+        {pricingTiers.map((tier) => (
+          <article key={tier.key}>
+            <span>{tier.name}</span>
+            <strong>{formatPrice(tier.min)}–{tier.max.toLocaleString('en-KE')}</strong>
+            <p>{tier.description}</p>
+          </article>
+        ))}
+      </div>
+    </section>
+  )
+}
+
+function HomePage({ navigate, onEnquire, savedSet, onToggleSaved }) {
   useScrollReveal('home')
   return (
     <main>
       <Hero navigate={navigate} onEnquire={onEnquire} />
-      <Featured navigate={navigate} />
+      <Featured navigate={navigate} savedSet={savedSet} onToggleSaved={onToggleSaved} />
+      <PricingGuide navigate={navigate} />
       <section className="manifesto section-pad" data-reveal>
         <div className="manifesto__copy">
           <span className="eyebrow">How it works</span>
@@ -327,7 +388,7 @@ function HomePage({ navigate, onEnquire }) {
   )
 }
 
-function CollectionPage() {
+function CollectionPage({ savedSet, onToggleSaved }) {
   const initialPreferences = useRef(null)
   if (!initialPreferences.current) initialPreferences.current = readCollectionPreferences()
   const [category, setCategory] = useState(initialPreferences.current.category)
@@ -377,7 +438,7 @@ function CollectionPage() {
       <section className="collection-hero section-pad">
         <span className="eyebrow">Invitations for every event</span>
         <h1>Invitation designs</h1>
-        <p>Filter by style, preview each design and choose one to customise.</p>
+        <p>Filter by style, preview each design and choose one to customise. Each price is one-time, with no per-guest charge.</p>
       </section>
 
       <section className="catalog section-pad">
@@ -421,7 +482,14 @@ function CollectionPage() {
 
         {filtered.length ? (
           <div className="catalog-grid">
-            {filtered.map((design) => <DesignCard key={design.id} design={design} />)}
+            {filtered.map((design) => (
+              <DesignCard
+                key={design.id}
+                design={design}
+                saved={savedSet.has(design.slug)}
+                onToggleSaved={onToggleSaved}
+              />
+            ))}
           </div>
         ) : (
           <div className="empty-state">
@@ -429,6 +497,44 @@ function CollectionPage() {
             <h2>No designs match your search.</h2>
             <p>Try another search or clear the filters.</p>
             <button type="button" className="button button--dark" onClick={clearFilters}>Clear filters</button>
+          </div>
+        )}
+      </section>
+    </main>
+  )
+}
+
+function SavedPage({ navigate, savedDesigns, savedSet, onToggleSaved }) {
+  useScrollReveal(`saved-${savedDesigns.length}`)
+
+  return (
+    <main className="collection-page saved-page">
+      <section className="collection-hero section-pad">
+        <span className="eyebrow">Saved on this device</span>
+        <h1>Your shortlist</h1>
+        <p>Compare the designs you love, then preview one when you are ready.</p>
+      </section>
+      <section className="catalog section-pad">
+        {savedDesigns.length ? (
+          <>
+            <div className="catalog-results"><span>{savedDesigns.length} saved {savedDesigns.length === 1 ? 'design' : 'designs'}</span></div>
+            <div className="catalog-grid">
+              {savedDesigns.map((design) => (
+                <DesignCard
+                  key={design.id}
+                  design={design}
+                  saved={savedSet.has(design.slug)}
+                  onToggleSaved={onToggleSaved}
+                />
+              ))}
+            </div>
+          </>
+        ) : (
+          <div className="empty-state">
+            <span>Your shortlist is empty</span>
+            <h2>Save a few favourites.</h2>
+            <p>Tap the heart on any design and it will stay here on this device.</p>
+            <button type="button" className="button button--dark" onClick={() => navigate('collection')}>Browse designs</button>
           </div>
         )}
       </section>
@@ -501,13 +607,14 @@ function EnquiryPanel({ design, onClose }) {
   )
 }
 
-function Footer({ navigate, onEnquire }) {
+function Footer({ navigate, onEnquire, savedCount }) {
   return (
     <footer className="site-footer section-pad">
       <div className="footer-brand"><BrandLogo /></div>
       <div className="footer-copy"><p>Digital invitations<br />designed in Nairobi.</p><span>Available worldwide</span></div>
       <div className="footer-links">
         <button type="button" onClick={() => navigate('collection')}>Designs</button>
+        <button type="button" onClick={() => navigate('saved')}>Saved designs{savedCount ? ` (${savedCount})` : ''}</button>
         <button type="button" onClick={() => onEnquire(null)}>Custom design</button>
         <button type="button" onClick={() => navigate('home')}>Home</button>
         <button type="button" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>Back to top</button>
@@ -520,11 +627,39 @@ function Footer({ navigate, onEnquire }) {
 export default function App() {
   const [view, setView] = useState(getView)
   const [enquiry, setEnquiry] = useState({ open: false, design: null })
+  const [savedSlugs, setSavedSlugs] = useState(readSavedDesigns)
+  const [saveAnnouncement, setSaveAnnouncement] = useState('')
   const progressRef = useRef(null)
   const viewRef = useRef(view)
   const collectionScrollRef = useRef(0)
   const closeEnquiry = useCallback(() => setEnquiry({ open: false, design: null }), [])
   const previewDesign = view === 'preview' ? getPreviewDesign() : null
+  const savedSet = useMemo(() => new Set(savedSlugs), [savedSlugs])
+  const savedDesigns = useMemo(
+    () => savedSlugs.map((slug) => designs.find((design) => design.slug === slug)).filter(Boolean),
+    [savedSlugs],
+  )
+
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(SAVED_DESIGNS_KEY, JSON.stringify(savedSlugs))
+    } catch {
+      // Saving still works for this visit when local storage is unavailable.
+    }
+  }, [savedSlugs])
+
+  useEffect(() => {
+    const syncSavedDesigns = (event) => {
+      if (event.key !== SAVED_DESIGNS_KEY) return
+      try {
+        setSavedSlugs(cleanSavedDesigns(JSON.parse(event.newValue || '[]')))
+      } catch {
+        setSavedSlugs([])
+      }
+    }
+    window.addEventListener('storage', syncSavedDesigns)
+    return () => window.removeEventListener('storage', syncSavedDesigns)
+  }, [])
 
   useEffect(() => {
     const changeView = () => {
@@ -567,11 +702,17 @@ export default function App() {
       ? `${previewDesign.name} | Tell & Wed`
       : view === 'collection'
         ? 'Invitation designs | Tell & Wed'
+        : view === 'saved'
+          ? 'Saved designs | Tell & Wed'
         : 'Tell & Wed | Digital invitations'
   }, [previewDesign, view])
 
   const navigate = (destination) => {
-    const nextHash = destination === 'collection' ? '#collection' : '#home'
+    const nextHash = destination === 'collection'
+      ? '#collection'
+      : destination === 'saved'
+        ? '#saved'
+        : '#home'
     if (window.location.hash === nextHash) {
       setView(destination)
       window.scrollTo({ top: 0, behavior: 'auto' })
@@ -584,6 +725,18 @@ export default function App() {
     setEnquiry({ open: true, design })
   }, [])
 
+  const toggleSaved = useCallback((design) => {
+    const willSave = !savedSlugs.includes(design.slug)
+    setSavedSlugs((current) => (
+      current.includes(design.slug)
+        ? current.filter((slug) => slug !== design.slug)
+        : [...current, design.slug]
+    ))
+    setSaveAnnouncement(willSave
+      ? `${design.name} saved on this device.`
+      : `${design.name} removed from saved designs.`)
+  }, [savedSlugs])
+
   if (view === 'preview' && previewDesign) {
     return (
       <>
@@ -595,8 +748,11 @@ export default function App() {
             design={previewDesign}
             onBack={() => navigate('collection')}
             onEnquire={openEnquiry}
+            saved={savedSet.has(previewDesign.slug)}
+            onToggleSaved={toggleSaved}
           />
         </Suspense>
+        <p className="sr-only" role="status" aria-live="polite" aria-atomic="true">{saveAnnouncement}</p>
         {enquiry.open && <EnquiryPanel design={enquiry.design} onClose={closeEnquiry} />}
       </>
     )
@@ -606,13 +762,16 @@ export default function App() {
     <>
       <SkipLink />
       <div className="scroll-progress" ref={progressRef} />
-      <Header view={view} navigate={navigate} onEnquire={openEnquiry} />
+      <Header view={view} navigate={navigate} onEnquire={openEnquiry} savedCount={savedSlugs.length} />
       <div id="main-content" tabIndex={-1}>
         {view === 'home'
-          ? <HomePage navigate={navigate} onEnquire={openEnquiry} />
-          : <CollectionPage />}
+          ? <HomePage navigate={navigate} onEnquire={openEnquiry} savedSet={savedSet} onToggleSaved={toggleSaved} />
+          : view === 'collection'
+            ? <CollectionPage savedSet={savedSet} onToggleSaved={toggleSaved} />
+            : <SavedPage navigate={navigate} savedDesigns={savedDesigns} savedSet={savedSet} onToggleSaved={toggleSaved} />}
       </div>
-      <Footer navigate={navigate} onEnquire={openEnquiry} />
+      <Footer navigate={navigate} onEnquire={openEnquiry} savedCount={savedSlugs.length} />
+      <p className="sr-only" role="status" aria-live="polite" aria-atomic="true">{saveAnnouncement}</p>
       {enquiry.open && <EnquiryPanel design={enquiry.design} onClose={closeEnquiry} />}
     </>
   )

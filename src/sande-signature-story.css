@@ -114,6 +114,47 @@
   backdrop-filter: blur(16px);
 }
 
+.ss-floating-nav__price {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  flex-direction: column;
+  gap: 3px;
+  padding: 9px 15px;
+  border: 1px solid rgb(255 255 255 / 20%);
+  border-radius: 999px;
+  background: rgb(10 20 46 / 75%);
+  box-shadow: 0 12px 35px rgb(6 15 36 / 20%);
+  color: #fff;
+  line-height: 1;
+  pointer-events: auto;
+  backdrop-filter: blur(16px);
+}
+
+.ss-floating-nav__price strong {
+  max-width: 180px;
+  overflow: hidden;
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ss-floating-nav__price small {
+  color: rgb(255 255 255 / 76%);
+  font-size: 9px;
+  font-weight: 650;
+  letter-spacing: .04em;
+  white-space: nowrap;
+}
+
+.ss-floating-nav__actions {
+  display: flex;
+  align-items: center;
+  justify-self: end;
+  gap: 8px;
+  pointer-events: auto;
+}
+
 .ss-round-action {
   display: inline-flex;
   min-height: 48px;
@@ -155,8 +196,11 @@
 }
 
 .ss-round-action--use {
-  justify-self: end;
   background: rgb(255 98 95 / 92%);
+}
+
+.ss-round-action--save {
+  padding-inline: 14px;
 }
 
 .ss-round-action--use:hover {
@@ -1359,11 +1403,8 @@
 
 @media (max-width: 920px) {
   .ss-floating-nav {
-    grid-template-columns: 1fr 1fr;
-  }
-
-  .ss-floating-nav__signature {
-    display: none;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    gap: 8px;
   }
 
   .ss-date-section,
@@ -1413,8 +1454,27 @@
   }
 
   .ss-round-action--back span,
-  .ss-round-action--use span {
-    font-size: 11px;
+  .ss-round-action--use span,
+  .ss-round-action--save span,
+  .ss-floating-nav__price strong {
+    display: none;
+  }
+
+  .ss-round-action--back,
+  .ss-round-action--use,
+  .ss-round-action--save {
+    width: 44px;
+    min-width: 44px;
+    justify-content: center;
+    padding: 0;
+  }
+
+  .ss-floating-nav__price {
+    padding: 9px 10px;
+  }
+
+  .ss-floating-nav__price small {
+    font-size: 8px;
   }
 
   .ss-music-button {
