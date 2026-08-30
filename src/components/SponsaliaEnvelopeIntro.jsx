@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { getCoupleNameReveal } from '../data/coupleNameReveals.js'
 import { formatPrice } from '../data/designs.js'
+import CoupleNameReveal from './CoupleNameReveal.jsx'
 import SaveDesignButton from './SaveDesignButton.jsx'
 import '../sponsalia-envelope-intro.css'
 
@@ -9,7 +11,8 @@ const PLAYBACK_RATE = 1.25
 const CLOSE_LEAD_SECONDS = 0.62
 const DISSOLVE_MS = 520
 const FALLBACK_OPEN_MS = 820
-const HARD_CLOSE_MS = 4400
+const HARD_OPEN_MS = 4400
+const REDUCED_REVEAL_MS = 2400
 
 const FALLBACK_PALETTE = ['#e6d8c8', '#302923', '#8b2735', '#b9a48d']
 
@@ -83,6 +86,7 @@ export default function SponsaliaEnvelopeIntro({
   const [videoFailed, setVideoFailed] = useState(false)
   const dialogRef = useRef(null)
   const buttonRef = useRef(null)
+  const skipRef = useRef(null)
   const videoRef = useRef(null)
   const timersRef = useRef([])
   const startedRef = useRef(false)
@@ -90,6 +94,8 @@ export default function SponsaliaEnvelopeIntro({
   const finishedRef = useRef(false)
   const fallbackStartedRef = useRef(false)
   const videoFailedRef = useRef(false)
+  const revealStartedRef = useRef(false)
+  const nameReveal = getCoupleNameReveal(design)
 
   const clearTimers = useCallback(() => {
     timersRef.current.forEach((timer) => window.clearTimeout(timer))
@@ -116,6 +122,24 @@ export default function SponsaliaEnvelopeIntro({
     schedule(finish, delay)
   }, [finish, schedule])
 
+  const beginReveal = useCallback((reducedMotion = false) => {
+    if (closingRef.current || finishedRef.current || revealStartedRef.current) return
+    if (!nameReveal) {
+      beginClosing(reducedMotion ? 140 : DISSOLVE_MS)
+      return
+    }
+
+    revealStartedRef.current = true
+    videoRef.current?.pause()
+    setVideoPlaying(false)
+    setPhase('revealing')
+    if (reducedMotion) {
+      schedule(() => beginClosing(140), REDUCED_REVEAL_MS)
+    } else {
+      schedule(beginClosing, nameReveal.duration)
+    }
+  }, [beginClosing, nameReveal, schedule])
+
   const runFallback = useCallback(() => {
     if (!startedRef.current || fallbackStartedRef.current) return
     fallbackStartedRef.current = true
@@ -123,8 +147,8 @@ export default function SponsaliaEnvelopeIntro({
     setVideoFailed(true)
     setVideoPlaying(false)
     videoRef.current?.pause()
-    schedule(beginClosing, FALLBACK_OPEN_MS)
-  }, [beginClosing, schedule])
+    schedule(beginReveal, FALLBACK_OPEN_MS)
+  }, [beginReveal, schedule])
 
   useEffect(() => {
     clearTimers()
@@ -133,6 +157,7 @@ export default function SponsaliaEnvelopeIntro({
     finishedRef.current = false
     fallbackStartedRef.current = false
     videoFailedRef.current = false
+    revealStartedRef.current = false
     setPhase('sealed')
     setVideoPlaying(false)
     setVideoFailed(false)
@@ -157,6 +182,11 @@ export default function SponsaliaEnvelopeIntro({
   useEffect(() => clearTimers, [clearTimers])
 
   useEffect(() => {
+    if (phase !== 'revealing') return
+    skipRef.current?.focus({ preventScroll: true })
+  }, [phase])
+
+  useEffect(() => {
     const bodyOverflow = document.body.style.overflow
     const htmlOverflow = document.documentElement.style.overflow
     document.body.style.overflow = 'hidden'
@@ -175,14 +205,12 @@ export default function SponsaliaEnvelopeIntro({
 
     const reducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
     if (reducedMotion) {
-      setPhase('closing')
-      closingRef.current = true
-      schedule(finish, 140)
+      beginReveal(true)
       return
     }
 
     setPhase('opening')
-    schedule(beginClosing, HARD_CLOSE_MS)
+    schedule(beginReveal, HARD_OPEN_MS)
 
     const video = videoRef.current
     if (!video || videoFailedRef.current) {
@@ -199,7 +227,7 @@ export default function SponsaliaEnvelopeIntro({
 
     const playRequest = video.play()
     playRequest?.catch(runFallback)
-  }, [beginClosing, design, finish, onUserGesture, runFallback, schedule])
+  }, [beginReveal, design, onUserGesture, runFallback, schedule])
 
   const skipInvitation = useCallback(() => {
     if (finishedRef.current || closingRef.current) return
@@ -214,8 +242,8 @@ export default function SponsaliaEnvelopeIntro({
   const trackProgress = useCallback((event) => {
     const video = event.currentTarget
     if (!Number.isFinite(video.duration) || video.duration <= 0) return
-    if (video.currentTime >= video.duration - CLOSE_LEAD_SECONDS) beginClosing()
-  }, [beginClosing])
+    if (video.currentTime >= video.duration - CLOSE_LEAD_SECONDS) beginReveal()
+  }, [beginReveal])
 
   const handleVideoError = useCallback(() => {
     videoFailedRef.current = true
@@ -226,12 +254,17 @@ export default function SponsaliaEnvelopeIntro({
   const names = Array.isArray(design?.couple)
     ? design.couple.filter(Boolean).join(' & ')
     : design?.name
+  const revealVisible = Boolean(nameReveal) && (
+    phase === 'revealing' || (phase === 'closing' && revealStartedRef.current)
+  )
 
   const className = [
     'sponsalia-envelope-intro',
     `spei-is-${phase}`,
     videoPlaying ? 'spei-video-playing' : '',
     videoFailed ? 'spei-is-fallback' : '',
+    nameReveal ? 'spei-has-name-reveal' : '',
+    revealVisible ? 'spei-reveal-visible' : '',
   ].filter(Boolean).join(' ')
 
   return (
@@ -250,6 +283,10 @@ export default function SponsaliaEnvelopeIntro({
         }
         if (event.key !== 'Tab') return
         const controls = [...(dialogRef.current?.querySelectorAll('button:not(:disabled)') || [])]
+          .filter((control) => {
+            const styles = window.getComputedStyle(control)
+            return styles.display !== 'none' && styles.visibility !== 'hidden'
+          })
         if (!controls.length) return
         const first = controls[0]
         const last = controls.at(-1)
@@ -274,6 +311,7 @@ export default function SponsaliaEnvelopeIntro({
         <div className="spei__control-group">
           <SaveDesignButton design={design} saved={saved} onToggle={onToggleSaved} className="spei__save" />
           <button
+            ref={skipRef}
             className="spei__control spei__control--skip"
             type="button"
             onClick={skipInvitation}
@@ -305,14 +343,14 @@ export default function SponsaliaEnvelopeIntro({
             onPlaying={() => setVideoPlaying(true)}
             onWaiting={() => setVideoPlaying(false)}
             onTimeUpdate={trackProgress}
-            onEnded={() => beginClosing()}
+            onEnded={() => beginReveal()}
             onError={handleVideoError}
           />
 
           <span className="spei__tone" aria-hidden="true" />
 
           <span className="spei__caption" aria-hidden="true">
-            {names && <span className="spei__names">{names}</span>}
+            {names && !nameReveal && <span className="spei__names">{names}</span>}
             <span className="spei__hint">Tap to open</span>
           </span>
 
@@ -320,8 +358,14 @@ export default function SponsaliaEnvelopeIntro({
         </span>
       </button>
 
+      <CoupleNameReveal design={design} recipe={nameReveal} active={revealVisible} />
+
       <span className="spei__status" aria-live="polite">
-        {phase === 'sealed' ? 'Invitation ready. Press enter to open.' : 'Opening invitation.'}
+        {phase === 'sealed'
+          ? 'Invitation ready. Press enter to open.'
+          : revealVisible
+            ? `${names}. Together, from this day forward.`
+            : 'Opening invitation.'}
       </span>
     </div>
   )

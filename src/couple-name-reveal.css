@@ -1,0 +1,1044 @@
+.couple-name-reveal {
+  position: absolute;
+  z-index: 5;
+  inset: 0;
+  display: grid;
+  min-width: 320px;
+  min-height: 100%;
+  place-items: center;
+  overflow: hidden;
+  isolation: isolate;
+  padding: clamp(5.5rem, 12vh, 8.5rem) clamp(1.25rem, 6vw, 6rem) clamp(3rem, 8vh, 6rem);
+  color: var(--cnr-ink);
+  background: var(--cnr-surface);
+  opacity: 0;
+  pointer-events: none;
+  visibility: hidden;
+}
+
+.couple-name-reveal,
+.couple-name-reveal *,
+.couple-name-reveal *::before,
+.couple-name-reveal *::after {
+  box-sizing: border-box;
+}
+
+.couple-name-reveal.is-active {
+  visibility: visible;
+  animation: cnr-stage-in 360ms both ease-out;
+}
+
+.cnr__artwork,
+.cnr__wash,
+.cnr__grain,
+.cnr__ornament {
+  position: absolute;
+  inset: 0;
+  display: block;
+  pointer-events: none;
+}
+
+.cnr__artwork {
+  z-index: -4;
+  background: var(--cnr-artwork) center / cover no-repeat;
+  opacity: 0;
+}
+
+.cnr__wash {
+  z-index: -3;
+}
+
+.cnr__grain {
+  z-index: -1;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.82' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.5'/%3E%3C/svg%3E");
+  mix-blend-mode: soft-light;
+  opacity: .1;
+}
+
+.cnr__copy {
+  position: relative;
+  z-index: 3;
+  display: grid;
+  width: min(94vw, 78rem);
+  justify-items: center;
+  text-align: center;
+}
+
+.cnr__eyebrow,
+.cnr__promise {
+  margin: 0;
+  font-family: "Inter Local", Inter, ui-sans-serif, system-ui, sans-serif;
+}
+
+.cnr__eyebrow {
+  margin-bottom: clamp(1.2rem, 3vh, 2rem);
+  font-size: clamp(.62rem, 1.3vw, .78rem);
+  font-weight: 680;
+  letter-spacing: .24em;
+  line-height: 1.4;
+  text-transform: uppercase;
+  opacity: 0;
+}
+
+.cnr__names {
+  width: 100%;
+  margin: 0;
+  color: inherit;
+  font-weight: 400;
+  line-height: .84;
+}
+
+.cnr__animated-names,
+.cnr__name {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cnr__animated-names {
+  flex-wrap: wrap;
+  gap: .04em .18em;
+}
+
+.cnr__name {
+  white-space: nowrap;
+}
+
+.cnr__character {
+  display: inline-block;
+  will-change: opacity, transform, filter;
+}
+
+.cnr__ampersand {
+  display: inline-block;
+  font-size: .42em;
+  font-style: italic;
+  opacity: 0;
+}
+
+.cnr__promise {
+  margin-top: clamp(1.5rem, 4vh, 2.8rem);
+  font-size: clamp(.72rem, 1.4vw, .9rem);
+  font-weight: 520;
+  letter-spacing: .12em;
+  line-height: 1.4;
+  opacity: 0;
+}
+
+.is-active .cnr__eyebrow {
+  animation: cnr-rise 560ms 160ms both cubic-bezier(.22, 1, .36, 1);
+}
+
+.is-active .cnr__promise {
+  animation: cnr-rise 540ms 1900ms both cubic-bezier(.22, 1, .36, 1);
+}
+
+/* The restrained cursive sweep is inspired by the familiar product-launch hello. */
+.cnr--signature {
+  background:
+    radial-gradient(circle at 18% 14%, color-mix(in srgb, var(--cnr-three) 28%, white), transparent 28%),
+    radial-gradient(circle at 84% 82%, color-mix(in srgb, var(--cnr-four) 18%, transparent), transparent 31%),
+    linear-gradient(145deg, color-mix(in srgb, var(--cnr-surface) 88%, white), var(--cnr-surface));
+}
+
+.cnr--signature .cnr__wash {
+  background:
+    linear-gradient(color-mix(in srgb, var(--cnr-ink) 4%, transparent) 1px, transparent 1px) 0 0 / 100% 2.2rem,
+    linear-gradient(90deg, transparent 49.9%, color-mix(in srgb, var(--cnr-ink) 5%, transparent) 50%, transparent 50.1%);
+}
+
+.cnr--signature .cnr__ornament i {
+  position: absolute;
+  width: clamp(8rem, 22vw, 19rem);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  filter: blur(3rem);
+  opacity: 0;
+}
+
+.cnr--signature .cnr__ornament i:nth-child(1) {
+  top: -8%;
+  right: 4%;
+  background: color-mix(in srgb, var(--cnr-accent) 20%, transparent);
+}
+
+.cnr--signature .cnr__ornament i:nth-child(2) {
+  bottom: -8%;
+  left: 2%;
+  background: color-mix(in srgb, var(--cnr-four) 24%, transparent);
+}
+
+.cnr--signature.is-active .cnr__ornament i:nth-child(-n + 2) {
+  animation: cnr-soft-orb 2.4s 100ms both ease-out;
+}
+
+.cnr--signature .cnr__names {
+  font-family: "Sponsalia Script", "Instrument Serif Local", Georgia, serif;
+  font-size: clamp(4.25rem, 15vw, 11.5rem);
+  letter-spacing: -.025em;
+  line-height: .72;
+}
+
+.cnr__signature {
+  position: relative;
+  display: grid;
+  width: min(100%, 9.5em);
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: baseline;
+  justify-content: center;
+  column-gap: .08em;
+  padding: .16em .08em .3em;
+}
+
+.cnr__signature-name {
+  display: block;
+  overflow: hidden;
+  opacity: 0;
+  white-space: nowrap;
+}
+
+.cnr__signature-name--first {
+  justify-self: end;
+}
+
+.cnr__signature-name--second {
+  justify-self: start;
+}
+
+.cnr__signature-ampersand {
+  display: block;
+  color: var(--cnr-accent);
+  font-family: "Instrument Serif Local", Georgia, serif;
+  font-size: .36em;
+  font-style: italic;
+  opacity: 0;
+  transform: translateY(-.14em);
+}
+
+.cnr__signature-stroke {
+  position: absolute;
+  right: 5%;
+  bottom: .04em;
+  left: 5%;
+  width: 90%;
+  height: .48em;
+  overflow: visible;
+}
+
+.cnr__signature-stroke path {
+  fill: none;
+  stroke: var(--cnr-accent);
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  stroke-linecap: round;
+  stroke-width: 2.2;
+  vector-effect: non-scaling-stroke;
+}
+
+.cnr--signature.is-active .cnr__signature-name--first {
+  animation: cnr-write 980ms 280ms both cubic-bezier(.65, 0, .35, 1);
+}
+
+.cnr--signature.is-active .cnr__signature-ampersand {
+  animation: cnr-signature-mark 420ms 1040ms both ease-out;
+}
+
+.cnr--signature.is-active .cnr__signature-name--second {
+  animation: cnr-write 1040ms 1180ms both cubic-bezier(.65, 0, .35, 1);
+}
+
+.cnr--signature.is-active .cnr__signature-stroke path {
+  animation: cnr-draw 1450ms 700ms both cubic-bezier(.4, 0, .2, 1);
+}
+
+/* Cinematic names arrive from opposite edges over the template's own imagery. */
+.cnr--cinema {
+  color: var(--cnr-ink);
+  background: var(--cnr-surface);
+}
+
+.cnr--cinema .cnr__artwork {
+  opacity: .62;
+  filter: saturate(.72) contrast(1.06);
+  transform: scale(1.07);
+}
+
+.cnr--cinema .cnr__wash {
+  background:
+    linear-gradient(90deg, color-mix(in srgb, var(--cnr-surface) 90%, transparent), transparent 42% 58%, color-mix(in srgb, var(--cnr-surface) 90%, transparent)),
+    linear-gradient(180deg, color-mix(in srgb, var(--cnr-surface) 82%, transparent), transparent 40%, color-mix(in srgb, var(--cnr-surface) 94%, #000));
+}
+
+.cnr--cinema::before,
+.cnr--cinema::after {
+  position: absolute;
+  z-index: 2;
+  top: 0;
+  bottom: 0;
+  width: 51%;
+  background: color-mix(in srgb, var(--cnr-surface) 88%, #020202);
+  content: "";
+}
+
+.cnr--cinema::before { left: 0; }
+.cnr--cinema::after { right: 0; }
+
+.cnr--cinema.is-active::before { animation: cnr-curtain-left 720ms 100ms both cubic-bezier(.76, 0, .24, 1); }
+.cnr--cinema.is-active::after { animation: cnr-curtain-right 720ms 100ms both cubic-bezier(.76, 0, .24, 1); }
+.cnr--cinema.is-active .cnr__artwork { animation: cnr-camera 3.2s both ease-out; }
+
+.cnr--cinema .cnr__copy {
+  text-shadow: 0 3px 24px color-mix(in srgb, var(--cnr-surface) 86%, transparent);
+}
+
+.cnr--cinema .cnr__names {
+  font-family: "Instrument Serif Local", "Cormorant Local", Georgia, serif;
+  font-size: clamp(4.2rem, 13vw, 10.8rem);
+  letter-spacing: -.055em;
+  text-transform: uppercase;
+}
+
+.cnr--cinema .cnr__animated-names {
+  flex-direction: column;
+  gap: 0;
+}
+
+.cnr--cinema .cnr__ampersand {
+  position: absolute;
+  color: var(--cnr-accent);
+  font-size: clamp(2rem, 5vw, 4rem);
+}
+
+.cnr--cinema .cnr__character {
+  opacity: 0;
+}
+
+.cnr--cinema.is-active .cnr__name--first .cnr__character {
+  animation: cnr-title-left 680ms calc(620ms + var(--cnr-character) * 45ms) both cubic-bezier(.16, 1, .3, 1);
+}
+
+.cnr--cinema.is-active .cnr__name--second .cnr__character {
+  animation: cnr-title-right 680ms calc(820ms + var(--cnr-character) * 45ms) both cubic-bezier(.16, 1, .3, 1);
+}
+
+.cnr--cinema.is-active .cnr__ampersand {
+  animation: cnr-focus 600ms 1320ms both ease-out;
+}
+
+/* Editorial layouts feel typeset rather than decorative. */
+.cnr--editorial {
+  color: var(--cnr-ink);
+  background:
+    linear-gradient(90deg, transparent 0 57%, color-mix(in srgb, var(--cnr-accent) 11%, transparent) 57%),
+    var(--cnr-surface);
+}
+
+.cnr--editorial .cnr__artwork {
+  inset: 9% 5% 9% 57%;
+  background-position: 52% center;
+  filter: grayscale(1) contrast(1.05);
+  opacity: .2;
+}
+
+.cnr--editorial .cnr__wash {
+  inset: clamp(1rem, 3vw, 2.5rem);
+  border: 1px solid color-mix(in srgb, var(--cnr-ink) 22%, transparent);
+}
+
+.cnr--editorial .cnr__copy {
+  align-items: start;
+  justify-items: start;
+  text-align: left;
+}
+
+.cnr--editorial .cnr__eyebrow {
+  padding-bottom: .75rem;
+  border-bottom: 1px solid currentColor;
+}
+
+.cnr--editorial .cnr__names {
+  font-family: "Bricolage Local", "Inter Local", sans-serif;
+  font-size: clamp(4rem, 13vw, 11rem);
+  font-weight: 760;
+  letter-spacing: -.09em;
+  line-height: .73;
+  text-transform: uppercase;
+}
+
+.cnr--editorial .cnr__animated-names {
+  align-items: flex-start;
+  flex-direction: column;
+}
+
+.cnr--editorial .cnr__ampersand {
+  position: absolute;
+  right: 8%;
+  bottom: 4%;
+  color: var(--cnr-accent);
+  font-family: "Instrument Serif Local", Georgia, serif;
+  font-size: clamp(4rem, 11vw, 9rem);
+}
+
+.cnr--editorial .cnr__character {
+  opacity: 0;
+}
+
+.cnr--editorial.is-active .cnr__name--first .cnr__character {
+  animation: cnr-editorial-up 580ms calc(240ms + var(--cnr-character) * 34ms) both cubic-bezier(.16, 1, .3, 1);
+}
+
+.cnr--editorial.is-active .cnr__name--second .cnr__character {
+  animation: cnr-editorial-up 580ms calc(700ms + var(--cnr-character) * 34ms) both cubic-bezier(.16, 1, .3, 1);
+}
+
+.cnr--editorial.is-active .cnr__ampersand {
+  animation: cnr-editorial-mark 650ms 1250ms both cubic-bezier(.16, 1, .3, 1);
+}
+
+.cnr--editorial .cnr__promise {
+  justify-self: end;
+}
+
+/* Electric variants trace each letter as if the sign has just powered on. */
+.cnr--neon {
+  color: var(--cnr-ink);
+  background:
+    radial-gradient(circle at 50% 48%, color-mix(in srgb, var(--cnr-accent) 23%, transparent), transparent 32%),
+    radial-gradient(circle at 20% 80%, color-mix(in srgb, var(--cnr-three) 15%, transparent), transparent 34%),
+    var(--cnr-surface);
+}
+
+.cnr--neon .cnr__wash {
+  background:
+    linear-gradient(color-mix(in srgb, var(--cnr-ink) 5%, transparent) 1px, transparent 1px) 0 0 / 100% 4rem,
+    linear-gradient(90deg, color-mix(in srgb, var(--cnr-ink) 5%, transparent) 1px, transparent 1px) 0 0 / 4rem 100%;
+  mask-image: radial-gradient(circle, #000, transparent 68%);
+}
+
+.cnr--neon .cnr__names {
+  font-family: "Bricolage Local", "Inter Local", sans-serif;
+  font-size: clamp(4rem, 13vw, 10.5rem);
+  font-weight: 580;
+  letter-spacing: -.08em;
+}
+
+.cnr--neon .cnr__character {
+  color: transparent;
+  opacity: 0;
+  -webkit-text-stroke: max(1px, .012em) var(--cnr-ink);
+}
+
+.cnr--neon .cnr__ampersand {
+  color: var(--cnr-accent);
+  text-shadow: 0 0 1.4rem var(--cnr-accent);
+}
+
+.cnr--neon .cnr__ornament::before,
+.cnr--neon .cnr__ornament::after {
+  --cnr-light-angle: -8deg;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: min(74vw, 56rem);
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--cnr-accent), transparent);
+  box-shadow: 0 0 1.2rem var(--cnr-accent);
+  content: "";
+  opacity: 0;
+  transform: translate(-50%, -50%) rotate(var(--cnr-light-angle));
+}
+
+.cnr--neon .cnr__ornament::after {
+  --cnr-light-angle: 8deg;
+}
+
+.cnr--neon.is-active .cnr__character {
+  animation: cnr-neon-on 760ms calc(180ms + var(--cnr-character) * 62ms) both linear;
+}
+
+.cnr--neon.is-active .cnr__ampersand {
+  animation: cnr-neon-mark 650ms 1050ms both linear;
+}
+
+.cnr--neon.is-active .cnr__ornament::before { animation: cnr-light-line 1s 330ms both ease-out; }
+.cnr--neon.is-active .cnr__ornament::after { animation: cnr-light-line 1s 620ms both ease-out; }
+
+/* Celestial templates resolve from two separate paths into one centre. */
+.cnr--orbit {
+  color: var(--cnr-ink);
+  background:
+    radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--cnr-accent) 22%, transparent), transparent 23%),
+    radial-gradient(circle at 20% 24%, color-mix(in srgb, var(--cnr-three) 16%, transparent), transparent 28%),
+    var(--cnr-surface);
+}
+
+.cnr--orbit .cnr__names {
+  font-family: "Instrument Serif Local", "Cormorant Local", Georgia, serif;
+  font-size: clamp(4rem, 13vw, 10.5rem);
+  letter-spacing: -.055em;
+}
+
+.cnr--orbit .cnr__name,
+.cnr--orbit .cnr__ampersand {
+  opacity: 0;
+}
+
+.cnr--orbit .cnr__ornament {
+  top: 50%;
+  left: 50%;
+  width: min(76vw, 49rem);
+  aspect-ratio: 1;
+  inset: auto;
+  opacity: 0;
+  transform: translate(-50%, -50%);
+}
+
+.cnr--orbit .cnr__ornament i {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: calc(42% + var(--cnr-ring, 0) * 9%);
+  aspect-ratio: 1;
+  border: 1px solid color-mix(in srgb, var(--cnr-accent) 68%, transparent);
+  border-radius: 50%;
+  transform: translate(-50%, -50%) rotate(calc(23deg + var(--cnr-ring, 0) * 31deg)) scaleY(calc(.34 + var(--cnr-ring, 0) * .04));
+}
+
+.cnr--orbit .cnr__ornament i:nth-child(1) { --cnr-ring: 0; }
+.cnr--orbit .cnr__ornament i:nth-child(2) { --cnr-ring: 1; }
+.cnr--orbit .cnr__ornament i:nth-child(3) { --cnr-ring: 2; }
+.cnr--orbit .cnr__ornament i:nth-child(4) { --cnr-ring: 3; }
+.cnr--orbit .cnr__ornament i:nth-child(5) { --cnr-ring: 4; }
+.cnr--orbit .cnr__ornament i:nth-child(n + 6) {
+  width: .32rem;
+  border: 0;
+  background: var(--cnr-ink);
+  box-shadow: 0 0 .8rem var(--cnr-accent);
+}
+.cnr--orbit .cnr__ornament i:nth-child(6) { top: 18%; left: 35%; }
+.cnr--orbit .cnr__ornament i:nth-child(7) { top: 68%; left: 84%; }
+.cnr--orbit .cnr__ornament i:nth-child(8) { top: 82%; left: 21%; }
+
+.cnr--orbit.is-active .cnr__ornament {
+  animation: cnr-orbit-lock 1.55s 100ms both cubic-bezier(.16, 1, .3, 1);
+}
+
+.cnr--orbit.is-active .cnr__name--first {
+  animation: cnr-orbit-first 1.15s 280ms both cubic-bezier(.16, 1, .3, 1);
+}
+
+.cnr--orbit.is-active .cnr__name--second {
+  animation: cnr-orbit-second 1.15s 440ms both cubic-bezier(.16, 1, .3, 1);
+}
+
+.cnr--orbit.is-active .cnr__ampersand {
+  animation: cnr-focus 540ms 1250ms both ease-out;
+}
+
+/* Destination and horizon reveals rise through their own landscape. */
+.cnr--drift {
+  color: var(--cnr-ink);
+  background: var(--cnr-surface);
+}
+
+.cnr--drift .cnr__artwork {
+  opacity: .84;
+  filter: saturate(.88) contrast(1.02);
+  transform: scale(1.06);
+}
+
+.cnr--drift .cnr__wash {
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--cnr-surface) 38%, transparent), transparent 32%, color-mix(in srgb, var(--cnr-surface) 86%, #061015)),
+    linear-gradient(90deg, color-mix(in srgb, var(--cnr-surface) 48%, transparent), transparent 50%, color-mix(in srgb, var(--cnr-surface) 36%, transparent));
+}
+
+.cnr--drift .cnr__copy {
+  text-shadow: 0 2px 24px color-mix(in srgb, var(--cnr-surface) 88%, transparent);
+}
+
+.cnr--drift .cnr__names {
+  font-family: "Cormorant Local", "Instrument Serif Local", Georgia, serif;
+  font-size: clamp(4.4rem, 14vw, 11rem);
+  font-style: italic;
+  letter-spacing: -.06em;
+}
+
+.cnr--drift .cnr__name,
+.cnr--drift .cnr__ampersand {
+  opacity: 0;
+}
+
+.cnr--drift .cnr__ornament i {
+  position: absolute;
+  right: -10%;
+  bottom: calc(-11% + var(--cnr-wave, 0) * 4%);
+  left: -10%;
+  height: 32%;
+  border: 1px solid color-mix(in srgb, var(--cnr-ink) 35%, transparent);
+  border-radius: 50% 50% 0 0;
+  opacity: 0;
+}
+
+.cnr--drift .cnr__ornament i:nth-child(1) { --cnr-wave: 0; }
+.cnr--drift .cnr__ornament i:nth-child(2) { --cnr-wave: 1; }
+.cnr--drift .cnr__ornament i:nth-child(3) { --cnr-wave: 2; }
+.cnr--drift .cnr__ornament i:nth-child(4) { --cnr-wave: 3; }
+
+.cnr--drift.is-active .cnr__artwork { animation: cnr-landscape 3.2s both ease-out; }
+.cnr--drift.is-active .cnr__name--first { animation: cnr-drift-first 980ms 240ms both cubic-bezier(.16, 1, .3, 1); }
+.cnr--drift.is-active .cnr__name--second { animation: cnr-drift-second 980ms 610ms both cubic-bezier(.16, 1, .3, 1); }
+.cnr--drift.is-active .cnr__ampersand { animation: cnr-focus 500ms 1100ms both ease-out; }
+.cnr--drift.is-active .cnr__ornament i:nth-child(-n + 4) { animation: cnr-wave 1.8s calc(220ms + var(--cnr-wave) * 110ms) both ease-out; }
+
+/* Botanical names and petals open around the same centre point. */
+.cnr--bloom {
+  color: var(--cnr-ink);
+  background:
+    radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--cnr-accent) 24%, transparent), transparent 37%),
+    var(--cnr-surface);
+}
+
+.cnr--bloom .cnr__artwork {
+  opacity: .18;
+  filter: saturate(.7) blur(1px);
+  transform: scale(1.08);
+}
+
+.cnr--bloom .cnr__wash {
+  background: linear-gradient(135deg, color-mix(in srgb, var(--cnr-surface) 88%, transparent), transparent 50%, color-mix(in srgb, var(--cnr-surface) 84%, transparent));
+}
+
+.cnr--bloom .cnr__names {
+  font-family: "Cormorant Local", "Instrument Serif Local", Georgia, serif;
+  font-size: clamp(4.25rem, 13vw, 10.5rem);
+  letter-spacing: -.055em;
+}
+
+.cnr--bloom .cnr__character {
+  opacity: 0;
+  transform-origin: 50% 100%;
+}
+
+.cnr--bloom .cnr__ornament {
+  top: 50%;
+  left: 50%;
+  width: min(74vw, 46rem);
+  aspect-ratio: 1;
+  inset: auto;
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(.45) rotate(-12deg);
+}
+
+.cnr--bloom .cnr__ornament i {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 48%;
+  height: 16%;
+  border: 1px solid color-mix(in srgb, var(--cnr-accent) 68%, transparent);
+  border-radius: 100% 0 100% 0;
+  transform-origin: 0 50%;
+  transform: rotate(calc(var(--cnr-petal, 0) * 45deg));
+}
+
+.cnr--bloom .cnr__ornament i:nth-child(1) { --cnr-petal: 0; }
+.cnr--bloom .cnr__ornament i:nth-child(2) { --cnr-petal: 1; }
+.cnr--bloom .cnr__ornament i:nth-child(3) { --cnr-petal: 2; }
+.cnr--bloom .cnr__ornament i:nth-child(4) { --cnr-petal: 3; }
+.cnr--bloom .cnr__ornament i:nth-child(5) { --cnr-petal: 4; }
+.cnr--bloom .cnr__ornament i:nth-child(6) { --cnr-petal: 5; }
+.cnr--bloom .cnr__ornament i:nth-child(7) { --cnr-petal: 6; }
+.cnr--bloom .cnr__ornament i:nth-child(8) { --cnr-petal: 7; }
+
+.cnr--bloom.is-active .cnr__ornament { animation: cnr-bloom 1.45s 100ms both cubic-bezier(.16, 1, .3, 1); }
+.cnr--bloom.is-active .cnr__character { animation: cnr-petal-letter 680ms calc(300ms + var(--cnr-character) * 48ms) both cubic-bezier(.16, 1, .3, 1); }
+.cnr--bloom.is-active .cnr__ampersand { animation: cnr-focus 520ms 1120ms both ease-out; }
+
+/* Cultural gold uses a quiet foil press and woven edge details. */
+.cnr--gold {
+  color: var(--cnr-ink);
+  background:
+    repeating-linear-gradient(45deg, transparent 0 2.2rem, color-mix(in srgb, var(--cnr-accent) 8%, transparent) 2.2rem 2.3rem),
+    repeating-linear-gradient(-45deg, transparent 0 2.8rem, color-mix(in srgb, var(--cnr-ink) 5%, transparent) 2.8rem 2.9rem),
+    var(--cnr-surface);
+}
+
+.cnr--gold::before,
+.cnr--gold::after {
+  position: absolute;
+  inset: clamp(1rem, 3vw, 2.5rem);
+  border: 1px solid color-mix(in srgb, var(--cnr-accent) 62%, transparent);
+  content: "";
+  opacity: 0;
+}
+
+.cnr--gold::after {
+  inset: clamp(1.5rem, 4vw, 3.5rem);
+  border-style: double;
+}
+
+.cnr--gold .cnr__names {
+  font-family: "Cormorant Local", "Instrument Serif Local", Georgia, serif;
+  font-size: clamp(4.2rem, 13vw, 10.5rem);
+  letter-spacing: -.05em;
+}
+
+.cnr--gold .cnr__name,
+.cnr--gold .cnr__ampersand {
+  color: transparent;
+  background: linear-gradient(105deg, var(--cnr-ink), var(--cnr-accent) 42%, #fff3bd 50%, var(--cnr-accent) 58%, var(--cnr-ink));
+  background-position: 100% center;
+  background-size: 260% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  opacity: 0;
+}
+
+.cnr--gold.is-active::before { animation: cnr-gold-frame 720ms 160ms both ease-out; }
+.cnr--gold.is-active::after { animation: cnr-gold-frame 720ms 300ms both ease-out; }
+.cnr--gold.is-active .cnr__name--first { animation: cnr-gold-press 720ms 300ms both cubic-bezier(.34, 1.56, .64, 1), cnr-foil 1.4s 850ms both ease-out; }
+.cnr--gold.is-active .cnr__name--second { animation: cnr-gold-press 720ms 720ms both cubic-bezier(.34, 1.56, .64, 1), cnr-foil 1.4s 1050ms both ease-out; }
+.cnr--gold.is-active .cnr__ampersand { animation: cnr-gold-press 620ms 1120ms both cubic-bezier(.34, 1.56, .64, 1); }
+
+@keyframes cnr-stage-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes cnr-rise {
+  from { opacity: 0; transform: translateY(.8rem); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes cnr-soft-orb {
+  from { opacity: 0; transform: scale(.7); }
+  to { opacity: .8; transform: scale(1); }
+}
+
+@keyframes cnr-write {
+  0% { clip-path: inset(0 100% 0 0); opacity: 0; filter: blur(3px); }
+  12% { opacity: 1; }
+  100% { clip-path: inset(0 -8% 0 0); opacity: 1; filter: blur(0); }
+}
+
+@keyframes cnr-signature-mark {
+  from { opacity: 0; transform: translateY(-.14em) scale(.5) rotate(-12deg); }
+  to { opacity: 1; transform: translateY(-.14em) scale(1) rotate(0); }
+}
+
+@keyframes cnr-draw {
+  to { stroke-dashoffset: 0; }
+}
+
+@keyframes cnr-curtain-left {
+  to { transform: translateX(-102%); }
+}
+
+@keyframes cnr-curtain-right {
+  to { transform: translateX(102%); }
+}
+
+@keyframes cnr-camera {
+  to { transform: scale(1); }
+}
+
+@keyframes cnr-title-left {
+  from { opacity: 0; filter: blur(9px); transform: translateX(-1.2em) skewX(-8deg); }
+  to { opacity: 1; filter: blur(0); transform: translateX(0) skewX(0); }
+}
+
+@keyframes cnr-title-right {
+  from { opacity: 0; filter: blur(9px); transform: translateX(1.2em) skewX(8deg); }
+  to { opacity: 1; filter: blur(0); transform: translateX(0) skewX(0); }
+}
+
+@keyframes cnr-focus {
+  from { opacity: 0; filter: blur(12px); transform: scale(1.8) rotate(-9deg); }
+  to { opacity: 1; filter: blur(0); transform: scale(1) rotate(0); }
+}
+
+@keyframes cnr-editorial-up {
+  from { clip-path: inset(100% 0 0); opacity: 0; transform: translateY(.65em); }
+  to { clip-path: inset(0); opacity: 1; transform: translateY(0); }
+}
+
+@keyframes cnr-editorial-mark {
+  from { opacity: 0; transform: translate(1.2rem, 1.2rem) rotate(18deg); }
+  to { opacity: 1; transform: translate(0) rotate(-7deg); }
+}
+
+@keyframes cnr-neon-on {
+  0%, 16%, 34% { opacity: 0; filter: none; }
+  12%, 25% { opacity: .35; filter: drop-shadow(0 0 .18em var(--cnr-accent)); }
+  48%, 100% { color: var(--cnr-ink); opacity: 1; filter: drop-shadow(0 0 .13em var(--cnr-accent)); }
+}
+
+@keyframes cnr-neon-mark {
+  0%, 34% { opacity: 0; }
+  18%, 48% { opacity: .35; }
+  100% { opacity: 1; }
+}
+
+@keyframes cnr-light-line {
+  from { opacity: 0; transform: translate(-50%, -50%) rotate(var(--cnr-light-angle)) scaleX(.1); }
+  50% { opacity: .75; }
+  to { opacity: .16; transform: translate(-50%, -50%) rotate(var(--cnr-light-angle)) scaleX(1); }
+}
+
+@keyframes cnr-orbit-lock {
+  from { opacity: 0; transform: translate(-50%, -50%) rotate(-42deg) scale(.48); }
+  to { opacity: .66; transform: translate(-50%, -50%) rotate(0) scale(1); }
+}
+
+@keyframes cnr-orbit-first {
+  from { opacity: 0; filter: blur(8px); transform: translate(-34vw, -22vh) rotate(-20deg) scale(.48); }
+  to { opacity: 1; filter: blur(0); transform: translate(0) rotate(0) scale(1); }
+}
+
+@keyframes cnr-orbit-second {
+  from { opacity: 0; filter: blur(8px); transform: translate(34vw, 22vh) rotate(20deg) scale(.48); }
+  to { opacity: 1; filter: blur(0); transform: translate(0) rotate(0) scale(1); }
+}
+
+@keyframes cnr-landscape {
+  from { transform: scale(1.08) translateY(1.2%); }
+  to { transform: scale(1); }
+}
+
+@keyframes cnr-drift-first {
+  from { opacity: 0; filter: blur(12px); transform: translate(-1.2rem, 2.5rem); }
+  to { opacity: 1; filter: blur(0); transform: translate(0); }
+}
+
+@keyframes cnr-drift-second {
+  from { opacity: 0; filter: blur(12px); transform: translate(1.2rem, 2.5rem); }
+  to { opacity: 1; filter: blur(0); transform: translate(0); }
+}
+
+@keyframes cnr-wave {
+  from { opacity: 0; transform: translateY(45%) scaleX(.72); }
+  to { opacity: .55; transform: translateY(0) scaleX(1); }
+}
+
+@keyframes cnr-bloom {
+  from { opacity: 0; transform: translate(-50%, -50%) scale(.32) rotate(-24deg); }
+  to { opacity: .64; transform: translate(-50%, -50%) scale(1) rotate(0); }
+}
+
+@keyframes cnr-petal-letter {
+  from { opacity: 0; filter: blur(5px); transform: translateY(.5em) rotate(9deg) scale(.72); }
+  to { opacity: 1; filter: blur(0); transform: translateY(0) rotate(0) scale(1); }
+}
+
+@keyframes cnr-gold-frame {
+  from { clip-path: inset(50%); opacity: 0; }
+  to { clip-path: inset(0); opacity: .86; }
+}
+
+@keyframes cnr-gold-press {
+  from { opacity: 0; filter: blur(4px); transform: scale(1.22); }
+  to { opacity: 1; filter: blur(0); transform: scale(1); }
+}
+
+@keyframes cnr-foil {
+  to { background-position: 0 center; }
+}
+
+@media (max-width: 44rem) {
+  .couple-name-reveal {
+    padding-inline: 1rem;
+  }
+
+  .cnr__animated-names:not(.cnr__signature) {
+    flex-direction: column;
+    gap: .08em;
+  }
+
+  .cnr__ampersand {
+    font-size: .32em;
+  }
+
+  .cnr__signature {
+    width: min(100%, 5.6em);
+    grid-template-columns: 1fr;
+    justify-items: center;
+    row-gap: .02em;
+  }
+
+  .cnr__signature-name--first,
+  .cnr__signature-name--second {
+    justify-self: center;
+  }
+
+  .cnr__signature-ampersand {
+    position: absolute;
+    top: 44%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  .cnr--signature.is-active .cnr__signature-ampersand {
+    animation-name: cnr-signature-mark-mobile;
+  }
+
+  .cnr__signature-stroke {
+    bottom: -.04em;
+  }
+
+  .cnr--editorial .cnr__artwork {
+    inset: 11% 7% 50%;
+  }
+
+  .cnr--editorial .cnr__copy {
+    justify-items: center;
+    text-align: center;
+  }
+
+  .cnr--editorial .cnr__animated-names {
+    align-items: center;
+  }
+
+  .cnr--editorial .cnr__ampersand {
+    position: static;
+    font-size: .34em;
+  }
+
+  .cnr--editorial .cnr__promise {
+    justify-self: center;
+  }
+
+  .cnr--cinema .cnr__names,
+  .cnr--editorial .cnr__names,
+  .cnr--neon .cnr__names,
+  .cnr--orbit .cnr__names,
+  .cnr--drift .cnr__names,
+  .cnr--bloom .cnr__names,
+  .cnr--gold .cnr__names {
+    font-size: clamp(3.5rem, 18vw, 6.3rem);
+    line-height: .82;
+  }
+}
+
+@media (max-height: 30rem) and (orientation: landscape) {
+  .couple-name-reveal {
+    padding: 3.25rem 1rem .75rem;
+  }
+
+  .cnr__copy {
+    width: min(92vw, 62rem);
+  }
+
+  .cnr__eyebrow {
+    margin-bottom: .45rem;
+    font-size: .55rem;
+  }
+
+  .cnr__promise {
+    margin-top: .65rem;
+    font-size: .62rem;
+  }
+
+  .cnr--signature .cnr__names,
+  .cnr--cinema .cnr__names,
+  .cnr--editorial .cnr__names,
+  .cnr--neon .cnr__names,
+  .cnr--orbit .cnr__names,
+  .cnr--drift .cnr__names,
+  .cnr--bloom .cnr__names,
+  .cnr--gold .cnr__names {
+    font-size: clamp(2.7rem, 11vw, 4rem);
+    line-height: .78;
+  }
+
+  .cnr--editorial .cnr__artwork {
+    inset: 8% 5% 40%;
+  }
+}
+
+@keyframes cnr-signature-mark-mobile {
+  from { opacity: 0; transform: translate(-50%, -50%) scale(.5) rotate(-12deg); }
+  to { opacity: 1; transform: translate(-50%, -50%) scale(1) rotate(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .couple-name-reveal.is-active,
+  .couple-name-reveal.is-active::before,
+  .couple-name-reveal.is-active::after,
+  .couple-name-reveal.is-active *,
+  .couple-name-reveal.is-active *::before,
+  .couple-name-reveal.is-active *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  .couple-name-reveal.is-active {
+    opacity: 1;
+  }
+
+  .couple-name-reveal.is-active .cnr__eyebrow,
+  .couple-name-reveal.is-active .cnr__promise,
+  .couple-name-reveal.is-active .cnr__ampersand,
+  .couple-name-reveal.is-active .cnr__name,
+  .couple-name-reveal.is-active .cnr__character,
+  .couple-name-reveal.is-active .cnr__signature-name,
+  .couple-name-reveal.is-active .cnr__signature-ampersand {
+    clip-path: none;
+    filter: none;
+    opacity: 1;
+    transform: none;
+  }
+
+  .couple-name-reveal.is-active .cnr__signature-ampersand {
+    transform: translateY(-.14em);
+  }
+
+  .couple-name-reveal.is-active .cnr__signature-stroke path {
+    stroke-dashoffset: 0;
+  }
+
+  .couple-name-reveal.is-active .cnr__ornament {
+    opacity: .35;
+  }
+
+  .cnr--cinema.is-active::before {
+    transform: translateX(-102%);
+  }
+
+  .cnr--cinema.is-active::after {
+    transform: translateX(102%);
+  }
+
+  .cnr--cinema.is-active .cnr__artwork,
+  .cnr--drift.is-active .cnr__artwork {
+    transform: scale(1);
+  }
+
+  .cnr--neon.is-active .cnr__ornament::before,
+  .cnr--neon.is-active .cnr__ornament::after {
+    opacity: .16;
+    transform: translate(-50%, -50%) rotate(var(--cnr-light-angle)) scaleX(1);
+  }
+
+  .cnr--drift.is-active .cnr__ornament i:nth-child(-n + 4) {
+    opacity: .35;
+    transform: translateY(0) scaleX(1);
+  }
+
+  .cnr--bloom.is-active .cnr__ornament {
+    opacity: .35;
+    transform: translate(-50%, -50%) scale(1) rotate(0);
+  }
+
+  .cnr--gold.is-active::before,
+  .cnr--gold.is-active::after {
+    clip-path: inset(0);
+    opacity: .86;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) and (max-width: 44rem) {
+  .couple-name-reveal.is-active .cnr__signature-ampersand {
+    transform: translate(-50%, -50%);
+  }
+}

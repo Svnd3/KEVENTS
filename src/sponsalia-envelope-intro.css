@@ -298,11 +298,13 @@
 }
 
 .spei-is-opening .spei__caption,
+.spei-is-revealing .spei__caption,
 .spei-is-closing .spei__caption {
   opacity: 0;
 }
 
 .spei-is-opening .spei__tone::after,
+.spei-is-revealing .spei__tone::after,
 .spei-is-closing .spei__tone::after {
   opacity: 0;
 }
@@ -317,6 +319,20 @@
 
 .spei-is-fallback.spei-is-opening .spei__frame::after {
   animation: spei-fallback-open 820ms cubic-bezier(.22, .61, .36, 1) forwards;
+}
+
+.spei-reveal-visible .spei__control--back,
+.spei-reveal-visible .spei__price,
+.spei-reveal-visible .spei__save {
+  visibility: hidden;
+  opacity: 0;
+}
+
+.spei-reveal-visible .spei__control--skip {
+  border-color: rgb(255 255 255 / 40%);
+  color: #fff;
+  background: rgb(8 8 10 / 72%);
+  box-shadow: 0 8px 28px rgb(0 0 0 / 16%);
 }
 
 .spei-is-closing {
