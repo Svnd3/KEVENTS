@@ -57,7 +57,7 @@ function SoundIcon({ playing }) {
 }
 
 function PreviewToolbar({ design, onBack, onEnquire, saved, onToggleSaved }) {
-  const { formatPrice, currencyCode } = useCurrency()
+  const { formatPrice } = useCurrency()
 
   return (
     <nav className="tp-toolbar" aria-label="Invitation preview controls">
@@ -68,7 +68,7 @@ function PreviewToolbar({ design, onBack, onEnquire, saved, onToggleSaved }) {
 
       <div className="tp-toolbar__title">
         <strong>{design.name}</strong>
-        <span>{formatPrice(design.price)}{currencyCode !== 'KES' ? ' approx.' : ''} · one-time</span>
+        <span>{formatPrice(design.price)} · one-time</span>
       </div>
 
       <div className="tp-toolbar__actions">

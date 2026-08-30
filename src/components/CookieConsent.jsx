@@ -1,4 +1,4 @@
-import { Check, ChevronRight, Cookie, ShieldCheck, SlidersHorizontal, X } from 'lucide-react'
+import { ChevronRight, X } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import {
   COOKIE_CONSENT_CHANGED_EVENT,
@@ -118,9 +118,7 @@ function CookiePreferencesDialog({
         tabIndex={-1}
       >
         <div className="tw-consent__dialog-head">
-          <span className="tw-consent__dialog-icon" aria-hidden="true"><SlidersHorizontal size={18} /></span>
           <div>
-            <span>Privacy controls</span>
             <h2 id="tw-cookie-preferences-title">Cookie preferences</h2>
           </div>
           <button
@@ -175,7 +173,7 @@ function CookiePreferencesDialog({
             Reject optional
           </button>
           <button type="button" className="tw-consent__button tw-consent__button--primary" onClick={() => onSave(preferences)}>
-            Save my choices <Check size={15} aria-hidden="true" />
+            Save choices
           </button>
         </div>
       </section>
@@ -259,19 +257,18 @@ export default function CookieBanner({
     <>
       {!consent && (
         <aside className="tw-consent__banner" aria-label="Cookie notice" aria-live="polite">
-          <div className="tw-consent__banner-icon" aria-hidden="true"><Cookie size={21} /></div>
           <div className="tw-consent__banner-copy">
-            <strong>Cookies, with your say.</strong>
+            <strong>Cookie settings</strong>
             <p>
-              We use necessary browser storage to make the site work. Analytics and marketing stay
-              off unless you choose them. <a href={policyHref} onClick={followPolicy}>Cookie policy</a>
+              This site uses necessary browser storage. Analytics and marketing remain off unless
+              you allow them. <a href={policyHref} onClick={followPolicy}>Cookie policy</a>
             </p>
           </div>
           <div className="tw-consent__banner-actions">
             <button type="button" className="tw-consent__text-button" onClick={() => choose(NECESSARY_COOKIE_PREFERENCES)}>Reject optional</button>
             <button type="button" className="tw-consent__text-button" onClick={() => setDialogOpen(true)}>Customise</button>
             <button type="button" className="tw-consent__accept" onClick={() => choose({ necessary: true, analytics: true, marketing: true })}>
-              Accept all <ShieldCheck size={15} aria-hidden="true" />
+              Accept all
             </button>
           </div>
         </aside>

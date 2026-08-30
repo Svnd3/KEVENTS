@@ -10,6 +10,7 @@ body.tw-consent-modal-open {
   --consent-accent: var(--accent, #8f3f50);
   --consent-muted: var(--muted, #676c64);
   --consent-line: var(--line, rgba(30, 36, 32, .14));
+  color: var(--consent-ink);
   font-family: var(--sans, "Inter Local", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif);
 }
 
@@ -25,57 +26,43 @@ body.tw-consent-modal-open {
   bottom: clamp(12px, 2.2vw, 32px);
   left: clamp(12px, 2.2vw, 32px);
   display: grid;
-  grid-template-columns: auto minmax(220px, 1fr) auto;
-  max-width: 1160px;
+  grid-template-columns: minmax(220px, 1fr) auto;
+  max-width: 1040px;
   align-items: center;
-  gap: 18px;
+  gap: 24px;
   margin: 0 auto;
-  padding: 16px 17px 16px 19px;
-  border: 1px solid rgba(255, 255, 255, .14);
-  border-radius: 18px;
-  color: #f8f4ec;
-  background: rgba(25, 30, 27, .965);
-  box-shadow: 0 22px 70px rgba(17, 20, 18, .24);
-  backdrop-filter: blur(18px);
-  animation: tw-consent-rise .45s cubic-bezier(.22, .8, .3, 1) both;
-}
-
-.tw-consent__banner-icon {
-  display: grid;
-  width: 42px;
-  height: 42px;
-  place-items: center;
-  border: 1px solid rgba(255, 255, 255, .14);
-  border-radius: 50%;
-  color: #e8b7c2;
+  padding: 18px 19px;
+  border: 1px solid var(--consent-line);
+  border-radius: 14px;
+  background: rgba(251, 248, 242, .98);
+  animation: tw-consent-rise .28s ease both;
 }
 
 .tw-consent__banner-copy strong {
   display: block;
   margin-bottom: 5px;
-  font-family: var(--serif, "Cormorant Local", Georgia, serif);
-  font-size: 19px;
-  font-weight: 500;
-  letter-spacing: -.01em;
+  font-family: var(--sans, "Inter Local", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif);
+  font-size: 13px;
+  font-weight: 700;
 }
 
 .tw-consent__banner-copy p {
-  max-width: 590px;
+  max-width: 620px;
   margin: 0;
-  color: rgba(248, 244, 236, .7);
+  color: var(--consent-muted);
   font-size: 11px;
   line-height: 1.55;
 }
 
 .tw-consent__banner-copy a {
-  border-bottom: 1px solid rgba(248, 244, 236, .48);
-  color: #fff;
+  border-bottom: 1px solid rgba(143, 63, 80, .4);
+  color: var(--consent-accent);
 }
 
 .tw-consent__banner-actions {
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 6px;
 }
 
 .tw-consent__text-button,
@@ -89,8 +76,8 @@ body.tw-consent-modal-open {
 
 .tw-consent__text-button {
   min-height: 40px;
-  padding: 0 13px;
-  color: rgba(248, 244, 236, .76);
+  padding: 0 11px;
+  color: var(--consent-muted);
   background: transparent;
   font-size: 10px;
   font-weight: 650;
@@ -98,7 +85,7 @@ body.tw-consent-modal-open {
 }
 
 .tw-consent__text-button:hover {
-  color: #fff;
+  color: var(--consent-ink);
 }
 
 .tw-consent__accept {
@@ -106,20 +93,18 @@ body.tw-consent-modal-open {
   min-height: 42px;
   align-items: center;
   justify-content: center;
-  gap: 9px;
-  padding: 0 17px;
-  border-radius: 999px;
-  color: var(--consent-ink);
-  background: #f5eee4;
+  padding: 0 16px;
+  border-radius: 11px;
+  color: #fff;
+  background: var(--consent-ink);
   font-size: 10px;
-  font-weight: 750;
+  font-weight: 700;
   white-space: nowrap;
-  transition: transform .2s ease, background .2s ease;
+  transition: background .2s ease;
 }
 
 .tw-consent__accept:hover {
-  transform: translateY(-1px);
-  background: #fff;
+  background: #343b36;
 }
 
 .tw-consent__backdrop {
@@ -130,59 +115,36 @@ body.tw-consent-modal-open {
   place-items: center;
   padding: 18px;
   overflow-y: auto;
-  background: rgba(22, 25, 23, .58);
-  backdrop-filter: blur(7px);
-  animation: tw-consent-fade .2s ease both;
+  background: rgba(22, 25, 23, .48);
+  animation: tw-consent-fade .18s ease both;
 }
 
 .tw-consent__dialog {
-  width: min(100%, 570px);
+  width: min(100%, 560px);
   max-height: calc(100svh - 36px);
   overflow-y: auto;
-  border: 1px solid rgba(255, 255, 255, .38);
-  border-radius: 24px;
-  color: var(--consent-ink);
+  border: 1px solid var(--consent-line);
+  border-radius: 16px;
   background: var(--consent-paper);
-  box-shadow: 0 30px 110px rgba(14, 18, 15, .3);
-  animation: tw-consent-dialog-in .35s cubic-bezier(.2, .8, .3, 1) both;
+  animation: tw-consent-dialog-in .22s ease both;
 }
 
 .tw-consent__dialog-head {
   display: grid;
-  grid-template-columns: auto 1fr auto;
+  grid-template-columns: 1fr auto;
   align-items: center;
   gap: 14px;
-  padding: 24px 24px 18px;
+  padding: 22px 24px 18px;
   border-bottom: 1px solid var(--consent-line);
-}
-
-.tw-consent__dialog-icon {
-  display: grid;
-  width: 40px;
-  height: 40px;
-  place-items: center;
-  border-radius: 50%;
-  color: var(--consent-accent);
-  background: rgba(143, 63, 80, .09);
-}
-
-.tw-consent__dialog-head div > span {
-  display: block;
-  margin-bottom: 4px;
-  color: var(--consent-accent);
-  font-size: 8px;
-  font-weight: 750;
-  letter-spacing: .15em;
-  text-transform: uppercase;
 }
 
 .tw-consent__dialog h2 {
   margin: 0;
-  font-family: var(--serif, "Cormorant Local", Georgia, serif);
-  font-size: 29px;
-  font-weight: 500;
-  letter-spacing: -.025em;
-  line-height: 1;
+  font-family: var(--sans, "Inter Local", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif);
+  font-size: 23px;
+  font-weight: 620;
+  letter-spacing: -.035em;
+  line-height: 1.1;
 }
 
 .tw-consent__close {
@@ -191,7 +153,7 @@ body.tw-consent-modal-open {
   height: 38px;
   place-items: center;
   border: 1px solid var(--consent-line);
-  border-radius: 50%;
+  border-radius: 11px;
   color: var(--consent-ink);
   background: transparent;
 }
@@ -202,7 +164,7 @@ body.tw-consent-modal-open {
 
 .tw-consent__dialog-intro {
   margin: 0;
-  padding: 22px 24px 18px;
+  padding: 20px 24px 18px;
   color: var(--consent-muted);
   font-size: 12px;
   line-height: 1.65;
@@ -258,7 +220,7 @@ body.tw-consent-modal-open {
   width: 43px;
   height: 25px;
   border: 1px solid rgba(30, 36, 32, .22);
-  border-radius: 999px;
+  border-radius: 13px;
   background: #e4e1da;
   cursor: pointer;
   transition: background .2s ease, border-color .2s ease;
@@ -272,7 +234,6 @@ body.tw-consent-modal-open {
   height: 17px;
   border-radius: 50%;
   background: #fff;
-  box-shadow: 0 2px 5px rgba(30, 36, 32, .18);
   transition: transform .2s ease;
 }
 
@@ -320,9 +281,8 @@ body.tw-consent-modal-open {
   min-height: 44px;
   align-items: center;
   justify-content: center;
-  gap: 9px;
-  padding: 0 18px;
-  border-radius: 999px;
+  padding: 0 17px;
+  border-radius: 11px;
   font-size: 10px;
   font-weight: 700;
 }
@@ -346,7 +306,7 @@ body.tw-consent-modal-open {
 }
 
 @keyframes tw-consent-rise {
-  from { opacity: 0; transform: translateY(18px); }
+  from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
@@ -356,30 +316,25 @@ body.tw-consent-modal-open {
 }
 
 @keyframes tw-consent-dialog-in {
-  from { opacity: 0; transform: translateY(12px) scale(.985); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 @media (max-width: 850px) {
   .tw-consent__banner {
-    grid-template-columns: auto 1fr;
+    grid-template-columns: 1fr;
+    gap: 14px;
   }
 
   .tw-consent__banner-actions {
-    grid-column: 1 / -1;
     justify-content: flex-end;
   }
 }
 
 @media (max-width: 560px) {
   .tw-consent__banner {
-    grid-template-columns: 1fr;
     gap: 12px;
-    padding: 18px;
-  }
-
-  .tw-consent__banner-icon {
-    display: none;
+    padding: 17px;
   }
 
   .tw-consent__banner-actions {
@@ -405,7 +360,7 @@ body.tw-consent-modal-open {
   .tw-consent__dialog {
     width: 100%;
     max-height: min(92svh, 760px);
-    border-radius: 24px 24px 0 0;
+    border-radius: 16px 16px 0 0;
   }
 
   .tw-consent__dialog-head,

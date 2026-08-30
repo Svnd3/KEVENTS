@@ -1,5 +1,5 @@
 import { useEffect, useId, useRef, useState } from 'react'
-import { ArrowRight, Eye, EyeOff, LockKeyhole, ShieldCheck, X } from 'lucide-react'
+import { ArrowRight, Eye, EyeOff, X } from 'lucide-react'
 import BrandLogo from '../components/BrandLogo.jsx'
 import { AuthError, createAccount, signIn } from './authClient.js'
 import useAccessibleDialog from './useAccessibleDialog.js'
@@ -123,12 +123,12 @@ export default function AuthDialog({
 
         <div className="tw-auth-dialog__brand"><BrandLogo /></div>
         <div className="tw-auth-dialog__intro">
-          <span className="tw-kicker">{signingUp ? 'Create your space' : 'Welcome back'}</span>
-          <h2 id={titleId}>{signingUp ? <>Keep every detail<br /><em>close.</em></> : <>Pick up where<br /><em>you left off.</em></>}</h2>
+          <span className="tw-kicker">Account</span>
+          <h2 id={titleId}>{signingUp ? 'Create an account' : 'Sign in'}</h2>
           <p id={descriptionId}>
             {signingUp
-              ? 'Save your planning details and keep your invitation shortlist together on this device.'
-              : 'Sign in to see your profile, preferences and planning details.'}
+              ? 'Save designs and planning details on this device.'
+              : 'Access your saved designs and account details on this device.'}
           </p>
         </div>
 
@@ -263,9 +263,7 @@ export default function AuthDialog({
         </p>
 
         <div className="tw-demo-note">
-          <ShieldCheck size={17} aria-hidden="true" />
-          <p><strong>Private preview</strong><span>This demo stays in this browser. Your password is saved only as a salted verifier—not readable text. Production launch should use server authentication.</span></p>
-          <LockKeyhole size={15} aria-hidden="true" />
+          <p><strong>Preview account</strong><span>This account is stored only in this browser and will not sync to another device.</span></p>
         </div>
       </section>
     </div>

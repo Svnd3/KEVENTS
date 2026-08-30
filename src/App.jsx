@@ -184,7 +184,7 @@ function SkipLink() {
   return <a className="skip-link" href="#main-content" onClick={focusMain}>Skip to content</a>
 }
 
-function Header({ view, navigate, onEnquire, onOpenAuth, onReport, savedCount, user }) {
+function Header({ view, navigate, onEnquire, onOpenAuth, savedCount, user }) {
   const [open, setOpen] = useState(false)
   const navigationRef = useRef(null)
   const menuToggleRef = useRef(null)
@@ -235,11 +235,9 @@ function Header({ view, navigate, onEnquire, onOpenAuth, onReport, savedCount, u
           <button className={view === 'account' ? 'is-active' : ''} type="button" onClick={openAccount}>
             {user ? `Account · ${accountName}` : 'Sign in or create account'}
           </button>
-          <button type="button" onClick={() => { setOpen(false); onReport() }}>Report a problem</button>
         </div>
       </nav>
       <div className="header-tools">
-        <CurrencyControl compact />
         <button className={`header-account ${view === 'account' ? 'is-active' : ''}`} type="button" onClick={openAccount} aria-label={user ? `Open ${accountName}'s account` : 'Sign in or create an account'}>
           {user ? <CircleUserRound size={17} /> : <LogIn size={16} />}
           <span>{user ? accountName : 'Sign in'}</span>
@@ -303,7 +301,9 @@ function Hero({ navigate, onEnquire }) {
   )
 }
 
-function DesignCard({ design, large = false, saved = false, onToggleSaved }) {
+function DesignCard({ design, large = false, saved = false, onToggleSaved, showOffer = false }) {
+  const { formatPrice } = useCurrency()
+
   return (
     <article className={`design-card ${large ? 'design-card--large' : ''}`}>
       <a
@@ -329,7 +329,11 @@ function DesignCard({ design, large = false, saved = false, onToggleSaved }) {
           <h3>{design.name}</h3>
         </div>
         <div className="design-card__price">
-          <PriceDisplay price={design.price} compareAt={design.compareAtPrice} compact />
+          {showOffer && design.compareAtPrice ? (
+            <PriceDisplay price={design.price} compareAt={design.compareAtPrice} compact />
+          ) : (
+            <><strong>{formatPrice(design.price)}</strong><small>One-time</small></>
+          )}
         </div>
       </div>
     </article>
@@ -374,7 +378,7 @@ function Featured({ navigate, savedSet, onToggleSaved }) {
 }
 
 function PricingGuide({ navigate }) {
-  const { formatRange, currencyCode } = useCurrency()
+  const { formatRange } = useCurrency()
 
   return (
     <section className="pricing-guide section-pad" data-reveal aria-labelledby="pricing-guide-title">
@@ -393,7 +397,6 @@ function PricingGuide({ navigate }) {
             <p>{tier.description}</p>
           </article>
         ))}
-        <p className="pricing-guide__currency-note">Prices shown in {currencyCode}. Non-KES amounts are indicative; your quote confirms the final KES total.</p>
       </div>
     </section>
   )
@@ -526,6 +529,7 @@ function CollectionPage({ savedSet, onToggleSaved }) {
               <DesignCard
                 key={design.id}
                 design={design}
+                showOffer
                 saved={savedSet.has(design.slug)}
                 onToggleSaved={onToggleSaved}
               />
@@ -563,6 +567,7 @@ function SavedPage({ navigate, savedDesigns, savedSet, onToggleSaved }) {
                 <DesignCard
                   key={design.id}
                   design={design}
+                  showOffer
                   saved={savedSet.has(design.slug)}
                   onToggleSaved={onToggleSaved}
                 />
@@ -588,7 +593,7 @@ function EnquiryPanel({ design, onClose }) {
   const [error, setError] = useState('')
   const dialogRef = useRef(null)
   const endpoint = import.meta.env.VITE_ENQUIRY_ENDPOINT
-  const { formatPrice, currencyCode } = useCurrency()
+  const { formatPrice } = useCurrency()
   useDialogBehavior(true, dialogRef, onClose)
 
   const submit = async (event) => {
@@ -623,7 +628,7 @@ function EnquiryPanel({ design, onClose }) {
             <span className="eyebrow">Enquiry</span>
             <h2 id="enquiry-title">Tell us what<br /><span>you need.</span></h2>
             <p>Share your details and we will reply with availability and next steps.</p>
-            {design && <div className="enquiry-selection"><span>Selected design</span><strong>{design.name}</strong><small>{formatPrice(design.price)} {currencyCode !== 'KES' ? '(estimate)' : ''}</small></div>}
+            {design && <div className="enquiry-selection"><span>Selected design</span><strong>{design.name}</strong><small>{formatPrice(design.price)}</small></div>}
             <form onSubmit={submit}>
               {design && <input type="hidden" name="design" value={design.name} />}
               {design && <input type="hidden" name="price" value={formatPrice(design.price)} />}
@@ -657,62 +662,52 @@ function EnquiryPanel({ design, onClose }) {
 function Footer({ navigate, onEnquire, onOpenAuth, onReport, onCookieSettings, onSignOut, savedCount, user }) {
   return (
     <footer className="site-footer section-pad">
-      <div className="footer-cta">
-        <span className="eyebrow">Your story deserves a beautiful entrance</span>
-        <h2>Ready to tell them<br /><em>you’re getting married?</em></h2>
+      <div className="footer-brand"><BrandLogo /></div>
+
+      <div className="footer-copy">
+        <p>Digital invitations<br />designed in Nairobi.</p>
+        <span>Available worldwide</span>
+        <div className="footer-socials" aria-label="Tell & Wed on social media">
+          <a href="https://www.instagram.com/tellandwed/" target="_blank" rel="noreferrer" aria-label="Instagram @tellandwed">
+            <Instagram size={15} /><span>@tellandwed</span><ExternalLink size={11} />
+          </a>
+          <a href="https://www.tiktok.com/@tell.wed.invitations" target="_blank" rel="noreferrer" aria-label="TikTok @tell.wed.invitations">
+            <Music2 size={15} /><span>@tell.wed.invitations</span><ExternalLink size={11} />
+          </a>
+        </div>
+      </div>
+
+      <nav className="footer-links" aria-label="Footer navigation">
         <div>
-          <button className="button button--light" type="button" onClick={() => navigate('collection')}>Browse invitations <ArrowRight size={17} /></button>
-          <button className="footer-text-link" type="button" onClick={() => onEnquire(null)}>Request something custom</button>
+          <strong>Explore</strong>
+          <button type="button" onClick={() => navigate('collection')}>Designs</button>
+          <button type="button" onClick={() => navigate('saved')}>Saved{savedCount ? ` (${savedCount})` : ''}</button>
+          <button type="button" onClick={() => onEnquire(null)}>Custom design</button>
         </div>
-      </div>
-
-      <div className="footer-main">
-        <div className="footer-intro">
-          <div className="footer-brand"><BrandLogo /></div>
-          <p>Thoughtful digital invitations, designed in Nairobi and shared everywhere.</p>
-          <div className="footer-socials" aria-label="Tell & Wed on social media">
-            <a href="https://www.instagram.com/tellandwed/" target="_blank" rel="noreferrer" aria-label="Instagram @tellandwed">
-              <Instagram size={16} /><span>@tellandwed</span><ExternalLink size={12} />
-            </a>
-            <a href="https://www.tiktok.com/@tell.wed.invitations" target="_blank" rel="noreferrer" aria-label="TikTok @tell.wed.invitations">
-              <Music2 size={16} /><span>@tell.wed.invitations</span><ExternalLink size={12} />
-            </a>
-          </div>
+        <div>
+          <strong>Account</strong>
+          <button type="button" onClick={() => user ? navigate('account') : onOpenAuth('sign-in')}>{user ? 'My account' : 'Sign in'}</button>
+          {!user && <button type="button" onClick={() => onOpenAuth('sign-up')}>Create account</button>}
+          {user && <button type="button" onClick={onSignOut}><LogOut size={13} /> Sign out</button>}
+          <button type="button" onClick={onReport}><LifeBuoy size={13} /> Report a problem</button>
         </div>
-
-        <nav className="footer-links" aria-label="Footer navigation">
-          <div>
-            <strong>Explore</strong>
-            <button type="button" onClick={() => navigate('collection')}>All designs</button>
-            <button type="button" onClick={() => navigate('saved')}>Saved designs{savedCount ? ` (${savedCount})` : ''}</button>
-            <button type="button" onClick={() => onEnquire(null)}>Custom design</button>
-          </div>
-          <div>
-            <strong>Account</strong>
-            <button type="button" onClick={() => user ? navigate('account') : onOpenAuth('sign-in')}>{user ? 'My account' : 'Sign in'}</button>
-            {!user && <button type="button" onClick={() => onOpenAuth('sign-up')}>Create account</button>}
-            {user && <button type="button" onClick={onSignOut}><LogOut size={13} /> Sign out</button>}
-          </div>
-          <div>
-            <strong>Help &amp; legal</strong>
-            <button type="button" onClick={onReport}><LifeBuoy size={13} /> Report a problem</button>
-            <button type="button" onClick={() => navigate('terms')}>Terms of service</button>
-            <button type="button" onClick={() => navigate('privacy')}>Privacy notice</button>
-            <button type="button" onClick={() => navigate('cookies')}>Cookie policy</button>
-            <button type="button" onClick={onCookieSettings}>Cookie settings</button>
-          </div>
-        </nav>
-      </div>
+        <div>
+          <strong>Information</strong>
+          <button type="button" onClick={() => navigate('terms')}>Terms</button>
+          <button type="button" onClick={() => navigate('privacy')}>Privacy</button>
+          <button type="button" onClick={() => navigate('cookies')}>Cookies</button>
+          <button type="button" onClick={onCookieSettings}>Cookie settings</button>
+        </div>
+      </nav>
 
       <div className="footer-utility">
-        <div><span>Country &amp; currency</span><CurrencyControl /></div>
+        <div><span>Country</span><CurrencyControl /></div>
         <button type="button" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>Back to top <ArrowDown className="footer-back-arrow" size={14} /></button>
       </div>
 
       <div className="footer-bottom">
         <span>© {new Date().getFullYear()} Tell &amp; Wed</span>
         <span>Nairobi, Kenya · Available worldwide</span>
-        <span>Prices are one-time unless stated otherwise</span>
       </div>
     </footer>
   )
@@ -726,7 +721,7 @@ export default function App() {
   const [savedSlugs, setSavedSlugs] = useState(readSavedDesigns)
   const [saveAnnouncement, setSaveAnnouncement] = useState('')
   const auth = useAuthSession()
-  const { country, currency } = useCurrency()
+  const { country } = useCurrency()
   const progressRef = useRef(null)
   const viewRef = useRef(view)
   const collectionScrollRef = useRef(0)
@@ -896,7 +891,7 @@ export default function App() {
         onSignOut={() => navigate('home')}
         onOpenAuth={openAuth}
         onReport={() => setReportOpen(true)}
-        currencySummary={{ label: `${currency.code} · ${currency.name}`, country: country.name }}
+        currencySummary={{ label: country.name, country: country.name }}
         onUserChange={auth.refresh}
       />
     )
@@ -921,7 +916,6 @@ export default function App() {
           navigate={navigate}
           onEnquire={openEnquiry}
           onOpenAuth={openAuth}
-          onReport={() => setReportOpen(true)}
           savedCount={savedSlugs.length}
           user={auth.user}
         />

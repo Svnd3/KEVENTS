@@ -65,7 +65,7 @@ The current sign-up, sign-in and account experience is a browser-only prototype.
 
 Reports are delivered as JSON when `VITE_REPORT_ENDPOINT` is configured. Without it, the report dialog clearly creates an unsent demo receipt. Set `VITE_CONTACT_EMAIL` to the public support/legal inbox used by the Terms, Privacy Notice and Cookie Policy.
 
-Country and currency detection uses browser time zone and language without requesting precise location. Visitors can always override both. Foreign-currency values are indicative conversions from KES; rates and their displayed update date live in `src/utils/currency.js` and should be refreshed regularly. Promotional “Was” amounts are explicit `compareAtPrice` values in `src/data/designs.js`; verify that each is a genuine prior price before publishing.
+Country detection uses browser time zone and language without requesting precise location. Visitors can override the detected country; its currency is then selected automatically. Foreign-currency values are indicative conversions from KES, and the rates in `src/utils/currency.js` should be refreshed regularly. Promotional “Was” amounts are explicit `compareAtPrice` values in `src/data/designs.js`; verify that each is a genuine prior price before publishing.
 
 The included legal documents are a practical Kenya-oriented draft, not a substitute for advice from a qualified lawyer. Confirm the legal business identity, contact details, refund practice, payment flow and data processors before launch.
 

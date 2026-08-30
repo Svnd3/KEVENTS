@@ -43,6 +43,7 @@ export default function SiteLoader({
     shouldShowLoader(sessionKey, force) ? 'visible' : 'done'
   ))
   const [animationReady, setAnimationReady] = useState(false)
+  const [animationFailed, setAnimationFailed] = useState(false)
   const animationContainerRef = useRef(null)
   const startedAtRef = useRef(Date.now())
   const onFinishRef = useRef(onFinish)
@@ -63,15 +64,18 @@ export default function SiteLoader({
 
     const elapsed = Date.now() - startedAtRef.current
     const hardStop = window.setTimeout(beginExit, Math.max(0, safeMaximum - elapsed))
-    const readyStop = ready
-      ? window.setTimeout(beginExit, Math.max(0, safeMinimum - elapsed))
+    const readyStop = ready && (animationReady || animationFailed)
+      ? window.setTimeout(
+        beginExit,
+        Math.max(0, safeMinimum - elapsed, animationReady ? 650 : 0),
+      )
       : null
 
     return () => {
       window.clearTimeout(hardStop)
       if (readyStop !== null) window.clearTimeout(readyStop)
     }
-  }, [beginExit, phase, ready, safeMaximum, safeMinimum])
+  }, [animationFailed, animationReady, beginExit, phase, ready, safeMaximum, safeMinimum])
 
   useEffect(() => {
     if (phase === 'done') return undefined
@@ -106,7 +110,7 @@ export default function SiteLoader({
         })
       })
       .catch(() => {
-        // The CSS wordmark remains visible as a resilient, motion-free fallback.
+        if (!cancelled) setAnimationFailed(true)
       })
 
     return () => {
@@ -133,24 +137,18 @@ export default function SiteLoader({
       aria-live="polite"
       aria-label="Loading Tell & Wed"
     >
-      <div className="tw-loader__wash" aria-hidden="true" />
       <div className="tw-loader__content">
         <div className="tw-loader__brand">
-          <span className="tw-loader__brand-glow" aria-hidden="true" />
           <BrandLogo />
         </div>
 
         <div className="tw-loader__animation-shell" aria-hidden="true">
           <div className={`tw-loader__fallback ${animationReady ? 'is-hidden' : ''}`}>
-            <span>loading</span><i />
+            <span>Loading…</span>
           </div>
           {!reduceMotion && <div className="tw-loader__lottie" ref={animationContainerRef} />}
         </div>
-
-        <p className="tw-loader__caption">Preparing something worth opening</p>
       </div>
-      <span className="tw-loader__corner tw-loader__corner--top" aria-hidden="true">TELL</span>
-      <span className="tw-loader__corner tw-loader__corner--bottom" aria-hidden="true">NBO · MMXXVI</span>
     </div>
   )
 }

@@ -1,5 +1,5 @@
 import { useEffect, useId, useRef, useState } from 'react'
-import { CheckCircle2, Flag, Send, ShieldAlert, X } from 'lucide-react'
+import { CheckCircle2, Send, ShieldAlert, X } from 'lucide-react'
 import useAccessibleDialog from './useAccessibleDialog.js'
 import './account-ui.css'
 
@@ -157,8 +157,8 @@ export default function ReportDialog({ open, onClose, user, source = 'website', 
         {receipt ? (
           <div className="tw-report-success">
             <span className="tw-report-success__icon"><CheckCircle2 size={27} aria-hidden="true" /></span>
-            <span className="tw-kicker">{receipt.demo ? 'Demo receipt' : 'Report received'}</span>
-            <h2 id={titleId}>{receipt.demo ? 'Your report is ready.' : 'Thank you for the heads-up.'}</h2>
+            <span className="tw-kicker">Report</span>
+            <h2 id={titleId}>{receipt.demo ? 'Demo report created' : 'Report received'}</h2>
             <p id={descriptionId}>
               {receipt.demo
                 ? 'No report was sent because a report endpoint has not been connected yet.'
@@ -172,10 +172,9 @@ export default function ReportDialog({ open, onClose, user, source = 'website', 
         ) : (
           <>
             <div className="tw-report-dialog__intro">
-              <span className="tw-report-dialog__flag"><Flag size={18} aria-hidden="true" /></span>
-              <span className="tw-kicker">Report an issue</span>
-              <h2 id={titleId}>Help us make this<br /><em>experience better.</em></h2>
-              <p id={descriptionId}>Share a problem with the website, your account, an order or any content that concerns you.</p>
+              <span className="tw-kicker">Support</span>
+              <h2 id={titleId}>Report a problem</h2>
+              <p id={descriptionId}>Tell us what went wrong so we can investigate.</p>
             </div>
 
             <form className="tw-report-form" onSubmit={submit} noValidate>

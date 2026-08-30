@@ -35,7 +35,7 @@ const auth = useAuthSession()
   onSignOut={({ deleted }) => navigate('home')}
   onOpenAuth={(mode) => openAuth(mode)}
   onReport={() => setReportOpen(true)}
-  currencySummary={{ label: 'KSh (KES)', country: 'Kenya' }}
+  currencySummary={{ label: 'Kenya', country: 'Kenya' }}
 />
 
 <ReportDialog

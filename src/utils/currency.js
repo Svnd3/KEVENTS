@@ -35,7 +35,27 @@ export const SUPPORTED_COUNTRIES = Object.freeze([
   Object.freeze({ code: 'ZA', name: 'South Africa', currencyCode: 'ZAR', locale: 'en-ZA' }),
   Object.freeze({ code: 'US', name: 'United States', currencyCode: 'USD', locale: 'en-US' }),
   Object.freeze({ code: 'GB', name: 'United Kingdom', currencyCode: 'GBP', locale: 'en-GB' }),
-  Object.freeze({ code: 'EU', name: 'Europe', currencyCode: 'EUR', locale: 'en-IE' }),
+  Object.freeze({ code: 'AT', name: 'Austria', currencyCode: 'EUR', locale: 'de-AT' }),
+  Object.freeze({ code: 'BE', name: 'Belgium', currencyCode: 'EUR', locale: 'nl-BE' }),
+  Object.freeze({ code: 'BG', name: 'Bulgaria', currencyCode: 'EUR', locale: 'bg-BG' }),
+  Object.freeze({ code: 'HR', name: 'Croatia', currencyCode: 'EUR', locale: 'hr-HR' }),
+  Object.freeze({ code: 'CY', name: 'Cyprus', currencyCode: 'EUR', locale: 'el-CY' }),
+  Object.freeze({ code: 'EE', name: 'Estonia', currencyCode: 'EUR', locale: 'et-EE' }),
+  Object.freeze({ code: 'FI', name: 'Finland', currencyCode: 'EUR', locale: 'fi-FI' }),
+  Object.freeze({ code: 'FR', name: 'France', currencyCode: 'EUR', locale: 'fr-FR' }),
+  Object.freeze({ code: 'DE', name: 'Germany', currencyCode: 'EUR', locale: 'de-DE' }),
+  Object.freeze({ code: 'GR', name: 'Greece', currencyCode: 'EUR', locale: 'el-GR' }),
+  Object.freeze({ code: 'IE', name: 'Ireland', currencyCode: 'EUR', locale: 'en-IE' }),
+  Object.freeze({ code: 'IT', name: 'Italy', currencyCode: 'EUR', locale: 'it-IT' }),
+  Object.freeze({ code: 'LV', name: 'Latvia', currencyCode: 'EUR', locale: 'lv-LV' }),
+  Object.freeze({ code: 'LT', name: 'Lithuania', currencyCode: 'EUR', locale: 'lt-LT' }),
+  Object.freeze({ code: 'LU', name: 'Luxembourg', currencyCode: 'EUR', locale: 'fr-LU' }),
+  Object.freeze({ code: 'MT', name: 'Malta', currencyCode: 'EUR', locale: 'mt-MT' }),
+  Object.freeze({ code: 'NL', name: 'Netherlands', currencyCode: 'EUR', locale: 'nl-NL' }),
+  Object.freeze({ code: 'PT', name: 'Portugal', currencyCode: 'EUR', locale: 'pt-PT' }),
+  Object.freeze({ code: 'SK', name: 'Slovakia', currencyCode: 'EUR', locale: 'sk-SK' }),
+  Object.freeze({ code: 'SI', name: 'Slovenia', currencyCode: 'EUR', locale: 'sl-SI' }),
+  Object.freeze({ code: 'ES', name: 'Spain', currencyCode: 'EUR', locale: 'es-ES' }),
   Object.freeze({ code: 'CA', name: 'Canada', currencyCode: 'CAD', locale: 'en-CA' }),
   Object.freeze({ code: 'AU', name: 'Australia', currencyCode: 'AUD', locale: 'en-AU' }),
   Object.freeze({ code: 'IN', name: 'India', currencyCode: 'INR', locale: 'en-IN' }),
@@ -43,11 +63,6 @@ export const SUPPORTED_COUNTRIES = Object.freeze([
 ])
 
 const COUNTRY_BY_CODE = new Map(SUPPORTED_COUNTRIES.map((country) => [country.code, country]))
-
-const EURO_AREA_COUNTRY_CODES = new Set([
-  'AT', 'BE', 'HR', 'CY', 'EE', 'FI', 'FR', 'DE', 'GR', 'IE', 'IT', 'LV', 'LT',
-  'LU', 'MT', 'NL', 'PT', 'SK', 'SI', 'ES',
-])
 
 const TIME_ZONE_COUNTRY_CODES = Object.freeze({
   'Africa/Nairobi': 'KE',
@@ -58,6 +73,32 @@ const TIME_ZONE_COUNTRY_CODES = Object.freeze({
   'Africa/Johannesburg': 'ZA',
   'Europe/London': 'GB',
   'Europe/Belfast': 'GB',
+  'Europe/Vienna': 'AT',
+  'Europe/Brussels': 'BE',
+  'Europe/Sofia': 'BG',
+  'Europe/Zagreb': 'HR',
+  'Asia/Nicosia': 'CY',
+  'Europe/Nicosia': 'CY',
+  'Europe/Tallinn': 'EE',
+  'Europe/Helsinki': 'FI',
+  'Europe/Paris': 'FR',
+  'Europe/Berlin': 'DE',
+  'Europe/Busingen': 'DE',
+  'Europe/Athens': 'GR',
+  'Europe/Dublin': 'IE',
+  'Europe/Rome': 'IT',
+  'Europe/Riga': 'LV',
+  'Europe/Vilnius': 'LT',
+  'Europe/Luxembourg': 'LU',
+  'Europe/Malta': 'MT',
+  'Europe/Amsterdam': 'NL',
+  'Europe/Lisbon': 'PT',
+  'Atlantic/Azores': 'PT',
+  'Atlantic/Madeira': 'PT',
+  'Europe/Bratislava': 'SK',
+  'Europe/Ljubljana': 'SI',
+  'Europe/Madrid': 'ES',
+  'Atlantic/Canary': 'ES',
   'America/Toronto': 'CA',
   'America/Vancouver': 'CA',
   'America/Edmonton': 'CA',
@@ -71,7 +112,6 @@ const TIME_ZONE_COUNTRY_CODES = Object.freeze({
 
 const US_TIME_ZONE_PREFIXES = ['America/New_York', 'America/Chicago', 'America/Denver', 'America/Los_Angeles', 'America/Phoenix', 'America/Anchorage', 'Pacific/Honolulu']
 const AUSTRALIAN_TIME_ZONE_PREFIX = 'Australia/'
-const EUROPEAN_TIME_ZONE_PREFIX = 'Europe/'
 
 function normaliseCode(value) {
   return typeof value === 'string' ? value.trim().toUpperCase() : ''
@@ -104,7 +144,6 @@ function regionFromLanguageTag(languageTag) {
 function countryCodeFromRegion(region) {
   const code = normaliseCode(region)
   if (COUNTRY_BY_CODE.has(code)) return code
-  if (EURO_AREA_COUNTRY_CODES.has(code)) return 'EU'
   return ''
 }
 
@@ -113,7 +152,6 @@ function countryCodeFromTimeZone(timeZone) {
   if (TIME_ZONE_COUNTRY_CODES[timeZone]) return TIME_ZONE_COUNTRY_CODES[timeZone]
   if (US_TIME_ZONE_PREFIXES.includes(timeZone)) return 'US'
   if (timeZone.startsWith(AUSTRALIAN_TIME_ZONE_PREFIX)) return 'AU'
-  if (timeZone.startsWith(EUROPEAN_TIME_ZONE_PREFIX)) return 'EU'
   return ''
 }
 
@@ -218,9 +256,8 @@ export function readCurrencyPreference(storage) {
   try {
     const parsed = JSON.parse(target.getItem(CURRENCY_PREFERENCE_STORAGE_KEY) || 'null')
     const country = getCountryByCode(parsed?.countryCode)
-    const currency = getCurrencyByCode(parsed?.currencyCode)
-    if (!country || !currency) return null
-    return { countryCode: country.code, currencyCode: currency.code, mode: 'manual' }
+    if (!country) return null
+    return { countryCode: country.code, currencyCode: country.currencyCode, mode: 'manual' }
   } catch {
     return null
   }
@@ -230,12 +267,10 @@ export function writeCurrencyPreference(preference, storage) {
   const target = resolveStorage(storage)
   if (!target) return false
   const country = getCountryByCode(preference?.countryCode)
-  const currency = getCurrencyByCode(preference?.currencyCode)
-  if (!country || !currency) return false
+  if (!country) return false
   try {
     target.setItem(CURRENCY_PREFERENCE_STORAGE_KEY, JSON.stringify({
       countryCode: country.code,
-      currencyCode: currency.code,
       updatedAt: new Date().toISOString(),
     }))
     return true

@@ -1,4 +1,4 @@
-import { ArrowLeft, ArrowUp, ExternalLink, FileText, ShieldCheck } from 'lucide-react'
+import { ArrowLeft, ArrowUp, ExternalLink } from 'lucide-react'
 import BrandLogo from './BrandLogo.jsx'
 import '../legal-page.css'
 
@@ -691,29 +691,23 @@ function CookieSections({ businessName, contactEmail, onOpenCookiePreferences })
 function getDocumentContent(type, options) {
   if (type === 'privacy') {
     return {
-      eyebrow: 'Your information',
       title: 'Privacy notice',
       intro: 'What we collect, why we use it, who receives it and the choices available to customers and wedding guests.',
-      summary: ['No sale of personal data', 'Guest lists are not used for our advertising', 'Kenyan data rights respected'],
       sections: PrivacySections(options),
     }
   }
 
   if (type === 'cookies') {
     return {
-      eyebrow: 'Your browser, your choice',
       title: 'Cookie policy',
       intro: 'A clear guide to the browser storage we need, the optional categories you control, and how to change your mind.',
-      summary: ['Necessary storage only by default', 'Analytics and marketing are optional', 'Change your choice at any time'],
       sections: CookieSections(options),
     }
   }
 
   return {
-    eyebrow: 'The working agreement',
     title: 'Terms of service',
     intro: 'The practical rules for ordering, approving and using a Tell & Wed digital invitation.',
-    summary: ['Clear approval and delivery responsibilities', 'Fair rules for personalised digital work', 'Kenyan law applies'],
     sections: TermsSections(options),
   }
 }
@@ -788,15 +782,10 @@ export default function LegalPage({
 
       <section className="tw-legal__hero">
         <div className="tw-legal__hero-copy">
-          <span className="tw-legal__eyebrow"><ShieldCheck size={15} aria-hidden="true" /> {content.eyebrow}</span>
           <h1 id={titleId} tabIndex={-1}>{content.title}</h1>
           <p>{content.intro}</p>
           <span className="tw-legal__updated">Last updated <time dateTime={LAST_UPDATED_ISO}>{LAST_UPDATED}</time></span>
         </div>
-        <aside className="tw-legal__summary" aria-label={`${content.title} at a glance`}>
-          <span><FileText size={16} aria-hidden="true" /> At a glance</span>
-          <ul>{content.summary.map((item) => <li key={item}>{item}</li>)}</ul>
-        </aside>
       </section>
 
       <div className="tw-legal__layout">
@@ -819,17 +808,12 @@ export default function LegalPage({
         </aside>
 
         <article className="tw-legal__article">
-          <div className="tw-legal__plain-language">
-            <strong>Plain-language document.</strong>
-            <span>Headings and summaries help navigation; the full sections below form the policy.</span>
-          </div>
           {content.sections.map((section) => (
             <section id={`legal-${type}-${section.id}`} key={section.id} tabIndex={-1}>
               <h2>{section.title}</h2>
               {section.content}
             </section>
           ))}
-          <div className="tw-legal__end-mark" aria-hidden="true"><span>&amp;</span></div>
           <a className="tw-legal__to-top" href={`#${titleId}`} onClick={(event) => followSectionLink(event, titleId)}>
             Back to top <ArrowUp size={15} aria-hidden="true" />
           </a>

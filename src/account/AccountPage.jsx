@@ -23,7 +23,6 @@ import {
   Sparkles,
   Trash2,
   UserRound,
-  WalletCards,
 } from 'lucide-react'
 import BrandLogo from '../components/BrandLogo.jsx'
 import { AuthError } from './authClient.js'
@@ -74,11 +73,11 @@ function normaliseSavedDesigns(savedDesigns) {
 }
 
 function displayCurrency(currencySummary) {
-  if (!currencySummary) return { primary: 'Currency follows your location', secondary: 'You can change it from the currency menu.' }
-  if (typeof currencySummary === 'string') return { primary: currencySummary, secondary: 'Current display currency' }
+  if (!currencySummary) return { primary: 'Detected automatically', secondary: 'Country for price display' }
+  if (typeof currencySummary === 'string') return { primary: currencySummary, secondary: 'Country for price display' }
   return {
-    primary: currencySummary.label || currencySummary.currency || currencySummary.code || 'Location-based currency',
-    secondary: currencySummary.country ? `Set for ${currencySummary.country}` : 'Current display currency',
+    primary: currencySummary.country || 'Detected automatically',
+    secondary: 'Country for price display',
   }
 }
 
@@ -113,11 +112,10 @@ function AccountOverview({ user, saved, currency, onNavigate, onReport, setSecti
     <div className="tw-account-overview">
       <section className="tw-account-welcome">
         <div>
-          <span className="tw-kicker">Your planning space</span>
+          <span className="tw-kicker">Account</span>
           <h1>Welcome, {profile.displayName?.split(' ')[0] || 'there'}.</h1>
-          <p>Your favourites saved on this device and planning details are all in one quiet place.</p>
+          <p>Manage your details, saved designs and preferences.</p>
         </div>
-        <span className="tw-account-welcome__flourish" aria-hidden="true"><Sparkles size={28} /></span>
       </section>
 
       <div className="tw-account-metrics" aria-label="Account summary">
@@ -134,7 +132,7 @@ function AccountOverview({ user, saved, currency, onNavigate, onReport, setSecti
           <ChevronRight size={16} aria-hidden="true" />
         </button>
         <div>
-          <span><WalletCards size={17} aria-hidden="true" /></span>
+          <span><MapPin size={17} aria-hidden="true" /></span>
           <strong>{currency.primary}</strong>
           <small>{currency.secondary}</small>
         </div>
@@ -265,16 +263,16 @@ function PreferencesSection({ user, onSaved, currency }) {
 
   return (
     <section className="tw-account-panel" aria-labelledby="tw-preferences-heading">
-      <div className="tw-account-panel__heading"><span className="tw-kicker">Make it yours</span><h1 id="tw-preferences-heading">Preferences</h1><p>Choose how Tell & Wed should support your planning.</p></div>
+      <div className="tw-account-panel__heading"><span className="tw-kicker">Account</span><h1 id="tw-preferences-heading">Preferences</h1><p>Manage account updates and price display.</p></div>
       <div className="tw-preference-list">
         <label>
           <span className="tw-preference-list__icon"><Sparkles size={18} aria-hidden="true" /></span>
-          <span><strong>Design inspiration</strong><small>Occasional new-design and styling notes. Delivery starts only after an email service is connected.</small></span>
+          <span><strong>Design inspiration</strong><small>Receive occasional design updates when email delivery is available.</small></span>
           <input className="tw-switch" type="checkbox" checked={values.inspirationEmails} onChange={() => toggle('inspirationEmails')} />
         </label>
         <label>
           <span className="tw-preference-list__icon"><Bell size={18} aria-hidden="true" /></span>
-          <span><strong>Planning reminders</strong><small>Remember key invitation milestones in your account. Notifications require the production service.</small></span>
+          <span><strong>Planning reminders</strong><small>Receive invitation reminders when notifications are available.</small></span>
           <input className="tw-switch" type="checkbox" checked={values.planningReminders} onChange={() => toggle('planningReminders')} />
         </label>
         <div>
@@ -291,7 +289,7 @@ function PreferencesSection({ user, onSaved, currency }) {
 function ActivitySection({ orders, enquiries, onNavigate }) {
   return (
     <section className="tw-account-panel" aria-labelledby="tw-activity-heading">
-      <div className="tw-account-panel__heading"><span className="tw-kicker">Activity</span><h1 id="tw-activity-heading">Orders & enquiries</h1><p>Once secure checkout and enquiry delivery are connected, their status will appear here.</p></div>
+      <div className="tw-account-panel__heading"><span className="tw-kicker">Activity</span><h1 id="tw-activity-heading">Orders & enquiries</h1><p>Orders and enquiries will appear here when those services are connected.</p></div>
       <div className="tw-activity-grid">
         <article className="tw-account-card">
           <div className="tw-account-card__heading"><div><span className="tw-kicker">Purchases</span><h2>Orders</h2></div><ShoppingBag size={19} aria-hidden="true" /></div>
@@ -306,7 +304,7 @@ function ActivitySection({ orders, enquiries, onNavigate }) {
           )) : <EmptyActivity icon={FileText} title="No tracked enquiries" copy="Connected form submissions will show up here." />}
         </article>
       </div>
-      <p className="tw-account-clarifier"><ShieldCheck size={15} aria-hidden="true" /> This preview does not invent order or enquiry history. Data appears only when supplied by the production service.</p>
+      <p className="tw-account-clarifier"><ShieldCheck size={15} aria-hidden="true" /> This preview shows only order and enquiry data supplied by a connected service.</p>
     </section>
   )
 }
@@ -388,9 +386,9 @@ export default function AccountPage({
         <section className="tw-account-gate">
           <BrandLogo />
           <span className="tw-account-gate__icon"><LockKeyhole size={24} aria-hidden="true" /></span>
-          <span className="tw-kicker">Your account</span>
-          <h1>A calm place for<br /><em>all the details.</em></h1>
-          <p>Sign in to view your profile, saved-design summary and planning preferences.</p>
+          <span className="tw-kicker">Account</span>
+          <h1>Sign in to your account</h1>
+          <p>View your profile, saved designs and preferences.</p>
           <button className="tw-primary-action" type="button" onClick={() => onOpenAuth?.('sign-in')}>Sign in <ArrowRight size={16} aria-hidden="true" /></button>
           <button className="tw-inline-action" type="button" onClick={() => onOpenAuth?.('sign-up')}>Create an account</button>
         </section>

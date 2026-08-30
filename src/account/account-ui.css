@@ -10,9 +10,9 @@ body.tw-dialog-open {
   --tw-accent: var(--accent, #8f3f50);
   --tw-muted: var(--muted, #676c64);
   --tw-line: var(--line, rgba(30, 36, 32, .14));
-  --tw-serif: "Cormorant Local", "Iowan Old Style", Georgia, serif;
-  --tw-display: "Instrument Serif Local", "Iowan Old Style", Georgia, serif;
   --tw-sans: "Inter Local", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --tw-serif: var(--tw-sans);
+  --tw-display: var(--tw-sans);
   color: var(--tw-ink);
   font-family: var(--tw-sans);
 }
@@ -67,7 +67,7 @@ body.tw-dialog-open {
 .tw-kicker {
   display: inline-flex;
   color: #73736d;
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 700;
   letter-spacing: .16em;
   line-height: 1.2;
@@ -124,8 +124,7 @@ body.tw-dialog-open {
   padding: 18px;
   place-items: center;
   overflow: auto;
-  background: rgba(14, 16, 14, .72);
-  backdrop-filter: blur(8px);
+  background: rgba(14, 16, 14, .68);
   animation: tw-dialog-fade .22s ease both;
 }
 
@@ -142,32 +141,27 @@ body.tw-dialog-open {
   width: 42px;
   height: 42px;
   place-items: center;
-  border: 1px solid rgba(30, 36, 32, .1) !important;
+  border: 1px solid var(--tw-line) !important;
   border-radius: 50%;
-  background: rgba(251, 248, 242, .86);
-  backdrop-filter: blur(8px);
-  transition: transform .2s ease, background .2s ease;
+  background: var(--tw-paper);
+  transition: background .2s ease;
 }
 
 .tw-dialog-close:hover {
-  transform: rotate(5deg);
   background: white;
 }
 
 /* Auth */
 .tw-auth-dialog {
   position: relative;
-  width: min(100%, 930px);
+  width: min(100%, 640px);
   max-height: calc(100svh - 36px);
-  padding: clamp(38px, 6vw, 76px) clamp(28px, 7vw, 94px) 30px;
+  padding: clamp(38px, 6vw, 58px) clamp(26px, 6vw, 56px) 30px;
   overflow: auto;
-  border: 1px solid rgba(255, 255, 255, .28);
-  border-radius: 30px;
-  background:
-    radial-gradient(circle at 94% 8%, rgba(143, 63, 80, .14), transparent 23rem),
-    radial-gradient(circle at 8% 92%, rgba(126, 147, 119, .13), transparent 22rem),
-    var(--tw-page);
-  box-shadow: 0 35px 100px rgba(0, 0, 0, .32);
+  border: 1px solid var(--tw-line);
+  border-radius: 18px;
+  background: var(--tw-page);
+  box-shadow: 0 24px 64px rgba(0, 0, 0, .24);
   animation: tw-dialog-rise .4s cubic-bezier(.2, .8, .2, 1) both;
 }
 
@@ -175,20 +169,8 @@ body.tw-dialog-open {
   from { opacity: 0; transform: translateY(16px) scale(.985); }
 }
 
-.tw-auth-dialog::before {
-  position: absolute;
-  top: -72px;
-  right: 11%;
-  width: 180px;
-  height: 180px;
-  border: 1px solid rgba(143, 63, 80, .18);
-  border-radius: 50%;
-  content: '';
-  pointer-events: none;
-}
-
 .tw-auth-dialog__brand {
-  margin-bottom: clamp(28px, 5vw, 55px);
+  margin-bottom: 30px;
 }
 
 .tw-auth-dialog__intro {
@@ -201,10 +183,10 @@ body.tw-dialog-open {
 .tw-account-gate h1 {
   margin: 13px 0 16px;
   font-family: var(--tw-display);
-  font-size: clamp(46px, 6vw, 68px);
-  font-weight: 400;
-  letter-spacing: -.055em;
-  line-height: .87;
+  font-size: clamp(34px, 5vw, 44px);
+  font-weight: 650;
+  letter-spacing: -.035em;
+  line-height: 1.05;
 }
 
 .tw-auth-dialog__intro h2 em,
@@ -221,16 +203,16 @@ body.tw-dialog-open {
   max-width: 480px;
   margin: 0;
   color: var(--tw-muted);
-  font-size: 12px;
-  line-height: 1.7;
+  font-size: 13px;
+  line-height: 1.6;
 }
 
 .tw-auth-form,
 .tw-report-form {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 18px 22px;
-  margin-top: 34px;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  margin-top: 28px;
 }
 
 .tw-form-field {
@@ -241,7 +223,7 @@ body.tw-dialog-open {
 
 .tw-form-field > span:first-child,
 .tw-form-field > label:first-child {
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 700;
   letter-spacing: .08em;
   text-transform: uppercase;
@@ -249,7 +231,7 @@ body.tw-dialog-open {
 
 .tw-form-field > span:first-child small {
   color: #888881;
-  font-size: 8px;
+  font-size: 10px;
   font-weight: 600;
 }
 
@@ -259,10 +241,10 @@ body.tw-dialog-open {
 .tw-password-field {
   width: 100%;
   border: 1px solid rgba(30, 36, 32, .15);
-  border-radius: 12px;
+  border-radius: 9px;
   outline: none;
-  background: rgba(255, 255, 255, .5);
-  font-size: 12px;
+  background: var(--tw-paper);
+  font-size: 13px;
   transition: border .2s ease, background .2s ease, box-shadow .2s ease;
 }
 
@@ -295,7 +277,7 @@ body.tw-dialog-open {
 
 .tw-form-field > small {
   color: #7b7d76;
-  font-size: 9px;
+  font-size: 11px;
   line-height: 1.45;
 }
 
@@ -326,7 +308,7 @@ body.tw-dialog-open {
 
 .tw-field-error {
   color: #a03232 !important;
-  font-size: 10px !important;
+  font-size: 11px !important;
   font-weight: 600 !important;
   letter-spacing: 0 !important;
   line-height: 1.35;
@@ -352,7 +334,7 @@ body.tw-dialog-open {
   gap: 10px;
   color: #5f625c;
   cursor: pointer;
-  font-size: 10px;
+  font-size: 11px;
   line-height: 1.55;
 }
 
@@ -379,7 +361,7 @@ body.tw-dialog-open {
 
 .tw-auth-form__help {
   justify-self: end;
-  font-size: 10px;
+  font-size: 11px;
 }
 
 .tw-form-alert,
@@ -387,7 +369,7 @@ body.tw-dialog-open {
   margin: 0;
   padding: 11px 13px;
   border-radius: 10px;
-  font-size: 10px;
+  font-size: 11px;
   line-height: 1.45;
 }
 
@@ -413,40 +395,28 @@ body.tw-dialog-open {
 .tw-auth-switch {
   margin: 18px 0 0;
   color: #696b66;
-  font-size: 11px;
+  font-size: 12px;
   text-align: center;
 }
 
 .tw-demo-note {
-  display: grid;
-  grid-template-columns: auto 1fr auto;
-  align-items: start;
-  gap: 11px;
   margin-top: 26px;
   padding-top: 20px;
   border-top: 1px solid var(--tw-line);
   color: #70736d;
 }
 
-.tw-demo-note > svg:first-child {
-  color: #526c53;
-}
-
-.tw-demo-note > svg:last-child {
-  opacity: .45;
-}
-
 .tw-demo-note p {
   display: grid;
   gap: 3px;
   margin: 0;
-  font-size: 9px;
-  line-height: 1.45;
+  font-size: 11px;
+  line-height: 1.5;
 }
 
 .tw-demo-note strong {
   color: var(--tw-ink);
-  font-size: 10px;
+  font-size: 11px;
 }
 
 /* Report dialog */
@@ -457,15 +427,13 @@ body.tw-dialog-open {
 
 .tw-report-dialog {
   position: relative;
-  width: min(100%, 560px);
+  width: min(100%, 520px);
   min-height: 100svh;
   max-height: 100svh;
   padding: clamp(72px, 9vh, 105px) clamp(25px, 5vw, 62px) 42px;
   overflow: auto;
-  background:
-    radial-gradient(circle at 100% 0, rgba(143, 63, 80, .1), transparent 24rem),
-    var(--tw-page);
-  box-shadow: -30px 0 90px rgba(0, 0, 0, .28);
+  background: var(--tw-page);
+  box-shadow: -18px 0 58px rgba(0, 0, 0, .22);
   animation: tw-report-in .4s cubic-bezier(.2, .8, .2, 1) both;
 }
 
@@ -477,20 +445,9 @@ body.tw-dialog-open {
   position: relative;
 }
 
-.tw-report-dialog__flag {
-  display: grid;
-  width: 42px;
-  height: 42px;
-  margin-bottom: 22px;
-  place-items: center;
-  border-radius: 50%;
-  background: #e9dedc;
-  color: var(--tw-accent);
-}
-
 .tw-report-dialog__intro h2,
 .tw-report-success h2 {
-  font-size: clamp(44px, 5vw, 63px);
+  font-size: clamp(34px, 5vw, 42px);
 }
 
 .tw-report-form {
@@ -513,14 +470,14 @@ body.tw-dialog-open {
 .tw-field-meta > small {
   margin-left: auto;
   color: #898a84;
-  font-size: 8px;
+  font-size: 10px;
 }
 
 .tw-check-field--boxed {
   padding: 14px;
   border: 1px solid var(--tw-line);
-  border-radius: 13px;
-  background: rgba(255, 255, 255, .34);
+  border-radius: 9px;
+  background: transparent;
 }
 
 .tw-check-field--boxed > span {
@@ -530,11 +487,11 @@ body.tw-dialog-open {
 
 .tw-check-field--boxed strong {
   color: var(--tw-ink);
-  font-size: 10px;
+  font-size: 11px;
 }
 
 .tw-check-field--boxed small {
-  font-size: 9px;
+  font-size: 10px;
   line-height: 1.4;
 }
 
@@ -556,9 +513,9 @@ body.tw-dialog-open {
 
 .tw-report-success__icon {
   display: grid;
-  width: 58px;
-  height: 58px;
-  margin-bottom: 28px;
+  width: 48px;
+  height: 48px;
+  margin-bottom: 24px;
   place-items: center;
   border-radius: 50%;
   background: #526c53;
@@ -573,19 +530,19 @@ body.tw-dialog-open {
   margin: 28px 0 18px;
   padding: 15px 17px;
   border: 1px solid var(--tw-line);
-  border-radius: 12px;
-  background: rgba(255, 255, 255, .42);
+  border-radius: 9px;
+  background: var(--tw-paper);
 }
 
 .tw-report-receipt span {
   color: var(--tw-muted);
-  font-size: 9px;
+  font-size: 10px;
   letter-spacing: .1em;
   text-transform: uppercase;
 }
 
 .tw-report-receipt strong {
-  font-size: 12px;
+  font-size: 13px;
   letter-spacing: .06em;
 }
 
@@ -596,9 +553,7 @@ body.tw-dialog-open {
   grid-template-columns: 268px minmax(0, 1fr);
   gap: clamp(28px, 4vw, 70px);
   padding: clamp(96px, 10vw, 128px) clamp(22px, 4vw, 70px) 70px;
-  background:
-    radial-gradient(circle at 91% 4%, rgba(143, 63, 80, .08), transparent 25rem),
-    var(--tw-page);
+  background: var(--tw-page);
 }
 
 .tw-account-sidebar {
@@ -611,10 +566,8 @@ body.tw-dialog-open {
   flex-direction: column;
   padding: 25px 18px 18px;
   border: 1px solid var(--tw-line);
-  border-radius: 22px;
-  background: rgba(251, 248, 242, .7);
-  box-shadow: 0 18px 50px rgba(37, 35, 31, .05);
-  backdrop-filter: blur(10px);
+  border-radius: 12px;
+  background: var(--tw-paper);
 }
 
 .tw-account-sidebar__brand {
@@ -641,10 +594,11 @@ body.tw-dialog-open {
   flex: 0 0 auto;
   place-items: center;
   border-radius: 50%;
-  background: #e6d7d6;
-  color: #713443;
-  font-family: var(--tw-display);
-  font-size: 16px;
+  background: var(--tw-ink);
+  color: var(--tw-paper);
+  font-family: var(--tw-sans);
+  font-size: 13px;
+  font-weight: 700;
 }
 
 .tw-account-identity div {
@@ -655,7 +609,7 @@ body.tw-dialog-open {
 
 .tw-account-identity strong {
   overflow: hidden;
-  font-size: 11px;
+  font-size: 12px;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -663,7 +617,7 @@ body.tw-dialog-open {
 .tw-account-identity small {
   overflow: hidden;
   color: #777972;
-  font-size: 8px;
+  font-size: 10px;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -680,10 +634,10 @@ body.tw-dialog-open {
   align-items: center;
   gap: 7px;
   padding: 0 11px;
-  border-radius: 11px;
+  border-radius: 7px;
   background: transparent;
   color: #62655f;
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 650;
   text-align: left;
   transition: background .2s ease, color .2s ease;
@@ -696,7 +650,7 @@ body.tw-dialog-open {
 
 .tw-account-sidebar nav button:hover,
 .tw-account-sidebar nav button.is-active {
-  background: #eae3da;
+  background: var(--tw-page);
   color: var(--tw-ink);
 }
 
@@ -720,16 +674,16 @@ body.tw-dialog-open {
   align-items: center;
   gap: 9px;
   padding: 0 10px;
-  border-radius: 9px;
+  border-radius: 7px;
   background: transparent;
   color: #676a63;
-  font-size: 9px;
+  font-size: 10px;
   font-weight: 650;
   text-align: left;
 }
 
 .tw-account-sidebar__footer button:hover {
-  background: rgba(143, 63, 80, .07);
+  background: var(--tw-page);
   color: var(--tw-accent);
 }
 
@@ -760,71 +714,59 @@ body.tw-dialog-open {
 .tw-account-panel__heading h1 {
   margin: 9px 0 10px;
   font-family: var(--tw-display);
-  font-size: clamp(48px, 6vw, 72px);
-  font-weight: 400;
-  letter-spacing: -.055em;
-  line-height: .92;
+  font-size: clamp(36px, 5vw, 52px);
+  font-weight: 650;
+  letter-spacing: -.04em;
+  line-height: 1.04;
 }
 
 .tw-account-welcome p,
 .tw-account-panel__heading p {
   margin: 0;
   color: var(--tw-muted);
-  font-size: 11px;
-  line-height: 1.65;
-}
-
-.tw-account-welcome__flourish {
-  display: grid;
-  width: 64px;
-  height: 64px;
-  flex: 0 0 auto;
-  margin-top: 12px;
-  place-items: center;
-  border: 1px solid rgba(143, 63, 80, .16);
-  border-radius: 50%;
-  color: var(--tw-accent);
-  transform: rotate(7deg);
+  font-size: 13px;
+  line-height: 1.6;
 }
 
 .tw-account-metrics {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
+  gap: 0;
   margin-bottom: 18px;
+  overflow: hidden;
+  border: 1px solid var(--tw-line);
+  border-radius: 12px;
+  background: var(--tw-paper);
 }
 
 .tw-account-metrics > * {
   position: relative;
   display: grid;
   min-width: 0;
-  min-height: 130px;
+  min-height: 116px;
   align-content: start;
   gap: 5px;
   padding: 18px;
-  border: 1px solid var(--tw-line);
-  border-radius: 17px;
-  background: rgba(251, 248, 242, .65);
+  border-right: 1px solid var(--tw-line);
+  background: transparent;
   text-align: left;
 }
 
+.tw-account-metrics > *:last-child {
+  border-right: 0;
+}
+
 .tw-account-metrics button {
-  transition: transform .2s ease, border .2s ease;
+  transition: background .2s ease;
 }
 
 .tw-account-metrics button:hover {
-  transform: translateY(-2px);
-  border-color: rgba(143, 63, 80, .34);
+  background: var(--tw-page);
 }
 
 .tw-account-metrics > * > span {
-  display: grid;
-  width: 32px;
-  height: 32px;
+  display: flex;
   margin-bottom: 8px;
-  place-items: center;
-  border-radius: 50%;
-  background: #eee4df;
   color: var(--tw-accent);
 }
 
@@ -841,7 +783,7 @@ body.tw-dialog-open {
 .tw-account-metrics small {
   overflow: hidden;
   color: #777a73;
-  font-size: 9px;
+  font-size: 10px;
   line-height: 1.4;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -858,8 +800,8 @@ body.tw-dialog-open {
   min-width: 0;
   padding: clamp(21px, 3vw, 30px);
   border: 1px solid var(--tw-line);
-  border-radius: 20px;
-  background: rgba(251, 248, 242, .64);
+  border-radius: 12px;
+  background: var(--tw-paper);
 }
 
 .tw-account-card--saved {
@@ -888,7 +830,7 @@ body.tw-dialog-open {
   gap: 8px;
   padding: 6px 0;
   background: transparent;
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 700;
 }
 
@@ -907,21 +849,20 @@ body.tw-dialog-open {
   align-content: space-between;
   gap: 18px 10px;
   padding: 15px;
-  border-radius: 14px;
-  background: #eae3da;
+  border: 1px solid var(--tw-line);
+  border-radius: 8px;
+  background: transparent;
   text-align: left;
-  transition: transform .2s ease, background .2s ease;
+  transition: background .2s ease;
 }
 
-.tw-saved-summary > button:nth-child(2) { background: #e5e8df; }
-.tw-saved-summary > button:nth-child(3) { background: #eadde0; }
-.tw-saved-summary > button:hover { transform: translateY(-2px); }
-.tw-saved-summary__number { grid-column: 1 / -1; color: #777871; font-size: 9px; letter-spacing: .1em; }
+.tw-saved-summary > button:hover { background: var(--tw-page); }
+.tw-saved-summary__number { grid-column: 1 / -1; color: #777871; font-size: 10px; letter-spacing: .1em; }
 .tw-saved-summary button > span:nth-child(2) { display: grid; min-width: 0; gap: 3px; }
-.tw-saved-summary strong { overflow: hidden; font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
-.tw-saved-summary small { color: #777971; font-size: 8px; }
+.tw-saved-summary strong { overflow: hidden; font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
+.tw-saved-summary small { color: #777971; font-size: 10px; }
 .tw-saved-summary svg { align-self: end; color: var(--tw-accent); }
-.tw-saved-summary > p { grid-column: 1 / -1; margin: 4px 0 0; color: #777971; font-size: 9px; }
+.tw-saved-summary > p { grid-column: 1 / -1; margin: 4px 0 0; color: #777971; font-size: 10px; }
 
 .tw-account-overview__split,
 .tw-activity-grid {
@@ -942,7 +883,7 @@ body.tw-dialog-open {
   gap: 15px;
   padding: 10px 0;
   border-bottom: 1px solid var(--tw-line);
-  font-size: 10px;
+  font-size: 11px;
 }
 
 .tw-account-details-list dt { color: #777971; }
@@ -953,22 +894,17 @@ body.tw-dialog-open {
   align-items: flex-start;
   flex-direction: column;
   justify-content: center;
-  background: #282f2a;
+  background: var(--tw-ink);
   color: white;
 }
 
 .tw-account-card--help > span {
-  display: grid;
-  width: 39px;
-  height: 39px;
+  display: flex;
   margin-bottom: 20px;
-  place-items: center;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, .1);
 }
 
 .tw-account-card--help h2 { margin: 0; }
-.tw-account-card--help p { margin: 11px 0 12px; color: rgba(255, 255, 255, .64); font-size: 10px; line-height: 1.6; }
+.tw-account-card--help p { margin: 11px 0 12px; color: rgba(255, 255, 255, .7); font-size: 11px; line-height: 1.6; }
 .tw-account-card--help .tw-inline-action { color: white; }
 
 .tw-account-empty {
@@ -979,22 +915,17 @@ body.tw-dialog-open {
   margin-top: 22px;
   padding: 17px;
   border: 1px dashed rgba(30, 36, 32, .18);
-  border-radius: 14px;
+  border-radius: 8px;
 }
 
 .tw-account-empty > span {
-  display: grid;
-  width: 38px;
-  height: 38px;
-  place-items: center;
-  border-radius: 50%;
-  background: #ebe4da;
+  display: flex;
   color: #77736d;
 }
 
-.tw-account-empty h4 { margin: 0 0 4px; font-size: 11px; }
-.tw-account-empty p { margin: 0; color: #787a74; font-size: 9px; line-height: 1.5; }
-.tw-account-empty > button { display: flex; align-items: center; gap: 7px; padding: 7px 0; background: transparent; font-size: 9px; font-weight: 700; }
+.tw-account-empty h4 { margin: 0 0 4px; font-size: 12px; }
+.tw-account-empty p { margin: 0; color: #787a74; font-size: 10px; line-height: 1.5; }
+.tw-account-empty > button { display: flex; align-items: center; gap: 7px; padding: 7px 0; background: transparent; font-size: 10px; font-weight: 700; }
 
 /* Account panels */
 .tw-account-panel__heading {
@@ -1007,8 +938,8 @@ body.tw-dialog-open {
   gap: 22px;
   padding: clamp(23px, 4vw, 38px);
   border: 1px solid var(--tw-line);
-  border-radius: 22px;
-  background: rgba(251, 248, 242, .65);
+  border-radius: 12px;
+  background: var(--tw-paper);
 }
 
 .tw-profile-form__pair {
@@ -1035,15 +966,15 @@ body.tw-dialog-open {
 .tw-form-actions > p {
   margin: 0;
   color: #526c53;
-  font-size: 10px;
+  font-size: 11px;
 }
 
 .tw-preference-list {
   display: grid;
   overflow: hidden;
   border: 1px solid var(--tw-line);
-  border-radius: 20px;
-  background: rgba(251, 248, 242, .65);
+  border-radius: 12px;
+  background: var(--tw-paper);
 }
 
 .tw-preference-list > label,
@@ -1058,12 +989,12 @@ body.tw-dialog-open {
 }
 
 .tw-preference-list > *:last-child { border-bottom: 0; }
-.tw-preference-list__icon { display: grid; width: 39px; height: 39px; place-items: center; border-radius: 50%; background: #ebe3db; color: var(--tw-accent); }
+.tw-preference-list__icon { display: flex; color: var(--tw-accent); }
 .tw-preference-list label > span:nth-child(2),
 .tw-preference-list div > span:nth-child(2) { display: grid; gap: 5px; }
-.tw-preference-list strong { font-size: 11px; }
-.tw-preference-list small { max-width: 550px; color: #777971; font-size: 9px; line-height: 1.5; }
-.tw-preference-list b { max-width: 180px; font-size: 10px; text-align: right; }
+.tw-preference-list strong { font-size: 12px; }
+.tw-preference-list small { max-width: 550px; color: #777971; font-size: 10px; line-height: 1.5; }
+.tw-preference-list b { max-width: 180px; font-size: 11px; text-align: right; }
 
 .tw-switch {
   width: 38px;
@@ -1112,9 +1043,9 @@ body.tw-dialog-open {
 }
 
 .tw-activity-row > span { display: grid; gap: 4px; }
-.tw-activity-row strong { font-size: 10px; }
-.tw-activity-row small { color: #777971; font-size: 8px; }
-.tw-activity-row b { padding: 5px 8px; border-radius: 999px; background: #e7e9df; color: #536055; font-size: 8px; }
+.tw-activity-row strong { font-size: 11px; }
+.tw-activity-row small { color: #777971; font-size: 10px; }
+.tw-activity-row b { padding: 5px 8px; border-radius: 6px; background: var(--tw-page); color: #536055; font-size: 9px; }
 
 .tw-account-clarifier {
   display: flex;
@@ -1122,7 +1053,7 @@ body.tw-dialog-open {
   gap: 8px;
   margin: 18px 0 0;
   color: #777971;
-  font-size: 9px;
+  font-size: 10px;
   line-height: 1.5;
 }
 
@@ -1130,8 +1061,8 @@ body.tw-dialog-open {
   display: grid;
   overflow: hidden;
   border: 1px solid var(--tw-line);
-  border-radius: 20px;
-  background: rgba(251, 248, 242, .65);
+  border-radius: 12px;
+  background: var(--tw-paper);
 }
 
 .tw-security-list > div {
@@ -1144,12 +1075,12 @@ body.tw-dialog-open {
 }
 
 .tw-security-list > div:last-child { border-bottom: 0; }
-.tw-security-list > div > span { display: grid; width: 42px; height: 42px; place-items: center; border-radius: 50%; background: #e7e9df; color: #536055; }
+.tw-security-list > div > span { display: flex; color: #536055; }
 .tw-security-list h2 { margin: 0 0 6px; font-size: 13px; }
-.tw-security-list p { max-width: 620px; margin: 0; color: #777971; font-size: 9px; line-height: 1.55; }
-.tw-security-list b { padding: 6px 9px; border-radius: 999px; background: #e7e9df; color: #536055; font-size: 8px; text-transform: uppercase; }
-.tw-security-list button { padding: 9px 12px; border: 1px solid var(--tw-line); border-radius: 999px; background: transparent; font-size: 9px; font-weight: 700; }
-.tw-security-list__danger > span { background: #eee1df !important; color: #8c3535 !important; }
+.tw-security-list p { max-width: 620px; margin: 0; color: #777971; font-size: 10px; line-height: 1.55; }
+.tw-security-list b { padding: 6px 9px; border-radius: 6px; background: var(--tw-page); color: #536055; font-size: 9px; text-transform: uppercase; }
+.tw-security-list button { padding: 9px 12px; border: 1px solid var(--tw-line); border-radius: 7px; background: transparent; font-size: 10px; font-weight: 700; }
+.tw-security-list__danger > span { color: #8c3535 !important; }
 .tw-security-list__danger button { border-color: rgba(160, 50, 50, .22); color: #912f2f; }
 
 .tw-delete-confirmation {
@@ -1160,15 +1091,15 @@ body.tw-dialog-open {
   margin-top: 15px;
   padding: 18px;
   border: 1px solid rgba(160, 50, 50, .23);
-  border-radius: 15px;
+  border-radius: 9px;
   background: rgba(160, 50, 50, .06);
 }
 
-.tw-delete-confirmation strong { color: #8a3131; font-size: 10px; }
-.tw-delete-confirmation p { margin: 4px 0 0; color: #706b68; font-size: 9px; }
-.tw-delete-confirmation input { width: 100%; min-height: 40px; padding: 0 12px; border: 1px solid rgba(160, 50, 50, .23); border-radius: 9px; background: rgba(255, 255, 255, .5); font-size: 10px; }
+.tw-delete-confirmation strong { color: #8a3131; font-size: 11px; }
+.tw-delete-confirmation p { margin: 4px 0 0; color: #706b68; font-size: 10px; }
+.tw-delete-confirmation input { width: 100%; min-height: 40px; padding: 0 12px; border: 1px solid rgba(160, 50, 50, .23); border-radius: 7px; background: var(--tw-paper); font-size: 11px; }
 .tw-delete-confirmation > div:nth-child(3) { display: flex; gap: 7px; }
-.tw-delete-confirmation button { min-height: 38px; padding: 0 12px; border-radius: 999px; background: #e8e3dc; font-size: 9px; font-weight: 700; }
+.tw-delete-confirmation button { min-height: 38px; padding: 0 12px; border-radius: 7px; background: #e8e3dc; font-size: 10px; font-weight: 700; }
 .tw-delete-confirmation button:last-child { background: #8e3535; color: white; }
 .tw-delete-confirmation button:disabled { cursor: not-allowed; opacity: .45; }
 .tw-delete-confirmation > p { grid-column: 1 / -1; color: #8a3131; }
@@ -1186,22 +1117,13 @@ body.tw-dialog-open {
   width: min(100%, 660px);
   align-items: center;
   flex-direction: column;
-  padding: clamp(35px, 7vw, 75px);
-  border: 1px solid var(--tw-line);
-  border-radius: 28px;
-  background: rgba(251, 248, 242, .68);
-  box-shadow: 0 24px 70px rgba(37, 35, 31, .07);
+  padding: clamp(35px, 7vw, 64px);
   text-align: center;
 }
 
 .tw-account-gate__icon {
-  display: grid;
-  width: 55px;
-  height: 55px;
+  display: flex;
   margin: 45px 0 22px;
-  place-items: center;
-  border-radius: 50%;
-  background: #e8dadd;
   color: var(--tw-accent);
 }
 
@@ -1244,29 +1166,27 @@ body.tw-dialog-open {
 
 @media (max-width: 680px) {
   .tw-dialog-shell { padding: 0; align-items: end; }
-  .tw-auth-dialog { width: 100%; max-height: 94svh; padding: 55px 21px 24px; border-radius: 24px 24px 0 0; }
+  .tw-auth-dialog { width: 100%; max-height: 94svh; padding: 55px 21px 24px; border-radius: 16px 16px 0 0; }
   .tw-auth-dialog__brand { margin-bottom: 30px; }
-  .tw-auth-dialog__intro h2 { font-size: 48px; }
+  .tw-auth-dialog__intro h2 { font-size: 36px; }
   .tw-auth-form { grid-template-columns: 1fr; gap: 15px; margin-top: 26px; }
   .tw-auth-form__checks,
   .tw-auth-form__help,
   .tw-auth-form > .tw-primary-action,
   .tw-auth-form > .tw-form-alert,
   .tw-auth-form > .tw-form-notice { grid-column: auto; }
-  .tw-demo-note > svg:last-child { display: none; }
-  .tw-demo-note { grid-template-columns: auto 1fr; }
-
   .tw-report-dialog { width: 100%; }
   .tw-report-dialog__intro h2,
-  .tw-report-success h2 { font-size: 47px; }
+  .tw-report-success h2 { font-size: 36px; }
 
   .tw-account-page { padding: 84px 14px 50px; }
   .tw-account-sidebar { border-radius: 16px; }
-  .tw-account-welcome__flourish { display: none; }
   .tw-account-welcome h1,
-  .tw-account-panel__heading h1 { font-size: 51px; }
+  .tw-account-panel__heading h1 { font-size: 38px; }
   .tw-account-metrics { grid-template-columns: 1fr 1fr; }
-  .tw-account-metrics > *:last-child { grid-column: 1 / -1; min-height: 105px; }
+  .tw-account-metrics > * { border-bottom: 1px solid var(--tw-line); }
+  .tw-account-metrics > *:nth-child(2) { border-right: 0; }
+  .tw-account-metrics > *:last-child { grid-column: 1 / -1; min-height: 105px; border-right: 0; border-bottom: 0; }
   .tw-saved-summary { grid-template-columns: 1fr; }
   .tw-saved-summary > button { min-height: 90px; }
   .tw-account-overview__split,
@@ -1291,6 +1211,7 @@ body.tw-dialog-open {
 @media (max-width: 420px) {
   .tw-account-identity small { max-width: 150px; }
   .tw-account-metrics { grid-template-columns: 1fr; }
+  .tw-account-metrics > * { border-right: 0; }
   .tw-account-metrics > *:last-child { grid-column: auto; }
   .tw-account-sidebar nav button { padding-inline: 10px; }
   .tw-account-sidebar nav button svg:first-child { display: none; }
