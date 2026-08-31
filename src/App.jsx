@@ -25,7 +25,7 @@ import LegalPage from './components/LegalPage.jsx'
 import SaveDesignButton from './components/SaveDesignButton.jsx'
 import { CurrencyControl, PriceDisplay, useCurrency } from './components/CurrencyControl.jsx'
 import { AccountPage, AuthDialog, ReportDialog, useAuthSession } from './account/index.js'
-import { categories, designs, pricingTiers } from './data/designs.js'
+import { categories, designs } from './data/designs.js'
 import { openCookiePreferences } from './utils/cookieConsent.js'
 
 const featuredNames = [
@@ -377,38 +377,12 @@ function Featured({ navigate, savedSet, onToggleSaved }) {
   )
 }
 
-function PricingGuide({ navigate }) {
-  const { formatRange } = useCurrency()
-
-  return (
-    <section className="pricing-guide section-pad" data-reveal aria-labelledby="pricing-guide-title">
-      <div className="pricing-guide__intro">
-        <span className="eyebrow">Clear, one-time pricing</span>
-        <h2 id="pricing-guide-title">One invitation.<br /><span>Every guest.</span></h2>
-        <p>Pay for the creative work—not for the size of your guest list. Every listed price includes personalisation, a shareable link and two review rounds.</p>
-        <button className="text-link" type="button" onClick={() => navigate('collection')}>See exact design prices <ArrowRight size={15} /></button>
-        <p className="pricing-guide__note">Names, wording, colours and event details are customised. No per-guest charge.</p>
-      </div>
-      <div className="pricing-guide__tiers">
-        {pricingTiers.map((tier) => (
-          <article key={tier.key}>
-            <span>{tier.name}</span>
-            <strong>{formatRange(tier.min, tier.max)}</strong>
-            <p>{tier.description}</p>
-          </article>
-        ))}
-      </div>
-    </section>
-  )
-}
-
 function HomePage({ navigate, onEnquire, savedSet, onToggleSaved }) {
   useScrollReveal('home')
   return (
     <main>
       <Hero navigate={navigate} onEnquire={onEnquire} />
       <Featured navigate={navigate} savedSet={savedSet} onToggleSaved={onToggleSaved} />
-      <PricingGuide navigate={navigate} />
       <section className="manifesto section-pad" data-reveal>
         <div className="manifesto__copy">
           <span className="eyebrow">How it works</span>

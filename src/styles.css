@@ -1542,90 +1542,6 @@ img {
   padding-bottom: 130px;
 }
 
-.pricing-guide {
-  display: grid;
-  grid-template-columns: minmax(280px, .8fr) minmax(0, 1.2fr);
-  gap: clamp(45px, 8vw, 130px);
-  padding-top: clamp(95px, 10vw, 150px);
-  padding-bottom: clamp(95px, 10vw, 150px);
-  border-top: 1px solid var(--line);
-  border-bottom: 1px solid var(--line);
-  background: #efe9df;
-}
-
-.pricing-guide__intro h2 {
-  margin: 18px 0 28px;
-  font-size: clamp(48px, 5.6vw, 88px);
-  font-weight: 510;
-  letter-spacing: -.068em;
-  line-height: .9;
-}
-
-.pricing-guide__intro h2 span {
-  color: var(--accent);
-  font: inherit;
-  font-weight: 420;
-}
-
-.pricing-guide__intro > p {
-  max-width: 510px;
-  margin: 0 0 18px;
-  color: #62645f;
-  font-size: 14px;
-  line-height: 1.75;
-}
-
-.pricing-guide__tiers {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  border-top: 1px solid var(--line);
-  border-left: 1px solid var(--line);
-}
-
-.pricing-guide__tiers article {
-  min-height: 230px;
-  padding: clamp(24px, 3vw, 42px);
-  border-right: 1px solid var(--line);
-  border-bottom: 1px solid var(--line);
-}
-
-.pricing-guide__tiers span {
-  display: block;
-  margin-bottom: 18px;
-  color: #696a65;
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: .14em;
-  text-transform: uppercase;
-}
-
-.pricing-guide__tiers strong {
-  display: block;
-  font-family: var(--sans);
-  font-size: clamp(21px, 2vw, 30px);
-  font-weight: 620;
-  letter-spacing: -.04em;
-  white-space: nowrap;
-}
-
-.pricing-guide__tiers p {
-  max-width: 320px;
-  margin: 18px 0 0;
-  color: #676863;
-  font-size: 12px;
-  line-height: 1.65;
-}
-
-.pricing-guide__note {
-  margin: 28px 0 0 !important;
-  color: #5e605b;
-  font-size: 10px;
-  font-weight: 650;
-  letter-spacing: .08em;
-  line-height: 1.6 !important;
-  text-transform: uppercase;
-}
-
 .manifesto__copy > p {
   max-width: 630px;
   margin: 35px 0 26px;
@@ -2272,7 +2188,6 @@ img {
   .catalog-grid .design-card:nth-child(even) { transform: translateY(32px); }
   .manifesto { grid-template-columns: 1fr 1fr; }
   .manifesto__details { grid-column: auto; }
-  .pricing-guide { grid-template-columns: 1fr; }
   .site-footer { grid-template-columns: 1fr 1fr; }
   .footer-links { grid-column: 2; }
 }
@@ -2350,14 +2265,6 @@ img {
   .design-card__meta p { display: none; }
   .collection-teaser { min-height: 360px; }
 
-  .pricing-guide {
-    gap: 42px;
-    padding-top: 90px;
-    padding-bottom: 90px;
-  }
-
-  .pricing-guide__intro h2 { font-size: clamp(48px, 15vw, 72px); }
-
   .manifesto {
     display: flex;
     min-height: auto;
@@ -2398,8 +2305,6 @@ img {
   .featured__track { grid-auto-columns: 88vw; }
   .design-card__meta { gap: 8px; }
   .design-card__price strong { font-size: 12px; }
-  .pricing-guide__tiers { grid-template-columns: 1fr; }
-  .pricing-guide__tiers article { min-height: 190px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
