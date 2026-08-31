@@ -383,18 +383,34 @@ function HomePage({ navigate, onEnquire, savedSet, onToggleSaved }) {
     <main>
       <Hero navigate={navigate} onEnquire={onEnquire} />
       <Featured navigate={navigate} savedSet={savedSet} onToggleSaved={onToggleSaved} />
-      <section className="manifesto section-pad" data-reveal>
-        <div className="manifesto__copy">
-          <span className="eyebrow">How it works</span>
-          <h2>Choose a design.<br /><span>We customise it.</span></h2>
-          <p>Send us your wording, colours, photos and event details. We prepare the invitation for you to review.</p>
-          <button className="text-link" type="button" onClick={() => onEnquire(null)}>Start an enquiry <ArrowRight size={15} /></button>
+      <section className="process section-pad" data-reveal aria-labelledby="process-title">
+        <div className="process__heading">
+          <div>
+            <span className="eyebrow">Ordering an invitation</span>
+            <h2 id="process-title">What happens after you choose a design</h2>
+          </div>
+          <div className="process__intro">
+            <p>We personalise the design with your event details and send you a proof before the final invitation is ready to share.</p>
+            <button className="text-link" type="button" onClick={() => navigate('collection')}>Browse designs <ArrowRight size={15} /></button>
+          </div>
         </div>
-        <div className="manifesto__details">
-          <div><span>Choose a design</span></div>
-          <div><span>Send your details</span></div>
-          <div><span>Review and approve</span></div>
-        </div>
+        <ol className="process__steps">
+          <li>
+            <span>01</span>
+            <h3>Choose a starting point</h3>
+            <p>Pick a design from the collection, or ask for something custom.</p>
+          </li>
+          <li>
+            <span>02</span>
+            <h3>Send your content</h3>
+            <p>Share the names, date, venue, wording, colours and any photographs.</p>
+          </li>
+          <li>
+            <span>03</span>
+            <h3>Approve the proof</h3>
+            <p>Review the invitation and request changes before it is ready to share.</p>
+          </li>
+        </ol>
       </section>
       <section className="home-cta section-pad" data-reveal>
         <p>Custom design</p>
